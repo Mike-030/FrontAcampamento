@@ -115,7 +115,7 @@
 </aside>
 
 <!-- CONTENT PRINCIPAL -->
-<div class="fixed inset-0 w-full h-full flex flex-col bg-bg-primary overflow-y-auto overflow-x-hidden p-0 md:p-6 transition-all duration-500 {isSidebarOpen ? 'md:pl-80' : ''}">
+<div class="fixed inset-0 w-full h-full flex flex-col overflow-y-auto overflow-x-hidden p-0 md:p-6 transition-all duration-500 {isSidebarOpen ? 'md:pl-80' : ''}">
     
     <div class="flex-1 flex items-center justify-center p-4">
         <!-- Box Centralizado -->

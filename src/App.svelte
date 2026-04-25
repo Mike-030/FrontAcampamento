@@ -73,10 +73,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </svelte:head>
 
-<!-- BACKGROUND DINÂMICO 45º (LEVE E ELEGANTE) -->
-<div class="fixed inset-0 z-[-1] transition-colors duration-700
-            bg-gradient-to-br from-primary via-primary to-secondary
-            dark:from-[#0a0c0e] dark:via-[#0f1214] dark:to-[#1a1d20]">
+<!-- BACKGROUND DINÂMICO 45º MONOCROMÁTICO -->
+<div 
+    class="fixed inset-0 z-[-1] transition-all duration-700"
+    style={isDarkMode 
+        ? 'background: linear-gradient(45deg, #020304, #0D0F11, #242830)'
+        : 'background: linear-gradient(45deg, #C8BFB0, #E2D9CC, #F5F0E8)'}
+>
 </div>
 
 <!-- Botão de Troca de Tema -->
@@ -111,8 +114,8 @@
         margin: 0;
         padding: 0;
         font-family: "Inter", sans-serif;
-        background-color: var(--bg-primary);
+        background: transparent;
         color: var(--text-primary);
-        transition: background-color 0.5s ease, color 0.5s ease;
+        transition: color 0.5s ease;
     }
 </style>

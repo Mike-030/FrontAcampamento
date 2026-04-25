@@ -2,20 +2,20 @@
 
 @theme {
   /* DEFINIÇÃO DE CORES NO PADRÃO TAILWIND V4 */
-  --color-bg-primary: #FAF7F2;      
-  --color-bg-secondary: #F4F1EC;    
+  --color-bg-primary: #F2EDE4;      
+  --color-bg-secondary: #EAE4D9;    
   --color-text-primary: #1A1C1E;    
   --color-text-secondary: #44474A;  
-  --color-border-ui: #E6E2DC;       
+  --color-border-ui: #D9D3C8;       
   --color-brand: #de6e27;           
   --color-forest: #1a1e0a;
 
   /* Aliases para o App.svelte */
-  --color-primary: #FAF7F2;
-  --color-secondary: #F4F1EC;
+  --color-primary: #F2EDE4;
+  --color-secondary: #EAE4D9;
   --color-main: #1A1C1E;
   --color-sub: #44474A;
-  --color-border: #E6E2DC;
+  --color-border: #D9D3C8;
 
   --radius-3xl: 1.5rem;
   --radius-4xl: 2rem;
@@ -24,10 +24,10 @@
 
 @layer base {
   :root {
-    --bg-primary: #FAF7F2;      
-    --bg-secondary: #F4F1EC;    
+    --bg-primary: #F2EDE4;      
+    --bg-secondary: #EAE4D9;    
     --text-primary: #1A1C1E;    
-    --border-ui: #E6E2DC;       
+    --border-ui: #D9D3C8;       
   }
   
   .dark {

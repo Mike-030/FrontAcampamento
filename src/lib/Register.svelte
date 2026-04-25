@@ -208,7 +208,7 @@
 </script>
 
 <div
-    class="fixed inset-0 w-full h-full flex flex-col bg-bg-primary overflow-y-auto"
+    class="fixed inset-0 w-full h-full flex flex-col overflow-y-auto"
 >
     <div class="flex-1 flex items-center justify-center p-4">
         <div
