@@ -75,14 +75,14 @@
 
 <!-- BACKGROUND DINÂMICO 45º (LEVE E ELEGANTE) -->
 <div class="fixed inset-0 z-[-1] transition-colors duration-700
-            bg-gradient-to-br from-bg-primary via-bg-primary to-bg-secondary
+            bg-gradient-to-br from-primary via-primary to-secondary
             dark:from-[#0a0c0e] dark:via-[#0f1214] dark:to-[#1a1d20]">
 </div>
 
 <!-- Botão de Troca de Tema -->
 <button 
     onclick={toggleTheme}
-    class="fixed bottom-6 right-6 z-50 bg-bg-secondary/80 backdrop-blur-md text-text-primary p-3.5 rounded-2xl shadow-xl hover:scale-110 active:scale-95 transition-all border border-border-ui"
+    class="fixed bottom-6 right-6 z-50 bg-secondary/80 backdrop-blur-md text-main p-3.5 rounded-2xl shadow-xl hover:scale-110 active:scale-95 transition-all border border-border"
     aria-label="Trocar Tema"
 >
     {#if isDarkMode}
@@ -100,7 +100,7 @@
     {#if screen === "login"}
         <Login onLoginSuccess={handleLoginSuccess} onGoToRegister={goToRegister} />
     {:else if screen === "register"}
-        <Register onBackToLogin={goToLogin} />
+        <Register onGoToLogin={goToLogin} />
     {:else if screen === "dashboard"}
         <Dashboard onLogout={handleLogout} />
     {/if}
@@ -111,6 +111,8 @@
         margin: 0;
         padding: 0;
         font-family: "Inter", sans-serif;
-        background: transparent;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        transition: background-color 0.5s ease, color 0.5s ease;
     }
 </style>

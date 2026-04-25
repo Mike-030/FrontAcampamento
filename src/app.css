@@ -1,43 +1,69 @@
 @import "tailwindcss";
 
 @theme {
-  /* Cores da Nova Paleta */
-  --color-brand: #DE6E27;
-  --color-forest: #2B3210;
-  --color-cream: #FBF8EF;
-  --color-stone: #E5E2D9;
-  --color-olive: #505631;
+  /* DEFINIÇÃO DE CORES NO PADRÃO TAILWIND V4 */
+  --color-bg-primary: #FAF7F2;      
+  --color-bg-secondary: #F4F1EC;    
+  --color-text-primary: #1A1C1E;    
+  --color-text-secondary: #44474A;  
+  --color-border-ui: #E6E2DC;       
+  --color-brand: #de6e27;           
+  --color-forest: #1a1e0a;
 
-  /* Mapeamento para Temas */
-  --color-bg-primary: var(--bg-primary);
-  --color-bg-secondary: var(--bg-secondary);
-  --color-text-primary: var(--text-primary);
-  --color-text-secondary: var(--text-secondary);
-  --color-border-ui: var(--border-ui);
-}
+  /* Aliases para o App.svelte */
+  --color-primary: #FAF7F2;
+  --color-secondary: #F4F1EC;
+  --color-main: #1A1C1E;
+  --color-sub: #44474A;
+  --color-border: #E6E2DC;
 
-:root {
-  /* Modo Claro (Default) */
-  --bg-primary: #F2EBDC; /* Fundo FUNDO (Creme Amanteigado) */
-  --bg-secondary: #F5F1E1; /* Box Major (Creme Denso/Livro Antigo) */
-  --text-primary: #1a1e0a; 
-  --text-secondary: #3a3f24; 
-  --border-ui: rgba(26, 30, 10, 0.1);
-}
-
-:root.dark {
-  /* Modo Escuro - Agora com Cinza Realmente Escuro */
-  --bg-primary: #0a0c0e; /* Grafite Profundo / Quase Preto */
-  --bg-secondary: #161a1d; /* Cinza Escuro para os componentes */
-  --text-primary: #FBF8EF; /* Creme */
-  --text-secondary: #E5E2D9; /* Pedra */
-  --border-ui: rgba(251, 248, 239, 0.1);
+  --radius-3xl: 1.5rem;
+  --radius-4xl: 2rem;
+  --radius-5xl: 2.5rem;
 }
 
 @layer base {
-  body {
-    @apply bg-bg-primary text-text-primary transition-colors duration-300;
-    margin: 0;
-    min-height: 100vh;
+  :root {
+    --bg-primary: #FAF7F2;      
+    --bg-secondary: #F4F1EC;    
+    --text-primary: #1A1C1E;    
+    --border-ui: #E6E2DC;       
   }
+  
+  .dark {
+    --color-bg-primary: #0D0F11;      
+    --color-bg-secondary: #16191C;    
+    --color-text-primary: #F0F2F5;    
+    --color-text-secondary: #9BA1A6;  
+    --color-border-ui: #2A2D31;
+    
+    --color-primary: #0D0F11;
+    --color-secondary: #16191C;
+    --color-main: #F0F2F5;
+    --color-sub: #9BA1A6;
+    --color-border: #2A2D31;
+
+    /* Variáveis nativas para o Svelte */
+    --bg-primary: #0D0F11;
+    --text-primary: #F0F2F5;
+  }
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.5s ease, color 0.5s ease;
+  font-family: "Inter", sans-serif;
+}
+
+/* Scrollbar Custom */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-ui);
+  border-radius: 99px;
 }
