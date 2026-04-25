@@ -1,0 +1,158 @@
+﻿Loading svelte-check in workspace: c:\Users\miche\Desktop\Projeto\FrontAcampamento
+Getting Svelte diagnostics...
+
+c:\Users\miche\Desktop\Projeto\FrontAcampamento\[32msrc\lib\Login.svelte[39m:54:17
+[33mWarn[39m: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+[36m            <div class="space-y-2">
+                [35m<label class="text-slate-300 text-xs font-bold uppercase ml-1">E-mail</label>[36m
+                <input bind:value={email} type="email" required class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-brand outline-none transition-all" />[39m
+
+c:\Users\miche\Desktop\Projeto\FrontAcampamento\[32msrc\lib\Login.svelte[39m:59:17
+[33mWarn[39m: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+[36m            <div class="space-y-2">
+                [35m<label class="text-slate-300 text-xs font-bold uppercase ml-1">Senha</label>[36m
+                <input bind:value={password} type="password" required class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-brand outline-none transition-all" />[39m
+
+c:\Users\miche\Desktop\Projeto\FrontAcampamento\[32msrc\lib\Login.svelte[39m:14:33
+[31mError[39m: Parameter 'e' implicitly has an 'any' type. (js)
+[36m
+    async function handleSubmit([35me[36m) {
+        if (e) e.preventDefault();[39m
+
+c:\Users\miche\Desktop\Projeto\FrontAcampamento\[32msrc\lib\Login.svelte[39m:73:21
+[31mError[39m: Type 'Function' is not assignable to type 'MouseEventHandler<HTMLButtonElement>'.
+  Type 'Function' provides no match for the signature '(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement; }): any'. (js)
+[36m        <footer class="mt-8 text-center">
+            <button [35monclick[36m={onGoToRegister} class="text-slate-400 text-sm hover:text-white transition-colors">
+                Novo por aqui? <span class="text-[#646cff] font-bold">Crie sua conta</span>[39m
+
+c:\Users\miche\Desktop\Projeto\FrontAcampamento\[32msrc\lib\Dashboard.svelte[39m:5:9
+[31mError[39m: Variable 'festivals' implicitly has an 'any[]' type. (js)
+[36m
+    let [35mfestivals[36m = $state([]);
+    let loading = $state(true);[39m
+
+c:\Users\miche\Desktop\Projeto\FrontAcampamento\[32msrc\lib\Register.svelte[39m:82:25
+[33mWarn[39m: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+[36m                    <div class="space-y-1.5">
+                        [35m<label class="text-slate-400 text-[10px] font-bold uppercase tracking-widest ml-1">Nome Completo</label>[36m
+                        <input bind:value={formData.name} type="text" required class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-[#646cff] outline-none" />[39m
+
+c:\Users\miche\Desktop\Projeto\FrontAcampamento\[32msrc\lib\Register.svelte[39m:87:25
+[33mWarn[39m: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+[36m                    <div class="space-y-1.5">
+                        [35m<label class="text-slate-400 text-[10px] font-bold uppercase tracking-widest ml-1">E-mail</label>[36m
+                        <input bind:value={formData.email} type="email" required class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-[#646cff] outline-none" />[39m
+
+c:\Users\miche\Desktop\Projeto\FrontAcampamento\[32msrc\lib\Register.svelte[39m:92:25
+[33mWarn[39m: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+[36m                    <div class="space-y-1.5">
+                        [35m<label class="text-slate-400 text-[10px] font-bold uppercase tracking-widest ml-1">CPF (somente n├║meros)</label>[36m
+                        <input bind:value={formData.cpf} type="text" required class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-[#646cff] outline-none" />[39m
+
+c:\Users\miche\Desktop\Projeto\FrontAcampamento\[32msrc\lib\Register.svelte[39m:97:25
+[33mWarn[39m: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+[36m                    <div class="space-y-1.5">
+                        [35m<label class="text-slate-400 text-[10px] font-bold uppercase tracking-widest ml-1">Whatsapp</label>[36m
+                        <input bind:value={formData.phone} type="text" required class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-[#646cff] outline-none" />[39m
+
+c:\Users\miche\Desktop\Projeto\FrontAcampamento\[32msrc\lib\Register.svelte[39m:102:25
+[33mWarn[39m: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+[36m                    <div class="space-y-1.5">
+                        [35m<label class="text-slate-400 text-[10px] font-bold uppercase tracking-widest ml-1">Data de Nascimento</label>[36m
+                        <input bind:value={formData.birthday} type="date" required class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-[#646cff] outline-none" />[39m
+
+c:\Users\miche\Desktop\Projeto\FrontAcampamento\[32msrc\lib\Register.svelte[39m:107:25
+[33mWarn[39m: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+[36m                    <div class="space-y-1.5">
+                        [35m<label class="text-slate-400 text-[10px] font-bold uppercase tracking-widest ml-1">G├¬nero</label>[36m
+                        <select bind:value={formData.sex} class="w-full bg-[#1e293b] border border-white/10 rounded-2xl p-4 text-white outline-none">[39m
+
+c:\Users\miche\Desktop\Projeto\FrontAcampamento\[32msrc\lib\Register.svelte[39m:115:25
+[33mWarn[39m: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+[36m                    <div class="space-y-1.5">
+                        [35m<label class="text-slate-400 text-[10px] font-bold uppercase tracking-widest ml-1">Estado Civil</label>[36m
+                        <select bind:value={formData.marital_status_id} class="w-full bg-[#1e293b] border border-white/10 rounded-2xl p-4 text-white outline-none">[39m
+
+c:\Users\miche\Desktop\Projeto\FrontAcampamento\[32msrc\lib\Register.svelte[39m:124:25
+[33mWarn[39m: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+[36m                    <div class="space-y-1.5">
+                        [35m<label class="text-slate-400 text-[10px] font-bold uppercase tracking-widest ml-1">N├║mero RG</label>[36m
+                        <input bind:value={formData.document} type="text" required class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-[#646cff] outline-none" />[39m
+
+c:\Users\miche\Desktop\Projeto\FrontAcampamento\[32msrc\lib\Register.svelte[39m:129:25
+[33mWarn[39m: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+[36m                    <div class="space-y-1.5 md:col-span-2">
+                        [35m<label class="text-slate-400 text-[10px] font-bold uppercase tracking-widest ml-1">Link para sua foto de perfil</label>[36m
+                        <input bind:value={formData.picture} type="text" placeholder="https://..." required class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-[#646cff] outline-none" />[39m
+
+c:\Users\miche\Desktop\Projeto\FrontAcampamento\[32msrc\lib\Register.svelte[39m:134:25
+[33mWarn[39m: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+[36m                    <div class="space-y-1.5 md:col-span-2">
+                        [35m<label class="text-slate-400 text-[10px] font-bold uppercase tracking-widest ml-1">Crie sua senha</label>[36m
+                        <input bind:value={formData.password} type="password" minlength="8" required class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-[#646cff] outline-none" />[39m
+
+c:\Users\miche\Desktop\Projeto\FrontAcampamento\[32msrc\lib\Register.svelte[39m:25:35
+[31mError[39m: Parameter 'e' implicitly has an 'any' type. (js)
+[36m
+    async function handleRegister([35me[36m) {
+        if (e) e.preventDefault();[39m
+
+c:\Users\miche\Desktop\Projeto\FrontAcampamento\[32msrc\lib\Register.svelte[39m:155:21
+[31mError[39m: Type 'Function' is not assignable to type 'MouseEventHandler<HTMLButtonElement>'.
+  Type 'Function' provides no match for the signature '(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement; }): any'. (js)
+[36m        <footer class="mt-8 text-center">
+            <button [35monclick[36m={onBackToLogin} class="text-slate-400 text-sm hover:text-white transition-colors">
+                J├í tem cadastro? <span class="text-[#646cff] font-bold">Voltar para login</span>[39m
+
+c:\Users\miche\Desktop\Projeto\FrontAcampamento\[32msrc\App.svelte[39m:17:13
+[31mError[39m: Type 'string' is not assignable to type 'null'. (js)
+[36m        if (savedToken) {
+            [35mtoken[36m = savedToken;
+            user = savedUser ? JSON.parse(savedUser) : null;[39m
+
+c:\Users\miche\Desktop\Projeto\FrontAcampamento\[32msrc\App.svelte[39m:23:33
+[31mError[39m: Parameter 'newToken' implicitly has an 'any' type. (js)
+[36m
+    function handleLoginSuccess([35mnewToken[36m, userData) {
+        token = newToken;[39m
+
+c:\Users\miche\Desktop\Projeto\FrontAcampamento\[32msrc\App.svelte[39m:23:43
+[31mError[39m: Parameter 'userData' implicitly has an 'any' type. (js)
+[36m
+    function handleLoginSuccess(newToken, [35muserData[36m) {
+        token = newToken;[39m
+
+c:\Users\miche\Desktop\Projeto\FrontAcampamento\[32msrc\App.svelte[39m:44:61
+[31mError[39m: Type 'true' is not assignable to type '"" | "anonymous" | "use-credentials" | null | undefined'. (js)
+[36m    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" [35mcrossorigin[36m />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />[39m
+
+c:\Users\miche\Desktop\Projeto\FrontAcampamento\[32msrc\main.js[39m:6:3
+[31mError[39m: No overload matches this call.
+  Overload 1 of 2, '(component: ComponentType<SvelteComponent<Record<string, never>, any, any>> | Component<Record<string, never>, {}, any>, options: MountOptions<...>): {}', gave the following error.
+    Type 'HTMLElement | null' is not assignable to type 'Document | Element | ShadowRoot'.
+      Type 'null' is not assignable to type 'Document | Element | ShadowRoot'.
+  Overload 2 of 2, '(component: ComponentType<SvelteComponent<Record<string, never>, any, any>> | Component<Record<string, never>, {}, any>, options: MountOptions<...>): {}', gave the following error.
+    Type 'HTMLElement | null' is not assignable to type 'Document | Element | ShadowRoot'.
+      Type 'null' is not assignable to type 'Document | Element | ShadowRoot'. 
+[36mconst app = mount(App, {
+  [35mtarget[36m: document.getElementById('app'),
+})[39m
+
+====================================
+[31msvelte-check found 10 errors and 12 warnings in 5 files
+[39m

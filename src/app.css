@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@theme {
+  /* Cores da Nova Paleta */
+  --color-brand: #DE6E27;
+  --color-forest: #2B3210;
+  --color-cream: #FBF8EF;
+  --color-stone: #E5E2D9;
+  --color-olive: #505631;
+
+  /* Mapeamento para Temas */
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-border-ui: var(--border-ui);
+}
+
+:root {
+  /* Modo Claro (Default) */
+  --bg-primary: #FBF8EF; /* Creme */
+  --bg-secondary: #E5E2D9; /* Pedra */
+  --text-primary: #2B3210; /* Verde Forest */
+  --text-secondary: #505631; /* Oliva */
+  --border-ui: rgba(43, 50, 16, 0.1);
+}
+
+:root.dark {
+  /* Modo Escuro - Agora com Cinza Realmente Escuro */
+  --bg-primary: #0a0c0e; /* Grafite Profundo / Quase Preto */
+  --bg-secondary: #161a1d; /* Cinza Escuro para os componentes */
+  --text-primary: #FBF8EF; /* Creme */
+  --text-secondary: #E5E2D9; /* Pedra */
+  --border-ui: rgba(251, 248, 239, 0.1);
+}
+
+@layer base {
+  body {
+    @apply bg-bg-primary text-text-primary transition-colors duration-300;
+    margin: 0;
+    min-height: 100vh;
+  }
+}
