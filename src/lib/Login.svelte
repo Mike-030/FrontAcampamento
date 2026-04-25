@@ -1,5 +1,6 @@
 <script>
     import logo from "../assets/LogoComunidadeSaoMiguel.png";
+    import bgHero from "../assets/SaoMiguelArcanjo.png";
     
     /** @type {{ onLoginSuccess: Function, onGoToRegister: Function }} */
     let { onLoginSuccess, onGoToRegister } = $props();
@@ -42,73 +43,99 @@
     }
 </script>
 
-<div class="min-h-screen flex items-center justify-center p-4 bg-bg-primary transition-colors duration-300">
-    <div class="w-full max-w-md bg-bg-secondary/50 backdrop-blur-xl border border-border-ui p-10 rounded-[2.5rem] shadow-2xl transition-all duration-300">
-        <div class="text-center mb-6 relative z-10">
-            <!-- Logo Master - Bem grande e centralizada -->
-            <img src={logo} alt="Logo" class="h-64 sm:h-80 mx-auto mb-0 drop-shadow-[0_0_20px_rgba(222,110,39,0.25)]" />
-            <div class="-mt-10 sm:-mt-14 relative z-20">
-                <h1 class="text-text-primary text-3xl font-bold mb-1">Acesso</h1>
-                <p class="text-text-secondary text-sm">Portal Comunidade São Miguel</p>
+<div class="min-h-screen flex items-center justify-center bg-bg-primary p-0 md:p-6 transition-colors duration-300">
+    <!-- Container Split Principal -->
+    <div class="w-full max-w-6xl min-h-[700px] bg-bg-secondary border border-border-ui shadow-2xl overflow-hidden flex flex-col md:flex-row md:rounded-[3rem] transition-all">
+        
+        <!-- Lado da Imagem (Escondido no Mobile para priorizar login) -->
+        <div class="hidden md:block md:w-1/2 relative">
+            <img 
+                src={bgHero} 
+                alt="São Miguel Arcanjo" 
+                class="absolute inset-0 w-full h-full object-cover" 
+            />
+            <!-- Fade preto sólido na base para legibilidade máxima -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+            
+            <div class="relative z-10 p-12 flex flex-col justify-end h-full text-white">
+                <h2 class="text-5xl font-black mb-4 leading-tight italic">
+                    Quem como Deus?<br><span class="text-brand">Ninguém!</span>
+                </h2>
+                <p class="text-white/80 text-lg max-w-sm">
+                    Portal destinado aos servos e campistas da Comunidade São Miguel Arcanjo.
+                </p>
             </div>
         </div>
 
-        <form onsubmit={handleSubmit} class="space-y-5">
-            <div class="space-y-2">
-                <label for="email" class="text-text-secondary text-xs font-bold uppercase ml-1">E-mail</label>
-                <input 
-                    id="email" 
-                    bind:value={email} 
-                    type="email" 
-                    required 
-                    class="w-full bg-bg-primary/50 border border-border-ui rounded-2xl p-4 text-text-primary focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition-all placeholder:opacity-30" 
-                    placeholder="seu@email.com"
-                />
-            </div>
-
-            <div class="space-y-2">
-                <label for="password" class="text-text-secondary text-xs font-bold uppercase ml-1">Senha</label>
-                <input 
-                    id="password" 
-                    bind:value={password} 
-                    type="password" 
-                    required 
-                    class="w-full bg-bg-primary/50 border border-border-ui rounded-2xl p-4 text-text-primary focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition-all placeholder:opacity-30" 
-                    placeholder="••••••••"
-                />
-            </div>
-
-            {#if error}
-                <div class="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl text-xs text-center animate-shake">
-                    ⚠️ {error}
+        <!-- Lado do Formulário -->
+        <div class="w-full md:w-1/2 p-8 sm:p-16 sm:pt-4 flex flex-col justify-center items-center">
+            
+            <header class="text-center w-full mb-0 relative">
+                <!-- Logo Gigante com Brilho Dinâmico -->
+                <div class="relative group">
+                    <img 
+                        src={logo} 
+                        alt="Logo" 
+                        class="h-80 sm:h-[450px] mx-auto -mb-20 sm:-mb-32 drop-shadow-[0_0_30px_rgba(222,110,39,0.3)] transition-all duration-700 group-hover:drop-shadow-[0_0_50px_rgba(222,110,39,0.5)]" 
+                    />
                 </div>
-            {/if}
+                <div class="relative z-10">
+                    <h1 class="text-text-primary text-5xl font-black mb-1">Acesso</h1>
+                    <p class="text-text-secondary text-sm font-medium opacity-60">Portal Comunidade São Miguel</p>
+                </div>
+            </header>
 
-            <button 
-                type="submit" 
-                disabled={loading} 
-                class="w-full bg-brand text-white p-4 rounded-2xl font-bold hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 shadow-lg shadow-brand/20"
-            >
-                {loading ? "Entrando..." : "Entrar no Sistema"}
-            </button>
-        </form>
+            <form onsubmit={handleSubmit} class="w-full max-w-sm space-y-5">
+                <div class="space-y-1.5">
+                    <label for="email" class="text-text-secondary text-[10px] font-bold uppercase tracking-widest ml-1">E-mail</label>
+                    <input 
+                        id="email" 
+                        bind:value={email} 
+                        type="email" 
+                        required 
+                        class="w-full bg-bg-primary/50 border border-border-ui rounded-2xl p-4 text-text-primary focus:border-brand focus:ring-4 focus:ring-brand/10 outline-none transition-all placeholder:opacity-20" 
+                        placeholder="seu@email.com"
+                    />
+                </div>
 
-        <footer class="mt-8 text-center">
-            <button onclick={() => onGoToRegister()} class="text-text-secondary text-sm hover:text-text-primary transition-colors group">
-                Novo por aqui? <span class="text-brand font-bold group-hover:underline">Crie sua conta</span>
-            </button>
-        </footer>
+                <div class="space-y-1.5">
+                    <label for="password" class="text-text-secondary text-[10px] font-bold uppercase tracking-widest ml-1">Senha</label>
+                    <input 
+                        id="password" 
+                        bind:value={password} 
+                        type="password" 
+                        required 
+                        class="w-full bg-bg-primary/50 border border-border-ui rounded-2xl p-4 text-text-primary focus:border-brand focus:ring-4 focus:ring-brand/10 outline-none transition-all placeholder:opacity-20" 
+                        placeholder="••••••••"
+                    />
+                </div>
+
+                {#if error}
+                    <div class="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl text-xs text-center border-dashed">
+                        {error}
+                    </div>
+                {/if}
+
+                <button 
+                    type="submit" 
+                    disabled={loading} 
+                    class="w-full bg-brand text-white p-5 rounded-2xl font-black uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 shadow-xl shadow-brand/20"
+                >
+                    {loading ? "Entrando..." : "Entrar agora"}
+                </button>
+            </form>
+
+            <footer class="mt-10 text-center">
+                <button onclick={() => onGoToRegister()} class="text-text-secondary text-sm hover:text-text-primary transition-all group">
+                    Novo por aqui? <span class="text-brand font-black group-hover:underline">Crie sua conta</span>
+                </button>
+            </footer>
+        </div>
     </div>
 </div>
 
 <style>
-    :global(.animate-shake) {
-        animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-    }
-    @keyframes shake {
-        10%, 90% { transform: translate3d(-1px, 0, 0); }
-        20%, 80% { transform: translate3d(2px, 0, 0); }
-        30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-        40%, 60% { transform: translate3d(4px, 0, 0); }
+    :global(body) {
+        overflow-x: hidden;
     }
 </style>
