@@ -135,7 +135,7 @@
                             oninput={(e) => { if (e.target instanceof HTMLInputElement) maskedCpf = applyCpfMask(e.target.value); }} 
                             placeholder="000.000.000-00" 
                             required 
-                            class="w-full bg-bg-primary/50 border border-border-ui rounded-2xl p-4 text-text-primary focus:border-brand outline-none" 
+                            class="w-full bg-bg-primary/50 border border-border-ui rounded-2xl p-4 text-text-primary focus:border-brand outline-none transition-all placeholder:text-text-secondary/60" 
                         />
                     </div>
 
@@ -167,7 +167,7 @@
                             oninput={(e) => { if (e.target instanceof HTMLInputElement) maskedDocument = applyRgMask(e.target.value); }} 
                             placeholder="00.000.000-0" 
                             required 
-                            class="w-full bg-bg-primary/50 border border-border-ui rounded-2xl p-4 text-text-primary focus:border-brand outline-none" 
+                            class="w-full bg-bg-primary/50 border border-border-ui rounded-2xl p-4 text-text-primary focus:border-brand outline-none transition-all placeholder:text-text-secondary/60" 
                         />
                     </div>
 
@@ -181,12 +181,12 @@
 
                     <div class="space-y-1.5 md:col-span-2">
                         <label for="picture" class="text-text-secondary text-[10px] font-bold uppercase tracking-widest ml-1">Link para sua foto</label>
-                        <input id="picture" bind:value={formData.picture} type="url" required class="w-full bg-bg-primary/50 border border-border-ui rounded-2xl p-4 text-text-primary focus:border-brand outline-none" />
+                        <input id="picture" bind:value={formData.picture} type="url" required class="w-full bg-bg-primary/50 border border-border-ui rounded-2xl p-4 text-text-primary focus:border-brand outline-none transition-all placeholder:text-text-secondary/60" placeholder="https://..." />
                     </div>
 
                     <div class="space-y-1.5 md:col-span-2">
                         <label for="reg-password" class="text-text-secondary text-[10px] font-bold uppercase tracking-widest ml-1">Senha de Acesso</label>
-                        <input id="reg-password" bind:value={formData.password} type="password" minlength="8" required class="w-full bg-bg-primary/50 border border-border-ui rounded-2xl p-4 text-text-primary focus:border-brand outline-none" />
+                        <input id="reg-password" bind:value={formData.password} type="password" minlength="8" required class="w-full bg-bg-primary/50 border border-border-ui rounded-2xl p-4 text-text-primary focus:border-brand outline-none transition-all placeholder:text-text-secondary/60" placeholder="••••••••" />
                     </div>
                 </div>
 

@@ -18,11 +18,11 @@
 
 :root {
   /* Modo Claro (Default) */
-  --bg-primary: #FBF8EF; /* Creme */
-  --bg-secondary: #E5E2D9; /* Pedra */
-  --text-primary: #2B3210; /* Verde Forest */
-  --text-secondary: #505631; /* Oliva */
-  --border-ui: rgba(43, 50, 16, 0.1);
+  --bg-primary: #F2EBDC; /* Fundo FUNDO (Creme Amanteigado) */
+  --bg-secondary: #F5F1E1; /* Box Major (Creme Denso/Livro Antigo) */
+  --text-primary: #1a1e0a; 
+  --text-secondary: #3a3f24; 
+  --border-ui: rgba(26, 30, 10, 0.1);
 }
 
 :root.dark {
