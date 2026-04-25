@@ -12,15 +12,14 @@
     /** @type {string} */
     let screen = $state("login");
     
-    // Estado do Tema (Escuro/Claro)
-    let isDarkMode = $state(true); // Começa no dark por padrão
+    // Estado do Tema
+    let isDarkMode = $state(true);
 
     onMount(() => {
         const savedToken = localStorage.getItem("auth_token");
         const savedUser = localStorage.getItem("user_data");
         const savedTheme = localStorage.getItem("theme");
         
-        // Recupera o tema salvo
         if (savedTheme === "light") {
             isDarkMode = false;
         }
@@ -74,13 +73,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </svelte:head>
 
-<!-- Botão de Troca de Tema (Fica fixo em todas as telas por enquanto) -->
+<!-- Botão de Troca de Tema Dinâmico -->
 <button 
     onclick={toggleTheme}
-    class="fixed bottom-6 right-6 z-50 bg-brand text-white p-4 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all text-xl"
-    title="Trocar tema"
+    class="fixed bottom-6 right-6 z-50 bg-brand text-white p-3.5 rounded-2xl shadow-2xl hover:scale-110 active:scale-95 transition-all border border-white/20 shadow-brand/40"
+    aria-label="Trocar Tema"
 >
-    {isDarkMode ? '☀️' : '🌙'}
+    {#if isDarkMode}
+        <!-- Ícone do Sol (Light Mode) -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+        </svg>
+    {:else}
+        <!-- Ícone da Lua (Dark Mode) -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+        </svg>
+    {/if}
 </button>
 
 <main class="w-full min-h-screen">

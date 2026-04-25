@@ -43,12 +43,14 @@
 </script>
 
 <div class="min-h-screen flex items-center justify-center p-4 bg-bg-primary transition-colors duration-300">
-    <div class="w-full max-w-md bg-bg-secondary/50 backdrop-blur-xl border border-border-ui p-10 rounded-[2.5rem] shadow-2xl">
-        <div class="text-center mb-8">
-            <!-- Logo com brilho sutil que se adapta ao fundo -->
-            <img src={logo} alt="Logo" class="h-40 sm:h-52 mx-auto mb-2 drop-shadow-[0_0_15px_rgba(222,110,39,0.2)]" />
-            <h1 class="text-text-primary text-3xl font-bold mb-1">Acesso</h1>
-            <p class="text-text-secondary text-sm">Portal Comunidade São Miguel</p>
+    <div class="w-full max-w-md bg-bg-secondary/50 backdrop-blur-xl border border-border-ui p-10 rounded-[2.5rem] shadow-2xl transition-all duration-300">
+        <div class="text-center mb-6 relative z-10">
+            <!-- Logo Master - Bem grande e centralizada -->
+            <img src={logo} alt="Logo" class="h-64 sm:h-80 mx-auto mb-0 drop-shadow-[0_0_20px_rgba(222,110,39,0.25)]" />
+            <div class="-mt-10 sm:-mt-14 relative z-20">
+                <h1 class="text-text-primary text-3xl font-bold mb-1">Acesso</h1>
+                <p class="text-text-secondary text-sm">Portal Comunidade São Miguel</p>
+            </div>
         </div>
 
         <form onsubmit={handleSubmit} class="space-y-5">
