@@ -41,7 +41,7 @@
     let daysInMonth = $derived(new Date(selectedYear, selectedMonth, 0).getDate());
     let daysList = $derived(Array.from({ length: daysInMonth }, (_, i) => i + 1));
 
-    // Efeito para corrigir o dia se o mês mudar (ex: de 31 para 30 ou 28)
+    // Efeito para corrigir o dia se o mês mudar
     $effect(() => {
         if (selectedDay > daysInMonth) {
             selectedDay = daysInMonth;
@@ -50,24 +50,28 @@
 
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
 
+    /** @param {string} val */
     function applyCpfMask(val) {
-        val = val.replace(/\D/g, "");
-        if (val.length > 11) val = val.slice(0, 11);
-        return val.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+        let v = val.replace(/\D/g, "");
+        if (v.length > 11) v = v.slice(0, 11);
+        return v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
     }
 
+    /** @param {string} val */
     function applyPhoneMask(val) {
-        val = val.replace(/\D/g, "");
-        if (val.length > 11) val = val.slice(0, 11);
-        return val.replace(/(\d{2})(\d{1})(\d{4})(\d{4})/, "($1) $2 $3-$4");
+        let v = val.replace(/\D/g, "");
+        if (v.length > 11) v = v.slice(0, 11);
+        return v.replace(/(\d{2})(\d{1})(\d{4})(\d{4})/, "($1) $2 $3-$4");
     }
 
+    /** @param {string} val */
     function applyRgMask(val) {
-        val = val.replace(/\D/g, "");
-        if (val.length > 9) val = val.slice(0, 9);
-        return val.replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, "$1.$2.$3-$4");
+        let v = val.replace(/\D/g, "");
+        if (v.length > 9) v = v.slice(0, 9);
+        return v.replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, "$1.$2.$3-$4");
     }
 
+    /** @param {SubmitEvent} e */
     async function handleRegister(e) {
         if (e) e.preventDefault();
         loading = true;
@@ -113,8 +117,8 @@
     /** @param {HTMLElement} node */
     function dragScroll(node) {
         let isDown = false;
-        let startY;
-        let scrollTop;
+        let startY = 0;
+        let scrollTop = 0;
 
         node.addEventListener('mousedown', (e) => {
             isDown = true;
@@ -134,9 +138,8 @@
         node.addEventListener('mousemove', (e) => {
             if (!isDown) return;
             if (e.buttons === 1) {
-                e.preventDefault();
                 const y = e.pageY - node.offsetTop;
-                const walk = (y - startY) * 2;
+                const walk = (y - startY) * 1.5;
                 node.scrollTop = scrollTop - walk;
             }
         });
@@ -145,24 +148,27 @@
             const containerCenter = node.getBoundingClientRect().top + (node.offsetHeight / 2);
             const items = node.querySelectorAll('.picker-item');
             
+            /** @type {{val: string} | null} */
             let closestItem = null;
             let minDistance = Infinity;
 
             items.forEach((item) => {
+                if (!(item instanceof HTMLElement)) return;
                 const itemCenter = item.getBoundingClientRect().top + (item.offsetHeight / 2);
                 const distance = Math.abs(containerCenter - itemCenter);
                 
                 if (distance < minDistance) {
                     minDistance = distance;
-                    closestItem = { val: item.getAttribute('data-val') };
+                    const valAttr = item.getAttribute('data-val');
+                    if (valAttr) closestItem = { val: valAttr };
                 }
             });
 
             if (closestItem) {
                 const val = parseInt(closestItem.val);
-                if (node.id === "scroll-day") selectedDay = val;
-                if (node.id === "scroll-month") selectedMonth = val;
-                if (node.id === "scroll-year") selectedYear = val;
+                if (node.id === "scroll-day" && selectedDay !== val) selectedDay = val;
+                if (node.id === "scroll-month" && selectedMonth !== val) selectedMonth = val;
+                if (node.id === "scroll-year" && selectedYear !== val) selectedYear = val;
             }
         });
     }
@@ -234,12 +240,12 @@
 
                             <div class="space-y-1.5">
                                 <label for="cpf" class="text-text-secondary text-[10px] font-bold uppercase tracking-widest ml-1">CPF</label>
-                                <input id="cpf" bind:value={maskedCpf} oninput={(e) => { if (e.target instanceof HTMLInputElement) maskedCpf = applyCpfMask(e.target.value); }} placeholder="000.000.000-00" required class="w-full bg-bg-primary/50 border border-border-ui rounded-2xl p-4 text-text-primary focus:border-brand outline-none transition-all placeholder:text-text-secondary/60" />
+                                <input id="cpf" value={maskedCpf} oninput={(e) => maskedCpf = applyCpfMask(e.currentTarget.value)} placeholder="000.000.000-00" required class="w-full bg-bg-primary/50 border border-border-ui rounded-2xl p-4 text-text-primary focus:border-brand outline-none transition-all placeholder:text-text-secondary/60" />
                             </div>
 
                             <div class="space-y-1.5">
                                 <label for="phone" class="text-text-secondary text-[10px] font-bold uppercase tracking-widest ml-1">WhatsApp</label>
-                                <input id="phone" bind:value={maskedPhone} oninput={(e) => { if (e.target instanceof HTMLInputElement) maskedPhone = applyPhoneMask(e.target.value); }} placeholder="(00) 0 0000-0000" required class="w-full bg-bg-primary/50 border border-border-ui rounded-2xl p-4 text-text-primary focus:border-brand outline-none transition-all placeholder:text-text-secondary/60" />
+                                <input id="phone" value={maskedPhone} oninput={(e) => maskedPhone = applyPhoneMask(e.currentTarget.value)} placeholder="(00) 0 0000-0000" required class="w-full bg-bg-primary/50 border border-border-ui rounded-2xl p-4 text-text-primary focus:border-brand outline-none transition-all placeholder:text-text-secondary/60" />
                             </div>
 
                             <div class="space-y-1.5">
@@ -254,17 +260,17 @@
 
                             <div class="space-y-1.5">
                                 <label for="document" class="text-text-secondary text-[10px] font-bold uppercase tracking-widest ml-1">RG</label>
-                                <input id="document" bind:value={maskedDocument} oninput={(e) => { if (e.target instanceof HTMLInputElement) maskedDocument = applyRgMask(e.target.value); }} placeholder="00.000.000-0" required class="w-full bg-bg-primary/50 border border-border-ui rounded-2xl p-4 text-text-primary focus:border-brand outline-none transition-all placeholder:text-text-secondary/60" />
+                                <input id="document" value={maskedDocument} oninput={(e) => maskedDocument = applyRgMask(e.currentTarget.value)} placeholder="00.000.000-0" required class="w-full bg-bg-primary/50 border border-border-ui rounded-2xl p-4 text-text-primary focus:border-brand outline-none transition-all placeholder:text-text-secondary/60" />
                             </div>
 
-                            <!-- Data de Nascimento (INTELIGENTE) -->
+                            <!-- Data de Nascimento -->
                             <div class="space-y-3 md:col-span-2">
-                                <label class="text-text-secondary text-[10px] font-bold uppercase tracking-widest ml-1">Data de Nascimento</label>
+                                <p class="text-text-secondary text-[10px] font-bold uppercase tracking-widest ml-1">Data de Nascimento</p>
                                 <div class="bg-bg-primary/50 border border-border-ui rounded-3xl p-6 relative overflow-hidden h-48 flex items-center justify-around group">
                                     <div class="absolute left-4 right-4 h-12 border-y-2 border-brand/20 bg-brand/5 pointer-events-none rounded-xl shadow-inner shadow-brand/10"></div>
 
-                                    <!-- Dia (DINÂMICO) -->
-                                    <div id="scroll-day" use:dragScroll class="w-1/4 h-full overflow-y-auto no-scrollbar snap-y snap-mandatory scroll-smooth text-center z-10 select-none" style="scrollbar-width: none;">
+                                    <!-- Dia -->
+                                    <div id="scroll-day" use:dragScroll class="w-1/4 h-full overflow-y-auto no-scrollbar snap-y snap-mandatory scroll-smooth text-center z-10 select-none" style="scrollbar-width: none; touch-action: pan-y;">
                                         <div class="h-[72px]"></div>
                                         {#each daysList as d}
                                             <div data-val={d} class="picker-item h-12 flex items-center justify-center font-black text-xl snap-center transition-all duration-300 {selectedDay === d ? 'text-brand scale-110' : 'text-text-secondary opacity-10 scale-90'}">{String(d).padStart(2, '0')}</div>
@@ -273,7 +279,7 @@
                                     </div>
 
                                     <!-- Mês -->
-                                    <div id="scroll-month" use:dragScroll class="w-1/3 h-full overflow-y-auto no-scrollbar snap-y snap-mandatory scroll-smooth text-center z-10 select-none" style="scrollbar-width: none;">
+                                    <div id="scroll-month" use:dragScroll class="w-1/3 h-full overflow-y-auto no-scrollbar snap-y snap-mandatory scroll-smooth text-center z-10 select-none" style="scrollbar-width: none; touch-action: pan-y;">
                                         <div class="h-[72px]"></div>
                                         {#each months as m, i}
                                             <div data-val={i+1} class="picker-item h-12 flex items-center justify-center font-black text-sm snap-center transition-all duration-300 {selectedMonth === i + 1 ? 'text-brand scale-110' : 'text-text-secondary opacity-10 scale-90'}">{m}</div>
@@ -282,7 +288,7 @@
                                     </div>
 
                                     <!-- Ano -->
-                                    <div id="scroll-year" use:dragScroll class="w-1/4 h-full overflow-y-auto no-scrollbar snap-y snap-mandatory scroll-smooth text-center z-10 select-none" style="scrollbar-width: none;">
+                                    <div id="scroll-year" use:dragScroll class="w-1/4 h-full overflow-y-auto no-scrollbar snap-y snap-mandatory scroll-smooth text-center z-10 select-none" style="scrollbar-width: none; touch-action: pan-y;">
                                         <div class="h-[72px]"></div>
                                         {#each years as y}
                                             <div data-val={y} class="picker-item h-12 flex items-center justify-center font-black text-xl snap-center transition-all duration-300 {selectedYear === y ? 'text-brand scale-110' : 'text-text-secondary opacity-10 scale-90'}">{y}</div>
