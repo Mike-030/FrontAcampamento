@@ -207,6 +207,23 @@
     }
 </script>
 
+<!-- BOTÃO FLUTUANTE DE VOLTAR -->
+<button
+    onclick={() => onGoToLogin()}
+    class="fixed top-4 left-4 md:top-6 md:left-6 z-50
+           bg-bg-secondary/80 backdrop-blur-md
+           w-12 h-12 md:w-14 md:h-14
+           flex items-center justify-center rounded-2xl shadow-xl
+           border border-border-ui text-text-primary
+           hover:text-brand hover:border-brand/40
+           active:scale-90 transition-all"
+    aria-label="Voltar ao Login"
+>
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m15 18-6-6 6-6"/>
+    </svg>
+</button>
+
 <div
     class="fixed inset-0 w-full h-full flex flex-col overflow-y-auto"
 >
@@ -292,11 +309,11 @@
 
                 {#if success}
                     <div
-                        class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 p-10 rounded-3xl text-center"
+                        class="bg-brand/10 border border-brand/30 text-brand p-10 rounded-3xl text-center"
                     >
-                        <p class="text-5xl mb-4">🚀</p>
+                        <p class="text-5xl mb-4">🛡️</p>
                         <h3 class="font-bold text-xl mb-1">Bem-vindo!</h3>
-                        <p class="text-sm">
+                        <p class="text-sm text-text-secondary">
                             Seu acesso foi criado. Redirecionando...
                         </p>
                     </div>
