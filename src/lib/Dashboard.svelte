@@ -1,5 +1,11 @@
 <script>
     import logo from "../assets/LogoComunidadeSaoMiguel.png";
+    import Sidebar from "./components/Sidebar.svelte";
+    import Header from "./components/Header.svelte";
+    import Stats from "./components/Stats.svelte";
+    import ProfileForm from "./components/ProfileForm.svelte";
+    import Modal from "./components/Modal.svelte";
+
     let { onLogout } = $props();
 
     /** @type {any[]} */
@@ -44,7 +50,7 @@
     $effect(() => {
         if (activeTab === "events") {
             fetchEvents();
-        } else {
+        } else if (activeTab === "subscriptions") {
             fetchSubscriptions();
         }
     });
@@ -184,6 +190,49 @@
         }
     }
 
+    async function updateProfile() {
+        try {
+            const payload = {
+                name: userData.name,
+                email: userData.email,
+                phone: userData.phone,
+            };
+
+            const response = await fetch(`${API_URL}/v1/users/${userData.id}`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (response.ok) {
+                const responseData = await response.json();
+                userData = { ...userData, ...responseData.data };
+                localStorage.setItem("user_data", JSON.stringify(userData));
+                showModal("success", "Perfil atualizado com sucesso!");
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                const errorMessage = errorData.errors
+                    ? Object.values(errorData.errors)[0][0]
+                    : errorData.message;
+                showModal(
+                    "error",
+                    errorMessage || "Verifique os dados informados.",
+                );
+                console.error("Erros de validação:", errorData);
+            }
+        } catch (err) {
+            console.error("Erro ao atualizar perfil:", err);
+            showModal(
+                "error",
+                "Não foi possível conectar com o servidor. Tente novamente.",
+            );
+        }
+    }
+
     function handleLogout() {
         localStorage.removeItem("auth_token");
         localStorage.removeItem("user_data");
@@ -194,196 +243,20 @@
 <div
     class="flex min-h-screen bg-bg-primary text-text-primary transition-colors duration-300 font-['Inter']"
 >
-    <!-- Sidebar -->
-    <aside
-        class="w-64 bg-bg-secondary border-r border-border-ui flex flex-col p-6 fixed h-full shadow-lg z-10 transition-colors duration-300"
-    >
-        <div class="flex items-center gap-3 mb-10 overflow-hidden">
-            <img src={logo} alt="Logo" class="w-auto object-contain" />
-        </div>
-
-        <nav class="flex-grow">
-            <ul class="space-y-2">
-                <li
-                    onclick={() => (activeTab = "events")}
-                    class="flex items-center gap-3 p-3 rounded-xl {activeTab ===
-                    'events'
-                        ? 'bg-brand text-white shadow-lg shadow-brand/20'
-                        : 'hover:bg-forest/5 dark:hover:bg-cream/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer"
-                >
-                    <span class="text-xl">⛺</span>
-                    <span class="font-medium">Festivais</span>
-                </li>
-                {#if isAdmin}
-                    <li
-                        class="flex items-center gap-3 p-3 rounded-xl hover:bg-forest/5 dark:hover:bg-cream/5 text-text-secondary hover:text-text-primary transition-all cursor-pointer"
-                    >
-                        <span class="text-xl">👤</span>
-                        <span>Usuários</span>
-                    </li>
-                    <li
-                        class="flex items-center gap-3 p-3 rounded-xl hover:bg-forest/5 dark:hover:bg-cream/5 text-text-secondary hover:text-text-primary transition-all cursor-pointer"
-                    >
-                        <span class="text-xl">📅</span>
-                        <span>Eventos</span>
-                    </li>
-                {:else}
-                    <li
-                        onclick={() => (activeTab = "subscriptions")}
-                        class="flex items-center gap-3 p-3 rounded-xl {activeTab ===
-                        'subscriptions'
-                            ? 'bg-brand text-white shadow-lg shadow-brand/20'
-                            : 'hover:bg-forest/5 dark:hover:bg-cream/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer"
-                    >
-                        <span class="text-xl">📋</span>
-                        <span>Minhas Inscrições</span>
-                    </li>
-                {/if}
-            </ul>
-        </nav>
-
-        <!-- Perfil na Sidebar -->
-        <div class="pt-6 border-t border-border-ui space-y-4">
-            <div class="flex items-center gap-3 px-2">
-                <img
-                    src={userData.picture && userData.picture.startsWith("http")
-                        ? userData.picture
-                        : defaultAvatar}
-                    alt="Avatar"
-                    class="w-10 h-10 rounded-full object-cover border-2 border-brand"
-                />
-                <div class="flex flex-col overflow-hidden">
-                    <span class="font-bold text-sm truncate"
-                        >{userData.name || "Visitante"}</span
-                    >
-                    <span
-                        class="text-[10px] text-brand uppercase tracking-widest font-black mt-0.5"
-                        >{isAdmin ? "Admin" : "Participante"}</span
-                    >
-                </div>
-            </div>
-            <button
-                onclick={handleLogout}
-                class="w-full border border-forest/20 dark:border-cream/20 text-text-primary p-2.5 rounded-xl text-xs font-bold hover:bg-red-500 hover:text-white hover:border-red-500 transition-all"
-            >
-                Sair
-            </button>
-        </div>
-    </aside>
+    <Sidebar
+        bind:activeTab
+        {isAdmin}
+        {userData}
+        {defaultAvatar}
+        {handleLogout}
+    />
 
     <!-- Main Content -->
     <main class="ml-64 flex-grow p-10">
-        <header class="flex justify-between items-start mb-12">
-            <div>
-                <div class="flex items-center gap-4 mb-2">
-                    <h2 class="text-4xl font-black text-forest dark:text-cream">
-                        Painel Geral
-                    </h2>
-                    <span
-                        class="bg-forest/10 dark:bg-cream/10 px-3 py-1 rounded-full text-[10px] font-bold text-brand uppercase tracking-tighter self-center"
-                        >Versão 1.0</span
-                    >
-                </div>
-                <p class="text-text-secondary text-sm">
-                    Bem-vindo de volta, <span
-                        class="text-forest dark:text-cream font-bold"
-                        >{userData.name}</span
-                    >!
-                </p>
-            </div>
-
-            <div class="flex items-center gap-4">
-                <!-- Foto de Perfil Grande com Dropdown Placeholder -->
-                <div class="flex flex-col items-end mr-2">
-                    <span
-                        class="text-xs font-bold opacity-50 uppercase tracking-widest"
-                        >Acesso Rápido</span
-                    >
-                    <span class="text-[10px] text-emerald-500 font-bold"
-                        >● ONLINE</span
-                    >
-                </div>
-                <div class="relative group">
-                    <img
-                        src={userData.picture &&
-                        userData.picture.startsWith("http")
-                            ? userData.picture
-                            : defaultAvatar}
-                        alt="Profile"
-                        class="w-14 h-14 rounded-full object-cover border-[3px] border-bg-secondary shadow-xl group-hover:border-brand transition-all cursor-pointer"
-                    />
-                    <div
-                        class="absolute -bottom-1 -right-1 w-5 h-5 bg-brand rounded-full border-4 border-bg-primary flex items-center justify-center text-[10px] text-white font-bold"
-                    >
-                        +
-                    </div>
-                </div>
-            </div>
-        </header>
+        <Header {userData} {defaultAvatar} bind:activeTab {handleLogout} />
 
         <!-- Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            {#if isAdmin}
-                <div
-                    class="bg-bg-secondary p-6 rounded-3xl border border-border-ui shadow-sm group hover:border-brand transition-all"
-                >
-                    <p
-                        class="text-text-secondary text-xs font-bold uppercase tracking-widest mb-2 opacity-60"
-                    >
-                        Total Eventos
-                    </p>
-                    <p class="text-4xl font-black text-text-primary">
-                        {events.length}
-                    </p>
-                </div>
-                <div
-                    class="bg-bg-secondary p-6 rounded-3xl border border-border-ui shadow-sm"
-                >
-                    <p
-                        class="text-text-secondary text-xs font-bold uppercase tracking-widest mb-2 opacity-60"
-                    >
-                        Usuários Ativos
-                    </p>
-                    <p class="text-4xl font-black text-text-primary">--</p>
-                </div>
-                <button
-                    class="bg-brand group hover:opacity-90 p-6 rounded-3xl shadow-xl shadow-brand/20 transition-all text-left"
-                >
-                    <p
-                        class="text-white/60 text-xs font-bold uppercase tracking-widest mb-2"
-                    >
-                        Ação Rápida
-                    </p>
-                    <p class="text-xl font-black text-white">
-                        + Novo Acampamento
-                    </p>
-                </button>
-            {:else}
-                <div
-                    class="bg-bg-secondary p-6 rounded-3xl border border-border-ui shadow-sm group hover:border-brand transition-all"
-                >
-                    <p
-                        class="text-text-secondary text-xs font-bold uppercase tracking-widest mb-2 opacity-60"
-                    >
-                        Eventos Disponíveis
-                    </p>
-                    <p class="text-4xl font-black text-text-primary">
-                        {events.length}
-                    </p>
-                </div>
-                <button
-                    onclick={() => (activeTab = "subscriptions")}
-                    class="bg-brand group hover:opacity-90 p-6 rounded-3xl shadow-xl shadow-brand/20 transition-all text-left"
-                >
-                    <p
-                        class="text-white/60 text-xs font-bold uppercase tracking-widest mb-2"
-                    >
-                        Ação Rápida
-                    </p>
-                    <p class="text-xl font-black text-white">Ver Inscrições</p>
-                </button>
-            {/if}
-        </div>
+        <Stats {isAdmin} eventsCount={events.length} bind:activeTab />
 
         {#if loading}
             <div
@@ -403,13 +276,13 @@
                         Nenhum evento encontrado
                     </p>
                     <button
-                        class="bg-forest text-cream px-6 py-2 rounded-full text-[10px] font-bold"
+                        class="bg-brand text-white px-6 py-2 rounded-full text-[10px] font-bold"
                         >Sincronizar</button
                     >
                 </div>
             {:else}
                 <div
-                    class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8 text-forest dark:text-stone"
+                    class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8 text-text-primary"
                 >
                     {#each events as event}
                         <div
@@ -464,13 +337,13 @@
                     </p>
                     <button
                         onclick={() => (activeTab = "events")}
-                        class="bg-forest text-cream px-6 py-2 rounded-full text-[10px] font-bold"
+                        class="px-5 py-2 bg-text-primary text-bg-primary rounded-full text-[10px] font-bold hover:bg-brand hover:text-white transition-all"
                         >Ver Eventos</button
                     >
                 </div>
             {:else}
                 <div
-                    class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8 text-forest dark:text-stone"
+                    class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8 text-text-primary"
                 >
                     {#each subscriptions as sub}
                         <div
@@ -519,119 +392,10 @@
                     {/each}
                 </div>
             {/if}
+        {:else if activeTab === "profile"}
+            <ProfileForm bind:userData {updateProfile} {defaultAvatar} />
         {/if}
     </main>
 
-    <!-- Modal Pop-up -->
-    {#if modalState.isOpen}
-        <div
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity p-4"
-        >
-            <div
-                class="bg-bg-primary border border-border-ui p-8 rounded-3xl shadow-2xl max-w-sm w-full transform transition-all animate-in fade-in zoom-in-95 duration-200"
-            >
-                <div class="flex flex-col items-center text-center">
-                    {#if modalState.type === "error"}
-                        <div
-                            class="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-6 text-red-500 border border-red-500/20"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-8 w-8"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                                />
-                            </svg>
-                        </div>
-                        <h3 class="text-2xl font-black text-red-500 mb-3">
-                            Ops, algo falhou!
-                        </h3>
-                    {:else if modalState.type === "success"}
-                        <div
-                            class="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mb-6 text-green-500 border border-green-500/20"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-8 w-8"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="3"
-                                    d="M5 13l4 4L19 7"
-                                />
-                            </svg>
-                        </div>
-                        <h3 class="text-2xl font-black text-green-500 mb-3">
-                            Sucesso!
-                        </h3>
-                    {:else if modalState.type === "confirm"}
-                        <div
-                            class="w-16 h-16 rounded-full bg-yellow-500/10 flex items-center justify-center mb-6 text-yellow-500 border border-yellow-500/20"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-8 w-8"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                                />
-                            </svg>
-                        </div>
-                        <h3 class="text-2xl font-black text-yellow-500 mb-3">
-                            Atenção
-                        </h3>
-                    {/if}
-                    <p
-                        class="text-text-secondary text-sm font-medium leading-relaxed mb-8"
-                    >
-                        {modalState.message}
-                    </p>
-
-                    {#if modalState.type === "confirm"}
-                        <div class="flex gap-4 w-full">
-                            <button
-                                onclick={closeModal}
-                                class="w-1/2 py-3.5 rounded-xl text-sm font-black uppercase tracking-wider bg-bg-secondary text-text-secondary border border-border-ui hover:border-brand hover:text-text-primary transition-all"
-                            >
-                                Voltar
-                            </button>
-                            <button
-                                onclick={modalState.onConfirm}
-                                class="w-1/2 py-3.5 rounded-xl text-sm font-black uppercase tracking-wider bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/30 transition-all"
-                            >
-                                Confirmar
-                            </button>
-                        </div>
-                    {:else}
-                        <button
-                            onclick={closeModal}
-                            class="w-full py-3.5 rounded-xl text-sm font-black uppercase tracking-wider transition-all {modalState.type ===
-                            'error'
-                                ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/30'
-                                : 'bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/30'}"
-                        >
-                            Entendi
-                        </button>
-                    {/if}
-                </div>
-            </div>
-        </div>
-    {/if}
+    <Modal {modalState} {closeModal} />
 </div>
