@@ -1,10 +1,51 @@
 <script>
     let { event, onSubscribe, onBack } = $props();
+
+    let endDate = event.start_date ? new Date(event.start_date) : null;
+    if (endDate && event.duration_days) {
+        endDate.setDate(endDate.getDate() + event.duration_days);
+    }
+
+    // Calcula o valor com base no tipo de evento (Acampamento ou Festival)
+    let eventFee =
+        event.eventable?.camper_fee || event.eventable?.ticket_price || 0;
+
+    let subscriptionTypeText = "Inscrições Abertas";
+    if (event.eventable) {
+        const now = new Date();
+        const camperStart = event.eventable.camper_registration_start_date
+            ? new Date(event.eventable.camper_registration_start_date)
+            : null;
+        const camperEnd = event.eventable.camper_registration_end_date
+            ? new Date(event.eventable.camper_registration_end_date)
+            : null;
+
+        const servantStart = event.eventable.servant_registration_start_date
+            ? new Date(event.eventable.servant_registration_start_date)
+            : null;
+        const servantEnd = event.eventable.servant_registration_end_date
+            ? new Date(event.eventable.servant_registration_end_date)
+            : null;
+
+        if (
+            camperStart &&
+            camperEnd &&
+            now >= camperStart &&
+            now <= camperEnd
+        ) {
+            subscriptionTypeText = "Inscrições Abertas - Campista";
+        } else if (
+            servantStart &&
+            servantEnd &&
+            now >= servantStart &&
+            now <= servantEnd
+        ) {
+            subscriptionTypeText = "Inscrições Abertas - Servo";
+        }
+    }
 </script>
 
 <div class="flex flex-col gap-6 w-full max-w-5xl mx-auto">
-
-
     <div
         class="bg-bg-secondary border border-border-ui p-8 md:p-12 lg:p-16 rounded-[3rem] shadow-xl relative overflow-hidden"
     >
@@ -21,7 +62,17 @@
                     class="w-12 h-12 md:w-14 md:h-14 flex-shrink-0 flex items-center justify-center bg-bg-primary/50 border border-border-ui rounded-full text-text-secondary hover:bg-brand hover:text-white hover:border-brand transition-all shadow-sm"
                     aria-label="Voltar"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"><path d="m15 18-6-6 6-6" /></svg
+                    >
                 </button>
                 <h2
                     class="text-3xl md:text-5xl font-black text-text-primary leading-tight"
@@ -32,106 +83,145 @@
             <div
                 class="px-6 py-3 bg-brand/10 border border-brand/20 text-brand rounded-2xl"
             >
-                <span class="text-xs font-black uppercase tracking-widest"
-                    >Inscrições Abertas</span
+                <span
+                    class="text-[10px] md:text-xs font-black uppercase tracking-widest text-center block"
+                    >{subscriptionTypeText}</span
                 >
             </div>
         </div>
 
         <div class="space-y-10 relative z-10">
-            <div>
-                <p
-                    class="text-text-primary/80 leading-relaxed font-medium text-base md:text-lg"
-                >
-                    {event.description ||
-                        "Nenhuma descrição detalhada disponível para este evento."}
-                </p>
+            <div class="flex flex-col md:flex-row gap-8">
+                <!-- Lista de Detalhes -->
+                <ul class="flex-1 space-y-4">
+                    <li
+                        class="flex justify-between items-center p-5 bg-bg-primary/50 rounded-2xl border border-border-ui"
+                    >
+                        <span
+                            class="text-[10px] text-text-secondary uppercase tracking-widest font-bold"
+                            >Local</span
+                        >
+                        <span
+                            class="text-text-primary font-black text-sm md:text-base text-right max-w-[60%] leading-tight"
+                            >{event.place || "Não informado"}</span
+                        >
+                    </li>
+                    <li
+                        class="flex justify-between items-center p-5 bg-bg-primary/50 rounded-2xl border border-border-ui"
+                    >
+                        <span
+                            class="text-[10px] text-text-secondary uppercase tracking-widest font-bold"
+                            >Início</span
+                        >
+                        <span
+                            class="text-text-primary font-black text-sm md:text-base"
+                            >{event.start_date
+                                ? new Date(event.start_date).toLocaleDateString(
+                                      "pt-BR",
+                                  )
+                                : "Não definida"}</span
+                        >
+                    </li>
+                    <li
+                        class="flex justify-between items-center p-5 bg-bg-primary/50 rounded-2xl border border-border-ui"
+                    >
+                        <span
+                            class="text-[10px] text-text-secondary uppercase tracking-widest font-bold"
+                            >Término</span
+                        >
+                        <span
+                            class="text-text-primary font-black text-sm md:text-base"
+                            >{endDate
+                                ? endDate.toLocaleDateString("pt-BR")
+                                : "Não definida"}</span
+                        >
+                    </li>
+                    <li
+                        class="flex justify-between items-center p-5 bg-bg-primary/50 rounded-2xl border border-border-ui"
+                    >
+                        <span
+                            class="text-[10px] text-text-secondary uppercase tracking-widest font-bold"
+                            >Vagas</span
+                        >
+                        <span
+                            class="text-text-primary font-black text-sm md:text-base"
+                            >{event.total_vacancies || "Ilimitadas"}</span
+                        >
+                    </li>
+                    <li
+                        class="flex justify-between items-center p-5 bg-bg-primary/50 rounded-2xl border border-border-ui"
+                    >
+                        <span
+                            class="text-[10px] text-text-secondary uppercase tracking-widest font-bold"
+                            >Valor</span
+                        >
+                        <span class="text-brand font-black text-lg md:text-xl"
+                            >{eventFee > 0
+                                ? `R$ ${parseFloat(eventFee).toFixed(2).replace(".", ",")}`
+                                : "Gratuito"}</span
+                        >
+                    </li>
+                </ul>
+
+                <!-- Caixa da Imagem -->
+                {#if event.image}
+                    <div class="w-full md:w-2/5 flex-shrink-0">
+                        <div
+                            class="w-full h-full min-h-[240px] rounded-3xl overflow-hidden border border-border-ui shadow-lg"
+                        >
+                            <img
+                                src={event.image}
+                                alt={event.name}
+                                class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                            />
+                        </div>
+                    </div>
+                {:else}
+                    <div class="w-full md:w-2/5 flex-shrink-0">
+                        <div
+                            class="w-full h-full min-h-[240px] bg-bg-primary/30 rounded-3xl flex items-center justify-center border border-border-ui border-dashed"
+                        >
+                            <span
+                                class="text-text-secondary text-[10px] uppercase font-bold tracking-widest opacity-50"
+                                >Sem Imagem</span
+                            >
+                        </div>
+                    </div>
+                {/if}
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div
-                    class="p-6 bg-bg-primary/50 rounded-3xl border border-border-ui"
-                >
-                    <p
-                        class="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-2"
-                    >
-                        Início
-                    </p>
-                    <p class="text-text-primary font-black text-lg">
-                        {event.start_date
-                            ? new Date(event.start_date).toLocaleDateString(
-                                  "pt-BR",
-                              )
-                            : "Não definida"}
-                    </p>
-                </div>
-                <div
-                    class="p-6 bg-bg-primary/50 rounded-3xl border border-border-ui"
-                >
-                    <p
-                        class="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-2"
-                    >
-                        Término
-                    </p>
-                    <p class="text-text-primary font-black text-lg">
-                        {event.end_date
-                            ? new Date(event.end_date).toLocaleDateString(
-                                  "pt-BR",
-                              )
-                            : "Não definida"}
-                    </p>
-                </div>
-                <div
-                    class="p-6 bg-bg-primary/50 rounded-3xl border border-border-ui"
-                >
-                    <p
-                        class="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-2"
-                    >
-                        Valor
-                    </p>
-                    <p class="text-brand font-black text-2xl">
-                        {event.fee
-                            ? `R$ ${parseFloat(event.fee).toFixed(2).replace(".", ",")}`
-                            : "Gratuito"}
-                    </p>
-                </div>
-                <div
-                    class="p-6 bg-bg-primary/50 rounded-3xl border border-border-ui"
-                >
-                    <p
-                        class="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-2"
-                    >
-                        Vagas
-                    </p>
-                    <p class="text-text-primary font-black text-lg">
-                        {event.capacity || "Ilimitadas"}
-                    </p>
-                </div>
-            </div>
-
+            <!-- Botões Inferiores -->
             <div
-                class="pt-10 flex flex-col sm:flex-row justify-end items-center gap-4"
+                class="pt-8 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-border-ui"
             >
-                <p class="text-xs text-text-secondary font-medium px-4">
-                    Ao confirmar, você será redirecionado para suas inscrições.
-                </p>
+                <div class="flex flex-row flex-wrap gap-4 w-full md:w-auto">
+                    {#if event.eventable?.notice}
+                        <a
+                            href={event.eventable.notice}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="flex-1 md:flex-none text-center px-6 py-4 bg-bg-primary border border-border-ui text-text-primary rounded-xl text-[10px] md:text-xs font-black uppercase tracking-widest hover:bg-text-primary hover:text-bg-primary transition-all shadow-sm"
+                        >
+                            Edital
+                        </a>
+                    {/if}
+                    {#if event.eventable?.term}
+                        <a
+                            href={event.eventable.term}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="flex-1 md:flex-none text-center px-6 py-4 bg-bg-primary border border-border-ui text-text-primary rounded-xl text-[10px] md:text-xs font-black uppercase tracking-widest hover:bg-text-primary hover:text-bg-primary transition-all shadow-sm"
+                        >
+                            Termos
+                        </a>
+                    {/if}
+                </div>
+
                 <button
                     onclick={() => onSubscribe(event.id)}
-                    class="w-full sm:w-auto px-10 py-5 bg-brand text-white rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-brand/20 hover:-translate-y-1 hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3"
+                    class="w-full md:w-auto px-10 py-5 bg-brand text-white rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-brand/20 hover:-translate-y-1 hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3"
                 >
-                    Confirmar Inscrição
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="3"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        ><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg
-                    >
+                    Se Inscrever
                 </button>
             </div>
         </div>

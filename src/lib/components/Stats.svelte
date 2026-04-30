@@ -3,6 +3,7 @@
         isAdmin = false,
         eventsCount = 0,
         activeTab = $bindable(""),
+        onAddEvent
     } = $props();
 </script>
 
@@ -29,6 +30,7 @@
             <p class="text-4xl font-black text-text-primary">--</p>
         </div>
         <button
+            onclick={onAddEvent}
             class="bg-brand group hover:opacity-90 p-6 rounded-3xl shadow-xl shadow-brand/20 transition-all text-left"
         >
             <p
@@ -36,7 +38,7 @@
             >
                 Ação Rápida
             </p>
-            <p class="text-xl font-black text-white">+ Novo Acampamento</p>
+            <p class="text-xl font-black text-white">+ Adicionar Evento</p>
         </button>
     {/if}
 </div>

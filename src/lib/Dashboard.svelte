@@ -6,6 +6,7 @@
     import ProfileForm from "./components/ProfileForm.svelte";
     import Modal from "./components/Modal.svelte";
     import EventDetails from "./components/EventDetails.svelte";
+    import EventForm from "./components/EventForm.svelte";
 
     let { onLogout } = $props();
 
@@ -194,6 +195,17 @@
         }
     }
 
+    function requestSubscription(eventId) {
+        showModal(
+            "confirm",
+            "Ao confirmar, você será redirecionado para suas inscrições. Deseja continuar?",
+            () => {
+                closeModal();
+                subscribe(eventId);
+            },
+        );
+    }
+
     function requestUpdateProfile() {
         showModal(
             "confirm",
@@ -208,6 +220,11 @@
     function openEventDetails(event) {
         selectedEvent = event;
         activeTab = "event_details";
+    }
+
+    function openEventForm(event = null) {
+        selectedEvent = event;
+        activeTab = "event_form";
     }
 
     async function performUpdateProfile() {
@@ -294,7 +311,12 @@
         <Header {userData} {defaultAvatar} bind:activeTab {handleLogout} />
 
         <!-- Stats -->
-        <Stats {isAdmin} eventsCount={events.length} bind:activeTab />
+        <Stats
+            {isAdmin}
+            eventsCount={events.length}
+            bind:activeTab
+            onAddEvent={() => openEventForm()}
+        />
 
         {#if loading}
             <div
@@ -327,10 +349,6 @@
                         <div
                             class="bg-bg-secondary border border-border-ui p-8 rounded-[2.5rem] hover:shadow-2xl hover:-translate-y-1 transition-all group overflow-hidden relative"
                         >
-                            <div
-                                class="absolute top-0 right-0 w-24 h-24 bg-brand/5 rounded-bl-full"
-                            ></div>
-
                             <div class="flex justify-between items-start mb-6">
                                 <h3
                                     class="text-2xl font-black group-hover:text-brand transition-colors line-clamp-1"
@@ -338,15 +356,18 @@
                                     {event.name || "Evento"}
                                 </h3>
                                 <div
-                                    class="w-3 h-3 bg-brand rounded-full shadow-[0_0_10px_rgba(222,110,39,0.5)]"
-                                ></div>
+                                    class="px-3 py-1 bg-brand/10 border border-brand/20 text-brand rounded-full"
+                                >
+                                    <span
+                                        class="text-[10px] font-black uppercase tracking-widest whitespace-nowrap"
+                                    >
+                                        {event.eventable_type ===
+                                        "App\\Models\\Festival"
+                                            ? "Festival"
+                                            : "Acampamento"}
+                                    </span>
+                                </div>
                             </div>
-                            <p
-                                class="text-text-secondary text-sm leading-relaxed mb-8 line-clamp-3 font-medium opacity-80"
-                            >
-                                {event.description ||
-                                    "Nenhuma descrição disponível para este evento."}
-                            </p>
                             <div
                                 class="flex justify-between items-center pt-8 border-t border-border-ui"
                             >
@@ -357,7 +378,7 @@
                                 <button
                                     onclick={() =>
                                         isAdmin
-                                            ? null
+                                            ? openEventForm(event)
                                             : openEventDetails(event)}
                                     class="px-5 py-2 bg-text-primary text-bg-primary rounded-full text-[10px] font-bold hover:bg-brand hover:text-white transition-all"
                                 >
@@ -390,21 +411,26 @@
                         <div
                             class="bg-bg-secondary border border-border-ui p-8 rounded-[2.5rem] hover:shadow-2xl hover:-translate-y-1 transition-all group overflow-hidden relative"
                         >
-                            <div
-                                class="absolute top-0 right-0 w-24 h-24 bg-brand/5 rounded-bl-full"
-                            ></div>
-
                             <div class="flex justify-between items-start mb-6">
                                 <h3
                                     class="text-2xl font-black group-hover:text-brand transition-colors line-clamp-1"
                                 >
                                     {sub.event?.name || "Inscrição"}
                                 </h3>
-                                <div
-                                    class="w-3 h-3 {sub.paid_the_fee
-                                        ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]'
-                                        : 'bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]'} rounded-full"
-                                ></div>
+                                <div class="flex items-center gap-2">
+                                    <div
+                                        class="px-3 py-1 bg-brand/10 border border-brand/20 text-brand rounded-full"
+                                    >
+                                        <span
+                                            class="text-[10px] font-black uppercase tracking-widest whitespace-nowrap"
+                                        >
+                                            {sub.event?.eventable_type ===
+                                            "App\\Models\\Festival"
+                                                ? "Festival"
+                                                : "Acampamento"}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                             <p
                                 class="text-text-secondary text-sm leading-relaxed mb-4"
@@ -412,7 +438,7 @@
                                 <strong>Status:</strong>
                                 {sub.paid_the_fee
                                     ? "Confirmado"
-                                    : "Pendente pagamento"} <br />
+                                    : "Pagamento pendente"} <br />
                                 <strong>Tipo:</strong>
                                 {sub.subscription_type} <br />
                                 <strong>Sorteado:</strong>
@@ -442,8 +468,18 @@
         {:else if activeTab === "event_details" && selectedEvent}
             <EventDetails
                 event={selectedEvent}
-                onSubscribe={subscribe}
+                onSubscribe={requestSubscription}
                 onBack={() => (activeTab = "events")}
+            />
+        {:else if activeTab === "event_form"}
+            <EventForm
+                event={selectedEvent}
+                onCancel={() => (activeTab = "events")}
+                {token}
+                onSaveSuccess={() => {
+                    activeTab = "events";
+                    fetchEvents();
+                }}
             />
         {/if}
     </main>
