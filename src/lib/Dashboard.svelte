@@ -57,6 +57,7 @@
 
     async function fetchEvents() {
         try {
+            loading = true;
             const endpoint = isAdmin
                 ? `${API_URL}/v1/events`
                 : `${API_URL}/v1/events?available=true`;
@@ -276,7 +277,8 @@
                         Nenhum evento encontrado
                     </p>
                     <button
-                        class="bg-brand text-white px-6 py-2 rounded-full text-[10px] font-bold"
+                        onclick={fetchEvents}
+                        class="px-5 py-2 bg-text-primary text-bg-primary rounded-full text-[10px] font-bold hover:bg-brand hover:text-white transition-all"
                         >Sincronizar</button
                     >
                 </div>
