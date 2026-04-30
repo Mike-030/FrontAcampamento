@@ -68,8 +68,10 @@
     function applyCpfMask(val) {
         let v = val.replace(/\D/g, "");
         if (v.length > 11) v = v.slice(0, 11);
-        if (v.length > 9) v = `${v.slice(0, 3)}.${v.slice(3, 6)}.${v.slice(6, 9)}-${v.slice(9)}`;
-        else if (v.length > 6) v = `${v.slice(0, 3)}.${v.slice(3, 6)}.${v.slice(6)}`;
+        if (v.length > 9)
+            v = `${v.slice(0, 3)}.${v.slice(3, 6)}.${v.slice(6, 9)}-${v.slice(9)}`;
+        else if (v.length > 6)
+            v = `${v.slice(0, 3)}.${v.slice(3, 6)}.${v.slice(6)}`;
         else if (v.length > 3) v = `${v.slice(0, 3)}.${v.slice(3)}`;
         return v;
     }
@@ -87,8 +89,10 @@
     function applyRgMask(val) {
         let v = val.replace(/\D/g, "");
         if (v.length > 9) v = v.slice(0, 9);
-        if (v.length > 8) v = `${v.slice(0, 2)}.${v.slice(2, 5)}.${v.slice(5, 8)}-${v.slice(8)}`;
-        else if (v.length > 5) v = `${v.slice(0, 2)}.${v.slice(2, 5)}.${v.slice(5)}`;
+        if (v.length > 8)
+            v = `${v.slice(0, 2)}.${v.slice(2, 5)}.${v.slice(5, 8)}-${v.slice(8)}`;
+        else if (v.length > 5)
+            v = `${v.slice(0, 2)}.${v.slice(2, 5)}.${v.slice(5)}`;
         else if (v.length > 2) v = `${v.slice(0, 2)}.${v.slice(2)}`;
         return v;
     }
@@ -98,6 +102,20 @@
         if (e) e.preventDefault();
         loading = true;
         error = "";
+
+        const rawCpf = maskedCpf.replace(/\D/g, "");
+        if (rawCpf.length !== 11) {
+            error = "Por favor, informe um CPF válido com 11 dígitos.";
+            loading = false;
+            return;
+        }
+
+        const rawPhone = maskedPhone.replace(/\D/g, "");
+        if (rawPhone.length < 10) {
+            error = "Por favor, informe um número de celular válido.";
+            loading = false;
+            return;
+        }
 
         if (formData.name.length > 80) {
             error = "O nome é muito longo.";
@@ -117,8 +135,8 @@
             phone: maskedPhone.replace(/\D/g, ""),
             document: maskedDocument.replace(/\D/g, ""),
             birthday: `${selectedYear}-${String(selectedMonth).padStart(2, "0")}-${String(selectedDay).padStart(2, "0")}`,
-            is_counselor: 0, 
-            picture: "default.png"
+            is_counselor: 0,
+            picture: "default.png",
         };
 
         try {
@@ -224,30 +242,38 @@
            active:scale-90 transition-all"
     aria-label="Voltar ao Login"
 >
-    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="m15 18-6-6 6-6"/>
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+    >
+        <path d="m15 18-6-6 6-6" />
     </svg>
 </button>
 
-<div
-    class="fixed inset-0 w-full h-full flex flex-col overflow-y-auto"
->
+<div class="fixed inset-0 w-full h-full flex flex-col overflow-y-auto">
     <div class="flex-1 flex items-center justify-center p-4">
         <div
             class="w-full max-w-5xl bg-bg-secondary border border-border-ui shadow-2xl rounded-[3rem] overflow-hidden flex flex-col md:flex-row transition-all duration-300"
         >
             <!-- Lado Visual -->
             <div
-                class="hidden md:block md:w-1/3 relative bg-bg-primary/30 border-r border-border-ui/50 overflow-hidden"
+                class="hidden md:block md:w-1/3 bg-bg-primary/30 border-r border-border-ui/50"
             >
                 <div
-                    class="absolute inset-0 p-10 flex flex-col justify-between z-10"
+                    class="sticky top-4 p-10 flex flex-col justify-between h-[calc(100vh-2rem)] max-h-full z-10"
                 >
                     <div class="flex flex-col items-center text-center">
                         <img
                             src={logo}
                             alt="Logo"
-                            class="w-full max-w-[280px] -mt-6 mb-4 drop-shadow-2xl"
+                            class="w-full max-w-[280px] mb-4 drop-shadow-2xl"
                         />
                         <h2
                             class="text-5xl font-black text-text-primary leading-[1.1] mb-6"
@@ -339,7 +365,9 @@
                                 <label
                                     for="name"
                                     class="text-text-secondary text-[10px] font-bold uppercase tracking-widest ml-1"
-                                    >Nome Completo</label
+                                    >Nome Completo <span class="text-brand"
+                                        >*</span
+                                    ></label
                                 >
                                 <input
                                     id="name"
@@ -356,7 +384,8 @@
                                 <label
                                     for="reg-email"
                                     class="text-text-secondary text-[10px] font-bold uppercase tracking-widest ml-1"
-                                    >E-mail</label
+                                    >E-mail <span class="text-brand">*</span
+                                    ></label
                                 >
                                 <input
                                     id="reg-email"
@@ -373,7 +402,8 @@
                                 <label
                                     for="cpf"
                                     class="text-text-secondary text-[10px] font-bold uppercase tracking-widest ml-1"
-                                    >CPF</label
+                                    >CPF <span class="text-brand">*</span
+                                    ></label
                                 >
                                 <input
                                     id="cpf"
@@ -393,7 +423,9 @@
                                 <label
                                     for="phone"
                                     class="text-text-secondary text-[10px] font-bold uppercase tracking-widest ml-1"
-                                    >WhatsApp</label
+                                    >Número de Celular <span class="text-brand"
+                                        >*</span
+                                    ></label
                                 >
                                 <input
                                     id="phone"
@@ -413,7 +445,8 @@
                                 <label
                                     for="sex"
                                     class="text-text-secondary text-[10px] font-bold uppercase tracking-widest ml-1"
-                                    >Gênero</label
+                                    >Gênero <span class="text-brand">*</span
+                                    ></label
                                 >
                                 <select
                                     id="sex"
@@ -431,7 +464,9 @@
                                 <label
                                     for="marital"
                                     class="text-text-secondary text-[10px] font-bold uppercase tracking-widest ml-1"
-                                    >Estado Civil</label
+                                    >Estado Civil <span class="text-brand"
+                                        >*</span
+                                    ></label
                                 >
                                 <select
                                     id="marital"
@@ -462,7 +497,6 @@
                                         ))}
                                     maxlength="12"
                                     placeholder="00.000.000-0"
-                                    required
                                     class="w-full bg-bg-primary/50 border border-border-ui rounded-2xl p-4 text-text-primary focus:border-brand outline-none transition-all placeholder:text-text-secondary/60"
                                 />
                             </div>
@@ -572,7 +606,8 @@
                                 <label
                                     for="reg-password"
                                     class="text-text-secondary text-[10px] font-bold uppercase tracking-widest ml-1"
-                                    >Crie uma Senha</label
+                                    >Senha <span class="text-brand">*</span
+                                    ></label
                                 >
                                 <input
                                     id="reg-password"
@@ -590,7 +625,9 @@
                                 <label
                                     for="confirm-password"
                                     class="text-text-secondary text-[10px] font-bold uppercase tracking-widest ml-1"
-                                    >Confirme a Senha</label
+                                    >Confirme a Senha <span class="text-brand"
+                                        >*</span
+                                    ></label
                                 >
                                 <input
                                     id="confirm-password"
@@ -606,6 +643,13 @@
                         </div>
 
                         <div class="pt-6">
+                            <p
+                                class="text-[10px] text-text-secondary/60 text-center uppercase tracking-widest font-bold mb-4"
+                            >
+                                Campos marcados com <span class="text-brand"
+                                    >*</span
+                                > são obrigatórios.
+                            </p>
                             <button
                                 type="submit"
                                 disabled={loading}

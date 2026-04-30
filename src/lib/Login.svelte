@@ -243,7 +243,7 @@
                         <img
                             src={logo}
                             alt="Logo"
-                            class="pt-7 h-64 md:h-[35vh] lg:h-[45vh] max-h-[420px] max-w-[85vw] mx-auto -mb-8 md:-mb-12 lg:-mb-16 drop-shadow-[0_0_30px_rgba(222,110,39,0.3)] object-contain"
+                            class="pt-32 h-32 md:h-[35vh] lg:h-[45vh] max-h-[420px] max-w-full mx-auto mb-2 drop-shadow-[0_0_30px_rgba(222,110,39,0.3)] object-contain"
                         />
                     </div>
                     <div class="relative z-10 mt-2">
