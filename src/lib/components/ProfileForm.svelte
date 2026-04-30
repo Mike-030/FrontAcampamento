@@ -57,7 +57,23 @@
             >
             <input
                 type="text"
-                bind:value={userData.phone}
+                value={(() => {
+                    let v = userData.phone || "";
+                    v = v.replace(/\D/g, "");
+                    if (v.length > 11) v = v.slice(0, 11);
+                    if (v.length > 2) v = `(${v.slice(0, 2)}) ${v.slice(2)}`;
+                    if (v.length > 10) v = `${v.slice(0, 10)}-${v.slice(10)}`;
+                    return v;
+                })()}
+                oninput={(e) => {
+                    let v = e.target.value.replace(/\D/g, "");
+                    if (v.length > 11) v = v.slice(0, 11);
+                    if (v.length > 2) v = `(${v.slice(0, 2)}) ${v.slice(2)}`;
+                    if (v.length > 10) v = `${v.slice(0, 10)}-${v.slice(10)}`;
+                    userData.phone = v;
+                    e.target.value = v;
+                }}
+                maxlength="15"
                 placeholder="(00) 00000-0000"
                 class="w-full bg-bg-primary border border-border-ui rounded-2xl px-5 py-4 text-text-primary font-medium focus:outline-none focus:border-brand transition-all shadow-sm"
             />
@@ -69,7 +85,17 @@
             >
             <input
                 type="text"
-                value={userData.cpf || userData.document || ""}
+                value={(() => {
+                    let cpf = userData.cpf || userData.document || "";
+                    cpf = cpf.replace(/\D/g, "");
+                    if (cpf.length === 11) {
+                        return cpf.replace(
+                            /(\d{3})(\d{3})(\d{3})(\d{2})/,
+                            "$1.$2.$3-$4",
+                        );
+                    }
+                    return cpf;
+                })()}
                 class="w-full bg-bg-primary border border-border-ui rounded-2xl px-5 py-4 text-text-primary font-medium focus:outline-none focus:border-brand transition-all shadow-sm opacity-60 cursor-not-allowed"
                 readonly
             />

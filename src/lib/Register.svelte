@@ -68,9 +68,9 @@
     function applyCpfMask(val) {
         let v = val.replace(/\D/g, "");
         if (v.length > 11) v = v.slice(0, 11);
-        if (v.length <= 11) {
-            return v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-        }
+        if (v.length > 9) v = `${v.slice(0, 3)}.${v.slice(3, 6)}.${v.slice(6, 9)}-${v.slice(9)}`;
+        else if (v.length > 6) v = `${v.slice(0, 3)}.${v.slice(3, 6)}.${v.slice(6)}`;
+        else if (v.length > 3) v = `${v.slice(0, 3)}.${v.slice(3)}`;
         return v;
     }
 
@@ -78,14 +78,19 @@
     function applyPhoneMask(val) {
         let v = val.replace(/\D/g, "");
         if (v.length > 11) v = v.slice(0, 11);
-        return v.replace(/(\d{2})(\d{1})(\d{4})(\d{4})/, "($1) $2 $3-$4");
+        if (v.length > 2) v = `(${v.slice(0, 2)}) ${v.slice(2)}`;
+        if (v.length > 10) v = `${v.slice(0, 10)}-${v.slice(10)}`;
+        return v;
     }
 
     /** @param {string} val */
     function applyRgMask(val) {
         let v = val.replace(/\D/g, "");
         if (v.length > 9) v = v.slice(0, 9);
-        return v.replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, "$1.$2.$3-$4");
+        if (v.length > 8) v = `${v.slice(0, 2)}.${v.slice(2, 5)}.${v.slice(5, 8)}-${v.slice(8)}`;
+        else if (v.length > 5) v = `${v.slice(0, 2)}.${v.slice(2, 5)}.${v.slice(5)}`;
+        else if (v.length > 2) v = `${v.slice(0, 2)}.${v.slice(2)}`;
+        return v;
     }
 
     /** @param {SubmitEvent} e */

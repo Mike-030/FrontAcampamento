@@ -191,13 +191,29 @@
         }
     }
 
-    async function updateProfile() {
+    function requestUpdateProfile() {
+        showModal(
+            "confirm",
+            "Deseja realmente salvar as alterações no seu perfil?",
+            () => {
+                closeModal();
+                performUpdateProfile();
+            }
+        );
+    }
+
+    async function performUpdateProfile() {
         try {
             const payload = {
                 name: userData.name,
                 email: userData.email,
-                phone: userData.phone,
+                phone: userData.phone ? String(userData.phone).replace(/\D/g, "") : undefined,
             };
+            
+            const rawCpf = userData.cpf || userData.document;
+            if (rawCpf) {
+                payload.cpf = String(rawCpf).replace(/\D/g, "");
+            }
 
             const response = await fetch(`${API_URL}/v1/users/${userData.id}`, {
                 method: "PUT",
@@ -235,6 +251,17 @@
     }
 
     function handleLogout() {
+        showModal(
+            "confirm",
+            "Tem certeza que deseja sair da sua conta?",
+            () => {
+                closeModal();
+                performLogout();
+            }
+        );
+    }
+
+    function performLogout() {
         localStorage.removeItem("auth_token");
         localStorage.removeItem("user_data");
         onLogout();
@@ -395,7 +422,7 @@
                 </div>
             {/if}
         {:else if activeTab === "profile"}
-            <ProfileForm bind:userData {updateProfile} {defaultAvatar} />
+            <ProfileForm bind:userData updateProfile={requestUpdateProfile} {defaultAvatar} />
         {/if}
     </main>
 
