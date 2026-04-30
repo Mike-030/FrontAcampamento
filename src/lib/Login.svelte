@@ -236,14 +236,14 @@
             </div>
 
             <div
-                class="w-full md:w-1/2 p-4 md:p-12 lg:p-16 flex flex-col justify-center items-center py-10 md:pb-32"
+                class="w-full md:w-1/2 p-6 md:p-8 lg:p-12 flex flex-col justify-center items-center"
             >
                 <header class="text-center w-full mb-0 relative">
-                    <div class="relative -mt-6 md:-mt-10 lg:-mt-12">
+                    <div class="w-full flex justify-center mb-2">
                         <img
                             src={logo}
                             alt="Logo"
-                            class="pt-32 h-32 md:h-[35vh] lg:h-[45vh] max-h-[420px] max-w-full mx-auto mb-2 drop-shadow-[0_0_30px_rgba(222,110,39,0.3)] object-contain"
+                            class="pt-4 h-32 md:h-40 lg:h-50 max-w-full mt-4 drop-shadow-[0_0_30px_rgba(222,110,39,0.3)] object-contain"
                         />
                     </div>
                     <div class="relative z-10 mt-2">
@@ -262,7 +262,7 @@
 
                 <form
                     onsubmit={handleSubmit}
-                    class="w-full max-w-sm space-y-5 mt-8 px-4"
+                    class="w-full max-w-sm space-y-4 mt-6 px-4"
                 >
                     <div class="space-y-1.5 text-left w-full">
                         <label
