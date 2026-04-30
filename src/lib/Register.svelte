@@ -273,7 +273,7 @@
                         <img
                             src={logo}
                             alt="Logo"
-                            class="w-full max-w-[280px] mb-4 drop-shadow-2xl"
+                            class="w-full max-w-[280px] -mt-6 mb-4 drop-shadow-2xl"
                         />
                         <h2
                             class="text-5xl font-black text-text-primary leading-[1.1] mb-6"

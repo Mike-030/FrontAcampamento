@@ -5,6 +5,7 @@
     import Stats from "./components/Stats.svelte";
     import ProfileForm from "./components/ProfileForm.svelte";
     import Modal from "./components/Modal.svelte";
+    import EventDetails from "./components/EventDetails.svelte";
 
     let { onLogout } = $props();
 
@@ -14,6 +15,7 @@
     let subscriptions = $state([]);
     let loading = $state(true);
     let activeTab = $state("events");
+    let selectedEvent = $state(null);
     let userData = $state(
         JSON.parse(localStorage.getItem("user_data") || "{}"),
     );
@@ -130,7 +132,8 @@
 
             if (response.ok) {
                 showModal("success", "Inscrição realizada com sucesso!");
-                // Opcional: Atualizar a listagem ou exibir status
+                activeTab = "subscriptions";
+                fetchSubscriptions();
             } else {
                 const errorData = await response.json();
                 const errorMessage = errorData.errors
@@ -198,8 +201,13 @@
             () => {
                 closeModal();
                 performUpdateProfile();
-            }
+            },
         );
+    }
+
+    function openEventDetails(event) {
+        selectedEvent = event;
+        activeTab = "event_details";
     }
 
     async function performUpdateProfile() {
@@ -207,9 +215,11 @@
             const payload = {
                 name: userData.name,
                 email: userData.email,
-                phone: userData.phone ? String(userData.phone).replace(/\D/g, "") : undefined,
+                phone: userData.phone
+                    ? String(userData.phone).replace(/\D/g, "")
+                    : undefined,
             };
-            
+
             const rawCpf = userData.cpf || userData.document;
             if (rawCpf) {
                 payload.cpf = String(rawCpf).replace(/\D/g, "");
@@ -257,7 +267,7 @@
             () => {
                 closeModal();
                 performLogout();
-            }
+            },
         );
     }
 
@@ -346,10 +356,12 @@
                                 >
                                 <button
                                     onclick={() =>
-                                        isAdmin ? null : subscribe(event.id)}
+                                        isAdmin
+                                            ? null
+                                            : openEventDetails(event)}
                                     class="px-5 py-2 bg-text-primary text-bg-primary rounded-full text-[10px] font-bold hover:bg-brand hover:text-white transition-all"
                                 >
-                                    {isAdmin ? "Gerenciar" : "Inscrever-se"}
+                                    {isAdmin ? "Gerenciar" : "Ver Detalhes"}
                                 </button>
                             </div>
                         </div>
@@ -422,7 +434,17 @@
                 </div>
             {/if}
         {:else if activeTab === "profile"}
-            <ProfileForm bind:userData updateProfile={requestUpdateProfile} {defaultAvatar} />
+            <ProfileForm
+                bind:userData
+                updateProfile={requestUpdateProfile}
+                {defaultAvatar}
+            />
+        {:else if activeTab === "event_details" && selectedEvent}
+            <EventDetails
+                event={selectedEvent}
+                onSubscribe={subscribe}
+                onBack={() => (activeTab = "events")}
+            />
         {/if}
     </main>
 
