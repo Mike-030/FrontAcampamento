@@ -112,9 +112,9 @@
             const eventableEndpoint = eventType === "App\\Models\\Camping" ? "/v1/campings" : "/v1/festivals";
             
             if (eventType === "App\\Models\\Camping") {
-                const man = parseInt(campingData.raffle_man_vacancies || 0);
-                const woman = parseInt(campingData.raffle_woman_vacancies || 0);
-                const couple = parseInt(campingData.raffle_couple_vacancies || 0);
+                const man = Number(campingData.raffle_man_vacancies || 0);
+                const woman = Number(campingData.raffle_woman_vacancies || 0);
+                const couple = Number(campingData.raffle_couple_vacancies || 0);
                 campingData.raffle_total_vacancies = man + woman + (couple * 2);
                 formData.total_vacancies = campingData.raffle_total_vacancies;
             } else if (eventType === "App\\Models\\Festival") {
