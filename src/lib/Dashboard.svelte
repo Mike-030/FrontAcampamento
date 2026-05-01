@@ -26,6 +26,8 @@
             userData.role === "admin",
     );
 
+    let isSidebarExpanded = $state(false);
+
     let modalState = $state({
         isOpen: false,
         type: "error",
@@ -300,6 +302,7 @@
 >
     <Sidebar
         bind:activeTab
+        bind:isExpanded={isSidebarExpanded}
         {isAdmin}
         {userData}
         {defaultAvatar}
@@ -307,7 +310,7 @@
     />
 
     <!-- Main Content -->
-    <main class="ml-64 flex-grow p-10">
+    <main class="{isSidebarExpanded ? 'ml-64' : 'ml-20'} transition-all duration-300 ease-in-out flex-grow p-10">
         <Header {userData} {defaultAvatar} bind:activeTab {handleLogout} />
 
         <!-- Stats -->
