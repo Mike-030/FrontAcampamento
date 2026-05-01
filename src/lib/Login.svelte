@@ -1,6 +1,7 @@
 <script>
     import logo from "../assets/LogoComunidadeSaoMiguel.png";
     import bgHero from "../assets/SaoMiguelArcanjo.png";
+    import Modal from "./components/Modal.svelte";
 
     /** @type {{ onLoginSuccess: Function, onGoToRegister: Function }} */
     let { onLoginSuccess, onGoToRegister } = $props();
@@ -8,7 +9,23 @@
     let email = $state("");
     let password = $state("");
     let loading = $state(false);
-    let error = $state("");
+    let showPassword = $state(false);
+    let rememberMe = $state(false);
+
+    let modalState = $state({
+        isOpen: false,
+        type: "error",
+        message: "",
+        onConfirm: null,
+    });
+
+    function showModal(type, message, onConfirm = null) {
+        modalState = { isOpen: true, type, message, onConfirm };
+    }
+
+    function closeModal() {
+        modalState.isOpen = false;
+    }
 
     // Estado da Sidebar
     let isSidebarOpen = $state(false);
@@ -19,7 +36,6 @@
     async function handleSubmit(e) {
         if (e) e.preventDefault();
         loading = true;
-        error = "";
 
         try {
             const response = await fetch(`${API_URL}/v1/login`, {
@@ -28,7 +44,7 @@
                     "Content-Type": "application/json",
                     Accept: "application/json",
                 },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ email, password, remember: rememberMe }),
             });
 
             const data = await response.json();
@@ -36,10 +52,10 @@
             if (response.ok) {
                 onLoginSuccess(data.token, data.data);
             } else {
-                error = data.message || "E-mail ou senha incorretos.";
+                showModal("error", data.message || "E-mail ou senha incorretos.");
             }
         } catch (err) {
-            error = "Sem conexão com o servidor.";
+            showModal("error", "Sem conexão com o servidor.");
         } finally {
             loading = false;
         }
@@ -285,22 +301,43 @@
                             class="text-text-secondary text-[10px] font-bold uppercase tracking-widest ml-1"
                             >Senha</label
                         >
-                        <input
-                            id="password"
-                            bind:value={password}
-                            type="password"
-                            required
-                            class="w-full bg-bg-secondary/40 md:bg-bg-primary/50 border border-border-ui rounded-2xl p-4 text-text-primary focus:border-brand outline-none transition-all placeholder:text-text-secondary/60 shadow-sm"
-                            placeholder="••••••••"
-                        />
-                    </div>
-                    {#if error}
-                        <div
-                            class="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-xl text-xs text-center border-dashed"
-                        >
-                            {error}
+                        <div class="relative w-full">
+                            <input
+                                id="password"
+                                bind:value={password}
+                                type={showPassword ? "text" : "password"}
+                                required
+                                class="w-full bg-bg-secondary/40 md:bg-bg-primary/50 border border-border-ui rounded-2xl p-4 pr-12 text-text-primary focus:border-brand outline-none transition-all placeholder:text-text-secondary/60 shadow-sm"
+                                placeholder="••••••••"
+                            />
+                            <button
+                                type="button"
+                                onclick={() => showPassword = !showPassword}
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary focus:outline-none transition-colors"
+                            >
+                                {#if showPassword}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.733 5.076a10.744 10.744 0 0 1 1.267-.076c7.02 0 10 7 10 7a18.16 18.16 0 0 1-2.062 2.805M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
+                                {:else}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                {/if}
+                            </button>
                         </div>
-                    {/if}
+                    </div>
+
+                    <div class="flex items-center gap-2 mt-2 ml-1">
+                        <input
+                            type="checkbox"
+                            id="remember"
+                            bind:checked={rememberMe}
+                            class="w-4 h-4 rounded border-border-ui text-brand focus:ring-brand accent-brand cursor-pointer"
+                        />
+                        <label
+                            for="remember"
+                            class="text-text-secondary text-xs font-medium cursor-pointer select-none"
+                            >Lembrar-me</label
+                        >
+                    </div>
+
                     <div class="pt-2">
                         <button
                             type="submit"
@@ -326,6 +363,8 @@
         </div>
     </div>
 </div>
+
+<Modal {modalState} {closeModal} />
 
 <style>
     :global(html, body) {
