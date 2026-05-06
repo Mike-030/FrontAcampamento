@@ -238,12 +238,55 @@
             }}
             class="space-y-12"
         >
+            <!-- SECTION: TIPO -->
+            <section>
+                <h3
+                    class="text-l font-black text-brand uppercase tracking-widest mb-6"
+                >
+                    1. Tipo de Evento
+                </h3>
+                <div class="flex gap-4">
+                    <label class="flex-1 cursor-pointer">
+                        <input
+                            type="radio"
+                            bind:group={eventType}
+                            value="App\Models\Camping"
+                            class="hidden peer"
+                            disabled={!!event}
+                        />
+                        <div
+                            class="p-4 rounded-2xl border-2 border-border-ui bg-bg-primary text-center peer-checked:border-brand peer-checked:bg-brand/5 transition-all"
+                        >
+                            <span class="font-bold text-text-primary"
+                                >Acampamento</span
+                            >
+                        </div>
+                    </label>
+                    <label class="flex-1 cursor-pointer">
+                        <input
+                            type="radio"
+                            bind:group={eventType}
+                            value="App\Models\Festival"
+                            class="hidden peer"
+                            disabled={!!event}
+                        />
+                        <div
+                            class="p-4 rounded-2xl border-2 border-border-ui bg-bg-primary text-center peer-checked:border-brand peer-checked:bg-brand/5 transition-all"
+                        >
+                            <span class="font-bold text-text-primary"
+                                >Festival</span
+                            >
+                        </div>
+                    </label>
+                </div>
+            </section>
+
             <!-- SECTION: GERAL -->
             <section>
                 <h3
                     class="text-l font-black text-brand uppercase tracking-widest mb-6"
                 >
-                    1. Informações Gerais
+                    2. Informações Gerais
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -321,49 +364,6 @@
                             placeholder="Link ou path da Imagem"
                         />
                     </div>
-                </div>
-            </section>
-
-            <!-- SECTION: TIPO -->
-            <section>
-                <h3
-                    class="text-l font-black text-brand uppercase tracking-widest mb-6"
-                >
-                    2. Tipo de Evento
-                </h3>
-                <div class="flex gap-4">
-                    <label class="flex-1 cursor-pointer">
-                        <input
-                            type="radio"
-                            bind:group={eventType}
-                            value="App\Models\Camping"
-                            class="hidden peer"
-                            disabled={!!event}
-                        />
-                        <div
-                            class="p-4 rounded-2xl border-2 border-border-ui bg-bg-primary text-center peer-checked:border-brand peer-checked:bg-brand/5 transition-all"
-                        >
-                            <span class="font-bold text-text-primary"
-                                >Acampamento</span
-                            >
-                        </div>
-                    </label>
-                    <label class="flex-1 cursor-pointer">
-                        <input
-                            type="radio"
-                            bind:group={eventType}
-                            value="App\Models\Festival"
-                            class="hidden peer"
-                            disabled={!!event}
-                        />
-                        <div
-                            class="p-4 rounded-2xl border-2 border-border-ui bg-bg-primary text-center peer-checked:border-brand peer-checked:bg-brand/5 transition-all"
-                        >
-                            <span class="font-bold text-text-primary"
-                                >Festival</span
-                            >
-                        </div>
-                    </label>
                 </div>
             </section>
 

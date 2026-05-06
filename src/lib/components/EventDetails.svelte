@@ -9,6 +9,11 @@
         return date;
     });
 
+    // Calcula o valor com base no tipo de evento (Acampamento ou Festival)
+    let eventFee = $derived(
+        event.eventable?.camper_fee || event.eventable?.ticket_price || 0,
+    );
+
     let subscriptionTypeText = $derived.by(() => {
         let text = "Inscrições Abertas";
         if (event.eventable) {
