@@ -1,7 +1,6 @@
 <script>
     import Sidebar from "./components/Sidebar.svelte";
     import Header from "./components/Header.svelte";
-    import Stats from "./components/Stats.svelte";
     import ProfileForm from "./components/ProfileForm.svelte";
     import Modal from "./components/Modal.svelte";
     import EventDetails from "./components/EventDetails.svelte";
@@ -317,15 +316,6 @@
     <!-- Main Content -->
     <main class="ml-64 flex-grow p-10">
         <Header {userData} {defaultAvatar} bind:activeTab {handleLogout} />
-
-        <!-- Stats -->
-        <Stats
-            {isAdmin}
-            eventsCount={events.length}
-            bind:activeTab
-            onAddEvent={() => openEventForm()}
-        />
-
         {#if loading}
             <div
                 class="flex flex-col items-center justify-center py-20 text-text-secondary"
