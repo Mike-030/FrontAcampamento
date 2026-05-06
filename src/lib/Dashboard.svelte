@@ -6,6 +6,7 @@
     import Modal from "./components/Modal.svelte";
     import EventDetails from "./components/EventDetails.svelte";
     import EventForm from "./components/EventForm.svelte";
+    import UsersDashboard from "./components/UsersDashboard.svelte";
 
     let { onLogout } = $props();
 
@@ -381,7 +382,7 @@
                                     class="text-[10px] font-black uppercase opacity-40"
                                     >Campanha 2026</span
                                 >
-                                <div class="flex gap-4">
+                                <div class="flex gap-2">
                                     {#if isAdmin}
                                         <button
                                             onclick={() => openEventForm(event)}
@@ -472,6 +473,8 @@
                     {/each}
                 </div>
             {/if}
+        {:else if activeTab === "users"}
+            <UsersDashboard {token} />
         {:else if activeTab === "profile"}
             <ProfileForm
                 bind:userData

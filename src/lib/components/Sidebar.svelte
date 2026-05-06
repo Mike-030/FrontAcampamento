@@ -46,8 +46,14 @@
                 <span class="font-medium">Eventos</span>
             </li>
             {#if isAdmin}
+                <!-- svelte-ignore a11y_click_events_have_key_events -->
+                <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
                 <li
-                    class="flex items-center gap-3 p-3 rounded-xl hover:bg-text-primary/5 text-text-secondary hover:text-text-primary transition-all cursor-pointer"
+                    onclick={() => (activeTab = "users")}
+                    class="flex items-center gap-3 p-3 rounded-xl {activeTab ===
+                    'users'
+                        ? 'bg-brand text-white shadow-lg shadow-brand/20'
+                        : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
