@@ -3,9 +3,8 @@
     let {
         activeTab = $bindable(""),
         isAdmin = false,
-        userData = {},
-        defaultAvatar = "",
         handleLogout,
+        onAddEvent = () => {},
     } = $props();
 </script>
 
@@ -70,6 +69,31 @@
                         <circle cx="12" cy="7" r="4" />
                     </svg>
                     <span>Usuários</span>
+                </li>
+                <!-- svelte-ignore a11y_click_events_have_key_events -->
+                <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+                <li
+                    onclick={onAddEvent}
+                    class="flex items-center gap-3 p-3 rounded-xl {activeTab ===
+                    'event_form'
+                        ? 'bg-brand text-white shadow-lg shadow-brand/20'
+                        : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="M12 5v14" />
+                        <path d="M5 12h14" />
+                    </svg>
+                    <span>Criar Evento</span>
                 </li>
             {/if}
             <!-- svelte-ignore a11y_click_events_have_key_events -->

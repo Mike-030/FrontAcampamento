@@ -311,6 +311,7 @@
         {userData}
         {defaultAvatar}
         {handleLogout}
+        onAddEvent={() => openEventForm()}
     />
 
     <!-- Main Content -->
