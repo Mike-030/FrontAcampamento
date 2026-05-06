@@ -9,11 +9,6 @@
         return date;
     });
 
-    // Calcula o valor com base no tipo de evento (Acampamento ou Festival)
-    let eventFee = $derived(
-        event.eventable?.camper_fee || event.eventable?.ticket_price || 0,
-    );
-
     let subscriptionTypeText = $derived.by(() => {
         let text = "Inscrições Abertas";
         if (event.eventable) {
@@ -52,9 +47,28 @@
     });
 </script>
 
-<div class="flex flex-col gap-6 w-full max-w-5xl mx-auto">
+<div class="flex flex-col gap-6">
+    <button
+        onclick={onBack}
+        class="flex items-center gap-2 text-text-secondary hover:text-brand transition-colors font-bold text-sm uppercase tracking-wider"
+    >
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+        >
+            <path d="m15 18-6-6 6-6" />
+        </svg>
+        Voltar para lista
+    </button>
     <div
-        class="bg-bg-secondary border border-border-ui p-8 md:p-12 lg:p-16 rounded-[3rem] shadow-xl relative overflow-hidden"
+        class="bg-bg-secondary border border-border-ui p-8 rounded-[3rem] shadow-xl relative overflow-hidden"
     >
         <div
             class="absolute bottom-0 left-0 w-32 h-32 bg-text-primary/5 rounded-tr-full pointer-events-none"
@@ -65,24 +79,6 @@
         >
             <div class="flex flex-row items-center gap-4 md:gap-6 flex-1">
                 <div class="flex flex-row items-center gap-4 md:gap-6 flex-1">
-                    <button
-                        onclick={onBack}
-                        class="w-12 h-12 md:w-14 md:h-14 flex-shrink-0 flex items-center justify-center bg-bg-primary/50 border border-border-ui rounded-full text-text-secondary hover:bg-brand hover:text-white hover:border-brand transition-all shadow-sm"
-                        aria-label="Voltar"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2.5"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            ><path d="m15 18-6-6 6-6" /></svg
-                        >
-                    </button>
                     <h2
                         class="text-3xl font-black text-text-primary leading-tight"
                     >
