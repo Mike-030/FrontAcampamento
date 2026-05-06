@@ -1,48 +1,55 @@
 <script>
     let { event, onSubscribe, onBack } = $props();
 
-    let endDate = event.start_date ? new Date(event.start_date) : null;
-    if (endDate && event.duration_days) {
-        endDate.setDate(endDate.getDate() + event.duration_days);
-    }
+    let endDate = $derived.by(() => {
+        let date = event.start_date ? new Date(event.start_date) : null;
+        if (date && event.duration_days) {
+            date.setDate(date.getDate() + event.duration_days);
+        }
+        return date;
+    });
 
     // Calcula o valor com base no tipo de evento (Acampamento ou Festival)
-    let eventFee =
-        event.eventable?.camper_fee || event.eventable?.ticket_price || 0;
+    let eventFee = $derived(
+        event.eventable?.camper_fee || event.eventable?.ticket_price || 0
+    );
 
-    let subscriptionTypeText = "Inscrições Abertas";
-    if (event.eventable) {
-        const now = new Date();
-        const camperStart = event.eventable.camper_registration_start_date
-            ? new Date(event.eventable.camper_registration_start_date)
-            : null;
-        const camperEnd = event.eventable.camper_registration_end_date
-            ? new Date(event.eventable.camper_registration_end_date)
-            : null;
+    let subscriptionTypeText = $derived.by(() => {
+        let text = "Inscrições Abertas";
+        if (event.eventable) {
+            const now = new Date();
+            const camperStart = event.eventable.camper_registration_start_date
+                ? new Date(event.eventable.camper_registration_start_date)
+                : null;
+            const camperEnd = event.eventable.camper_registration_end_date
+                ? new Date(event.eventable.camper_registration_end_date)
+                : null;
 
-        const servantStart = event.eventable.servant_registration_start_date
-            ? new Date(event.eventable.servant_registration_start_date)
-            : null;
-        const servantEnd = event.eventable.servant_registration_end_date
-            ? new Date(event.eventable.servant_registration_end_date)
-            : null;
+            const servantStart = event.eventable.servant_registration_start_date
+                ? new Date(event.eventable.servant_registration_start_date)
+                : null;
+            const servantEnd = event.eventable.servant_registration_end_date
+                ? new Date(event.eventable.servant_registration_end_date)
+                : null;
 
-        if (
-            camperStart &&
-            camperEnd &&
-            now >= camperStart &&
-            now <= camperEnd
-        ) {
-            subscriptionTypeText = "Inscrições Abertas - Campista";
-        } else if (
-            servantStart &&
-            servantEnd &&
-            now >= servantStart &&
-            now <= servantEnd
-        ) {
-            subscriptionTypeText = "Inscrições Abertas - Servo";
+            if (
+                camperStart &&
+                camperEnd &&
+                now >= camperStart &&
+                now <= camperEnd
+            ) {
+                text = "Inscrições Abertas - Campista";
+            } else if (
+                servantStart &&
+                servantEnd &&
+                now >= servantStart &&
+                now <= servantEnd
+            ) {
+                text = "Inscrições Abertas - Servo";
+            }
         }
-    }
+        return text;
+    });
 </script>
 
 <div class="flex flex-col gap-6 w-full max-w-5xl mx-auto">

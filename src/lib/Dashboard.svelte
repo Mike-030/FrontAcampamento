@@ -33,6 +33,11 @@
         onConfirm: null,
     });
 
+    /** 
+     * @param {string} type 
+     * @param {string} message 
+     * @param {(() => void) | null} onConfirm 
+     */
     function showModal(type, message, onConfirm = null) {
         modalState = { isOpen: true, type, message, onConfirm };
     }
@@ -45,10 +50,11 @@
     const token = localStorage.getItem("auth_token");
 
     // Fallback para imagem caso o usuário não tenha uma
-    const defaultAvatar =
+    let defaultAvatar = $derived(
         "https://ui-avatars.com/api/?name=" +
         (userData.name || "User") +
-        "&background=DE6E27&color=fff";
+        "&background=DE6E27&color=fff"
+    );
 
     $effect(() => {
         if (activeTab === "events") {
@@ -229,6 +235,7 @@
 
     async function performUpdateProfile() {
         try {
+            /** @type {Record<string, any>} */
             const payload = {
                 name: userData.name,
                 email: userData.email,
