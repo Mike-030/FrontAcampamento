@@ -16,6 +16,14 @@
     let loading = $state(true);
     let activeTab = $state("events");
     let selectedEvent = $state(null);
+    let eventSearchQuery = $state("");
+    let filteredEvents = $derived(
+        events.filter(
+            (e) =>
+                e.name &&
+                e.name.toLowerCase().includes(eventSearchQuery.toLowerCase()),
+        ),
+    );
     let userData = $state(
         JSON.parse(localStorage.getItem("user_data") || "{}"),
     );
@@ -326,6 +334,15 @@
                 <p class="animate-pulse">Buscando dados...</p>
             </div>
         {:else if activeTab === "events"}
+            <div class="mb-6">
+                <h2 class="text-3xl font-black mb-6">Eventos Disponíveis</h2>
+                <input
+                    type="text"
+                    bind:value={eventSearchQuery}
+                    placeholder="Pesquisar por nome do evento..."
+                    class="w-full bg-bg-secondary border-2 border-border-ui text-text-primary p-4 rounded-2xl focus:border-brand focus:ring-4 focus:ring-brand/20 transition-all outline-none"
+                />
+            </div>
             {#if events.length === 0}
                 <div
                     class="text-center py-24 bg-bg-secondary/30 rounded-[3rem] border-2 border-dashed border-border-ui uppercase tracking-widest"
@@ -339,11 +356,19 @@
                         >Sincronizar</button
                     >
                 </div>
+            {:else if filteredEvents.length === 0}
+                <div
+                    class="text-center py-24 bg-bg-secondary/30 rounded-[3rem] border-2 border-dashed border-border-ui uppercase tracking-widest"
+                >
+                    <p class="text-text-secondary text-xs font-bold mb-6">
+                        Nenhum evento corresponde à pesquisa.
+                    </p>
+                </div>
             {:else}
                 <div
                     class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8 text-text-primary"
                 >
-                    {#each events as event}
+                    {#each filteredEvents as event}
                         <div
                             class="bg-bg-secondary border border-border-ui p-8 rounded-[2.5rem] hover:shadow-2xl hover:-translate-y-1 transition-all group overflow-hidden relative"
                         >
