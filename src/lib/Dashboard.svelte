@@ -1,5 +1,4 @@
 <script>
-    import logo from "../assets/LogoComunidadeSaoMiguel.png";
     import Sidebar from "./components/Sidebar.svelte";
     import Header from "./components/Header.svelte";
     import Stats from "./components/Stats.svelte";
@@ -33,10 +32,10 @@
         onConfirm: null,
     });
 
-    /** 
-     * @param {string} type 
-     * @param {string} message 
-     * @param {(() => void) | null} onConfirm 
+    /**
+     * @param {string} type
+     * @param {string} message
+     * @param {(() => void) | null} onConfirm
      */
     function showModal(type, message, onConfirm = null) {
         modalState = { isOpen: true, type, message, onConfirm };
@@ -52,8 +51,8 @@
     // Fallback para imagem caso o usuário não tenha uma
     let defaultAvatar = $derived(
         "https://ui-avatars.com/api/?name=" +
-        (userData.name || "User") +
-        "&background=DE6E27&color=fff"
+            (userData.name || "User") +
+            "&background=DE6E27&color=fff",
     );
 
     $effect(() => {
@@ -382,15 +381,22 @@
                                     class="text-[10px] font-black uppercase opacity-40"
                                     >Campanha 2026</span
                                 >
-                                <button
-                                    onclick={() =>
-                                        isAdmin
-                                            ? openEventForm(event)
-                                            : openEventDetails(event)}
-                                    class="px-5 py-2 bg-text-primary text-bg-primary rounded-full text-[10px] font-bold hover:bg-brand hover:text-white transition-all"
-                                >
-                                    {isAdmin ? "Gerenciar" : "Ver Detalhes"}
-                                </button>
+                                <div class="flex gap-4">
+                                    {#if isAdmin}
+                                        <button
+                                            onclick={() => openEventForm(event)}
+                                            class="px-5 py-2 bg-text-primary text-bg-primary rounded-full text-[10px] font-bold hover:bg-brand hover:text-white transition-all"
+                                        >
+                                            Gerenciar
+                                        </button>
+                                    {/if}
+                                    <button
+                                        onclick={() => openEventDetails(event)}
+                                        class="px-5 py-2 bg-text-primary text-bg-primary rounded-full text-[10px] font-bold hover:bg-brand hover:text-white transition-all"
+                                    >
+                                        Ver Detalhes
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     {/each}
