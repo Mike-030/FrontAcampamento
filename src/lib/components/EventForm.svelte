@@ -309,7 +309,7 @@
                         >Data de Início *</label
                     >
                     <input
-                        type="datetime-local"
+                        type="date"
                         bind:value={formData.start_date}
                         required
                         class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-all"
@@ -335,7 +335,7 @@
                         >URL da Imagem</label
                     >
                     <input
-                        type="texto"
+                        type="text"
                         bind:value={formData.image}
                         class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-all"
                         placeholder="Link ou path da Imagem"
@@ -430,7 +430,7 @@
                             >Início das Vendas</label
                         >
                         <input
-                            type="datetime-local"
+                            type="date"
                             bind:value={festivalData.sale_start_date}
                             required
                             class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
@@ -442,7 +442,7 @@
                             >Link de Pagamento</label
                         >
                         <input
-                            type="number"
+                            type="text"
                             bind:value={festivalData.payment_link}
                             class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
                         />
@@ -593,7 +593,7 @@
                                     class="block text-[10px] font-bold text-text-secondary mb-2"
                                     >Início Inscrição Campista</label
                                 ><input
-                                    type="datetime-local"
+                                    type="date"
                                     bind:value={
                                         campingData.raffle_camper_subscription_start_date
                                     }
@@ -606,7 +606,7 @@
                                     class="block text-[10px] font-bold text-text-secondary mb-2"
                                     >Fim Inscrição Campista</label
                                 ><input
-                                    type="datetime-local"
+                                    type="date"
                                     bind:value={
                                         campingData.raffle_camper_subscription_end_date
                                     }
@@ -619,7 +619,7 @@
                                     class="block text-[10px] font-bold text-text-secondary mb-2"
                                     >Data Sorteio Campista</label
                                 ><input
-                                    type="datetime-local"
+                                    type="date"
                                     bind:value={campingData.raffle_camper_date}
                                     required
                                     class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
@@ -631,7 +631,7 @@
                                     class="block text-[10px] font-bold text-text-secondary mb-2"
                                     >Início Inscrição Servo</label
                                 ><input
-                                    type="datetime-local"
+                                    type="date"
                                     bind:value={
                                         campingData.raffle_servant_subscription_start_date
                                     }
@@ -644,7 +644,7 @@
                                     class="block text-[10px] font-bold text-text-secondary mb-2"
                                     >Fim Inscrição Servo</label
                                 ><input
-                                    type="datetime-local"
+                                    type="date"
                                     bind:value={
                                         campingData.raffle_servant_subscription_end_date
                                     }
@@ -657,7 +657,7 @@
                                     class="block text-[10px] font-bold text-text-secondary mb-2"
                                     >Data Sorteio Servo</label
                                 ><input
-                                    type="datetime-local"
+                                    type="date"
                                     bind:value={campingData.raffle_servant_date}
                                     required
                                     class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
@@ -681,7 +681,7 @@
                                     class="block text-[10px] font-bold text-text-secondary mb-2"
                                     >Início Registro Campista</label
                                 ><input
-                                    type="datetime-local"
+                                    type="date"
                                     bind:value={
                                         campingData.camper_registration_start_date
                                     }
@@ -694,7 +694,7 @@
                                     class="block text-[10px] font-bold text-text-secondary mb-2"
                                     >Fim Registro Campista</label
                                 ><input
-                                    type="datetime-local"
+                                    type="date"
                                     bind:value={
                                         campingData.camper_registration_end_date
                                     }
@@ -707,7 +707,7 @@
                                     class="block text-[10px] font-bold text-text-secondary mb-2"
                                     >Link Pgto Campista (Data)</label
                                 ><input
-                                    type="datetime-local"
+                                    type="date"
                                     bind:value={campingData.camper_payment_link}
                                     class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
                                 />
@@ -717,7 +717,7 @@
                                     class="block text-[10px] font-bold text-text-secondary mb-2"
                                     >Data Pgto Campista</label
                                 ><input
-                                    type="datetime-local"
+                                    type="date"
                                     bind:value={campingData.camper_payment_date}
                                     class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
                                 />
@@ -728,7 +728,7 @@
                                     class="block text-[10px] font-bold text-text-secondary mb-2"
                                     >Início Registro Servo</label
                                 ><input
-                                    type="datetime-local"
+                                    type="date"
                                     bind:value={
                                         campingData.servant_registration_start_date
                                     }
@@ -741,7 +741,7 @@
                                     class="block text-[10px] font-bold text-text-secondary mb-2"
                                     >Fim Registro Servo</label
                                 ><input
-                                    type="datetime-local"
+                                    type="date"
                                     bind:value={
                                         campingData.servant_registration_end_date
                                     }
@@ -754,7 +754,7 @@
                                     class="block text-[10px] font-bold text-text-secondary mb-2"
                                     >Link Pgto Servo (Data)</label
                                 ><input
-                                    type="datetime-local"
+                                    type="date"
                                     bind:value={
                                         campingData.servant_payment_link
                                     }
@@ -767,7 +767,7 @@
                                     class="block text-[10px] font-bold text-text-secondary mb-2"
                                     >Data Pgto Servo</label
                                 ><input
-                                    type="datetime-local"
+                                    type="date"
                                     bind:value={
                                         campingData.servant_payment_date
                                     }
