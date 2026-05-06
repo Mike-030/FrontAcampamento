@@ -219,17 +219,28 @@
     class="max-w-4xl mx-auto bg-bg-secondary p-8 md:p-12 rounded-[3rem] shadow-xl border border-border-ui relative"
 >
     <div
-        class="flex justify-between items-center mb-8 pb-6 border-b border-border-ui"
+        class="flex justify-start items-center gap-4 md:gap-6 mb-8 pb-6 border-b border-border-ui"
     >
+        <button
+            onclick={onCancel}
+            class="w-12 h-12 md:w-14 md:h-14 flex-shrink-0 flex items-center justify-center bg-bg-primary/50 border border-border-ui rounded-full text-text-secondary hover:bg-brand hover:text-white hover:border-brand transition-all shadow-sm"
+            aria-label="Voltar"
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"><path d="m15 18-6-6 6-6" /></svg
+            >
+        </button>
         <h2 class="text-3xl font-black text-text-primary">
             {event ? "Editar Evento" : "Novo Evento"}
         </h2>
-        <button
-            onclick={onCancel}
-            class="w-10 h-10 flex items-center justify-center bg-bg-primary/50 rounded-full hover:bg-red-500 hover:text-white transition-all"
-        >
-            ✕
-        </button>
     </div>
 
     {#if errorMessage}

@@ -11,7 +11,7 @@
 
     // Calcula o valor com base no tipo de evento (Acampamento ou Festival)
     let eventFee = $derived(
-        event.eventable?.camper_fee || event.eventable?.ticket_price || 0
+        event.eventable?.camper_fee || event.eventable?.ticket_price || 0,
     );
 
     let subscriptionTypeText = $derived.by(() => {
@@ -64,36 +64,39 @@
             class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6 border-b border-border-ui pb-8"
         >
             <div class="flex flex-row items-center gap-4 md:gap-6 flex-1">
-                <button
-                    onclick={onBack}
-                    class="w-12 h-12 md:w-14 md:h-14 flex-shrink-0 flex items-center justify-center bg-bg-primary/50 border border-border-ui rounded-full text-text-secondary hover:bg-brand hover:text-white hover:border-brand transition-all shadow-sm"
-                    aria-label="Voltar"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"><path d="m15 18-6-6 6-6" /></svg
+                <div class="flex flex-row items-center gap-4 md:gap-6 flex-1">
+                    <button
+                        onclick={onBack}
+                        class="w-12 h-12 md:w-14 md:h-14 flex-shrink-0 flex items-center justify-center bg-bg-primary/50 border border-border-ui rounded-full text-text-secondary hover:bg-brand hover:text-white hover:border-brand transition-all shadow-sm"
+                        aria-label="Voltar"
                     >
-                </button>
-                <h2
-                    class="text-3xl md:text-5xl font-black text-text-primary leading-tight"
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            ><path d="m15 18-6-6 6-6" /></svg
+                        >
+                    </button>
+                    <h2
+                        class="text-3xl font-black text-text-primary leading-tight"
+                    >
+                        {event.name}
+                    </h2>
+                </div>
+                <div
+                    class="px-6 py-3 bg-brand/10 border border-brand/20 text-brand rounded-2xl"
                 >
-                    {event.name}
-                </h2>
-            </div>
-            <div
-                class="px-6 py-3 bg-brand/10 border border-brand/20 text-brand rounded-2xl"
-            >
-                <span
-                    class="text-[10px] md:text-xs font-black uppercase tracking-widest text-center block"
-                    >{subscriptionTypeText}</span
-                >
+                    <span
+                        class="text-[10px] md:text-xs font-black uppercase tracking-widest text-center block"
+                        >{subscriptionTypeText}</span
+                    >
+                </div>
             </div>
         </div>
 
