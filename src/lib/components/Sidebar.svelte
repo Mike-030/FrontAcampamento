@@ -103,24 +103,6 @@
 
     <!-- Perfil na Sidebar -->
     <div class="pt-6 border-t border-border-ui space-y-4">
-        <!-- <div class="flex items-center gap-3 px-2">
-            <img
-                src={userData.picture && userData.picture.startsWith("http")
-                    ? userData.picture
-                    : defaultAvatar}
-                alt="Avatar"
-                class="w-10 h-10 rounded-full object-cover border-2 border-brand"
-            />
-            <div class="flex flex-col overflow-hidden">
-                <span class="font-bold text-sm truncate"
-                    >{userData.name || "Visitante"}</span
-                >
-                <span
-                    class="text-[10px] text-brand uppercase tracking-widest font-black mt-0.5"
-                    >{isAdmin ? "Admin" : "Participante"}</span
-                >
-            </div>
-        </div> -->
         <button
             onclick={handleLogout}
             class="w-full border border-text-primary/20 text-text-primary p-2.5 rounded-xl text-xs font-bold hover:bg-red-500 hover:text-white hover:border-red-500 transition-all"
