@@ -1,12 +1,13 @@
 <script>
-    import logo from "../assets/LogoComunidadeSaoMiguel.png";
     import Sidebar from "./components/Sidebar.svelte";
     import Header from "./components/Header.svelte";
-    import Stats from "./components/Stats.svelte";
     import ProfileForm from "./components/ProfileForm.svelte";
     import Modal from "./components/Modal.svelte";
     import EventDetails from "./components/EventDetails.svelte";
     import EventForm from "./components/EventForm.svelte";
+    import UsersList from "./components/UsersList.svelte";
+    import EventsList from "./components/EventsList.svelte";
+    import MySubscriptions from "./components/MySubscriptions.svelte";
 
     let { onLogout } = $props();
 
@@ -35,6 +36,11 @@
         onConfirm: null,
     });
 
+    /**
+     * @param {string} type
+     * @param {string} message
+     * @param {(() => void) | null} onConfirm
+     */
     function showModal(type, message, onConfirm = null) {
         modalState = { isOpen: true, type, message, onConfirm };
     }
@@ -47,10 +53,11 @@
     const token = localStorage.getItem("auth_token");
 
     // Fallback para imagem caso o usuário não tenha uma
-    const defaultAvatar =
+    let defaultAvatar = $derived(
         "https://ui-avatars.com/api/?name=" +
-        (userData.name || "User") +
-        "&background=DE6E27&color=fff";
+            (userData.name || "User") +
+            "&background=DE6E27&color=fff",
+    );
 
     $effect(() => {
         if (activeTab === "events") {
@@ -231,6 +238,7 @@
 
     async function performUpdateProfile() {
         try {
+            /** @type {Record<string, any>} */
             const payload = {
                 name: userData.name,
                 email: userData.email,
@@ -307,20 +315,12 @@
         {userData}
         {defaultAvatar}
         {handleLogout}
+        onAddEvent={() => openEventForm()}
     />
 
     <!-- Main Content -->
     <main class="{isSidebarExpanded ? 'ml-64' : 'ml-20'} transition-all duration-300 ease-in-out flex-grow p-10">
         <Header {userData} {defaultAvatar} bind:activeTab {handleLogout} />
-
-        <!-- Stats -->
-        <Stats
-            {isAdmin}
-            eventsCount={events.length}
-            bind:activeTab
-            onAddEvent={() => openEventForm()}
-        />
-
         {#if loading}
             <div
                 class="flex flex-col items-center justify-center py-20 text-text-secondary"
@@ -331,137 +331,21 @@
                 <p class="animate-pulse">Buscando dados...</p>
             </div>
         {:else if activeTab === "events"}
-            {#if events.length === 0}
-                <div
-                    class="text-center py-24 bg-bg-secondary/30 rounded-[3rem] border-2 border-dashed border-border-ui uppercase tracking-widest"
-                >
-                    <p class="text-text-secondary text-xs font-bold mb-6">
-                        Nenhum evento encontrado
-                    </p>
-                    <button
-                        onclick={fetchEvents}
-                        class="px-5 py-2 bg-text-primary text-bg-primary rounded-full text-[10px] font-bold hover:bg-brand hover:text-white transition-all"
-                        >Sincronizar</button
-                    >
-                </div>
-            {:else}
-                <div
-                    class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8 text-text-primary"
-                >
-                    {#each events as event}
-                        <div
-                            class="bg-bg-secondary border border-border-ui p-8 rounded-[2.5rem] hover:shadow-2xl hover:-translate-y-1 transition-all group overflow-hidden relative"
-                        >
-                            <div class="flex justify-between items-start mb-6">
-                                <h3
-                                    class="text-2xl font-black group-hover:text-brand transition-colors line-clamp-1"
-                                >
-                                    {event.name || "Evento"}
-                                </h3>
-                                <div
-                                    class="px-3 py-1 bg-brand/10 border border-brand/20 text-brand rounded-full"
-                                >
-                                    <span
-                                        class="text-[10px] font-black uppercase tracking-widest whitespace-nowrap"
-                                    >
-                                        {event.eventable_type ===
-                                        "App\\Models\\Festival"
-                                            ? "Festival"
-                                            : "Acampamento"}
-                                    </span>
-                                </div>
-                            </div>
-                            <div
-                                class="flex justify-between items-center pt-8 border-t border-border-ui"
-                            >
-                                <span
-                                    class="text-[10px] font-black uppercase opacity-40"
-                                    >Campanha 2026</span
-                                >
-                                <button
-                                    onclick={() =>
-                                        isAdmin
-                                            ? openEventForm(event)
-                                            : openEventDetails(event)}
-                                    class="px-5 py-2 bg-text-primary text-bg-primary rounded-full text-[10px] font-bold hover:bg-brand hover:text-white transition-all"
-                                >
-                                    {isAdmin ? "Gerenciar" : "Ver Detalhes"}
-                                </button>
-                            </div>
-                        </div>
-                    {/each}
-                </div>
-            {/if}
+            <EventsList
+                {events}
+                {isAdmin}
+                {fetchEvents}
+                {openEventForm}
+                {openEventDetails}
+            />
         {:else if activeTab === "subscriptions"}
-            {#if subscriptions.length === 0}
-                <div
-                    class="text-center py-24 bg-bg-secondary/30 rounded-[3rem] border-2 border-dashed border-border-ui uppercase tracking-widest"
-                >
-                    <p class="text-text-secondary text-xs font-bold mb-6">
-                        Nenhuma inscrição encontrada
-                    </p>
-                    <button
-                        onclick={() => (activeTab = "events")}
-                        class="px-5 py-2 bg-text-primary text-bg-primary rounded-full text-[10px] font-bold hover:bg-brand hover:text-white transition-all"
-                        >Ver Eventos</button
-                    >
-                </div>
-            {:else}
-                <div
-                    class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8 text-text-primary"
-                >
-                    {#each subscriptions as sub}
-                        <div
-                            class="bg-bg-secondary border border-border-ui p-8 rounded-[2.5rem] hover:shadow-2xl hover:-translate-y-1 transition-all group overflow-hidden relative"
-                        >
-                            <div class="flex justify-between items-start mb-6">
-                                <h3
-                                    class="text-2xl font-black group-hover:text-brand transition-colors line-clamp-1"
-                                >
-                                    {sub.event?.name || "Inscrição"}
-                                </h3>
-                                <div class="flex items-center gap-2">
-                                    <div
-                                        class="px-3 py-1 bg-brand/10 border border-brand/20 text-brand rounded-full"
-                                    >
-                                        <span
-                                            class="text-[10px] font-black uppercase tracking-widest whitespace-nowrap"
-                                        >
-                                            {sub.event?.eventable_type ===
-                                            "App\\Models\\Festival"
-                                                ? "Festival"
-                                                : "Acampamento"}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <p
-                                class="text-text-secondary text-sm leading-relaxed mb-4"
-                            >
-                                <strong>Status:</strong>
-                                {sub.paid_the_fee
-                                    ? "Confirmado"
-                                    : "Pagamento pendente"} <br />
-                                <strong>Tipo:</strong>
-                                {sub.subscription_type} <br />
-                                <strong>Sorteado:</strong>
-                                {sub.was_selected ? "Sim" : "Não"}
-                            </p>
-                            <div
-                                class="flex justify-end items-center pt-6 border-t border-border-ui mt-4"
-                            >
-                                <button
-                                    onclick={() =>
-                                        requestCancelSubscription(sub.id)}
-                                    class="px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl text-[10px] font-bold transition-all uppercase tracking-wider"
-                                >
-                                    Cancelar Inscrição
-                                </button>
-                            </div>
-                        </div>
-                    {/each}
-                </div>
-            {/if}
+            <MySubscriptions
+                {subscriptions}
+                onGoToEvents={() => (activeTab = "events")}
+                {requestCancelSubscription}
+            />
+        {:else if activeTab === "users"}
+            <UsersList {token} />
         {:else if activeTab === "profile"}
             <ProfileForm
                 bind:userData

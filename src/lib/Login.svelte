@@ -52,7 +52,10 @@
             if (response.ok) {
                 onLoginSuccess(data.token, data.data);
             } else {
-                showModal("error", data.message || "E-mail ou senha incorretos.");
+                showModal(
+                    "error",
+                    data.message || "E-mail ou senha incorretos.",
+                );
             }
         } catch (err) {
             showModal("error", "Sem conexão com o servidor.");
@@ -312,13 +315,44 @@
                             />
                             <button
                                 type="button"
-                                onclick={() => showPassword = !showPassword}
+                                onclick={() => (showPassword = !showPassword)}
                                 class="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary focus:outline-none transition-colors"
                             >
                                 {#if showPassword}
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.733 5.076a10.744 10.744 0 0 1 1.267-.076c7.02 0 10 7 10 7a18.16 18.16 0 0 1-2.062 2.805M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        ><path
+                                            d="M10.733 5.076a10.744 10.744 0 0 1 1.267-.076c7.02 0 10 7 10 7a18.16 18.16 0 0 1-2.062 2.805M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"
+                                        /><line
+                                            x1="2"
+                                            x2="22"
+                                            y1="2"
+                                            y2="22"
+                                        /></svg
+                                    >
                                 {:else}
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        ><path
+                                            d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"
+                                        /><circle cx="12" cy="12" r="3" /></svg
+                                    >
                                 {/if}
                             </button>
                         </div>
@@ -334,7 +368,7 @@
                         <label
                             for="remember"
                             class="text-text-secondary text-xs font-medium cursor-pointer select-none"
-                            >Lembrar-me</label
+                            >Lembrar de mim</label
                         >
                     </div>
 
