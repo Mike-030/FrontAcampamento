@@ -244,7 +244,7 @@
                             >
                                 <button
                                     onclick={() => viewUserProfile(user)}
-                                    class="px-5 py-2 bg-brand text-white rounded-full text-xs font-bold hover:shadow-lg hover:shadow-brand/30 transition-all"
+                                    class="px-5 py-2 bg-text-primary text-bg-primary rounded-full text-[10px] font-bold hover:bg-brand hover:text-white transition-all"
                                 >
                                     Ver Perfil
                                 </button>
