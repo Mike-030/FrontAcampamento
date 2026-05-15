@@ -6,11 +6,33 @@
     /** @type {{ onLoginSuccess: Function, onGoToRegister: Function }} */
     let { onLoginSuccess, onGoToRegister } = $props();
 
-    let email = $state("");
+    let cpf = $state("");
     let password = $state("");
     let loading = $state(false);
     let showPassword = $state(false);
     let rememberMe = $state(false);
+
+    /** @param {Event} e */
+    function handleCpfInput(e) {
+        let value = /** @type {HTMLInputElement} */ (e.target).value.replace(
+            /\D/g,
+            "",
+        );
+        if (value.length > 11) value = value.slice(0, 11);
+
+        if (value.length > 9) {
+            value = value.replace(
+                /(\d{3})(\d{3})(\d{3})(\d{1,2})/,
+                "$1.$2.$3-$4",
+            );
+        } else if (value.length > 6) {
+            value = value.replace(/(\d{3})(\d{3})(\d{1,3})/, "$1.$2.$3");
+        } else if (value.length > 3) {
+            value = value.replace(/(\d{3})(\d{1,3})/, "$1.$2");
+        }
+
+        cpf = value;
+    }
 
     let modalState = $state({
         isOpen: false,
@@ -44,7 +66,11 @@
                     "Content-Type": "application/json",
                     Accept: "application/json",
                 },
-                body: JSON.stringify({ email, password, remember: rememberMe }),
+                body: JSON.stringify({
+                    cpf: cpf.replace(/\D/g, ""),
+                    password,
+                    remember: rememberMe,
+                }),
             });
 
             const data = await response.json();
@@ -285,17 +311,19 @@
                 >
                     <div class="space-y-1.5 text-left w-full">
                         <label
-                            for="email"
+                            for="cpf"
                             class="text-text-secondary text-[10px] font-bold uppercase tracking-widest ml-1"
-                            >E-mail</label
+                            >CPF</label
                         >
                         <input
-                            id="email"
-                            bind:value={email}
-                            type="email"
+                            id="cpf"
+                            value={cpf}
+                            oninput={handleCpfInput}
+                            type="text"
                             required
+                            maxlength="14"
                             class="w-full bg-bg-secondary/40 md:bg-bg-primary/50 border border-border-ui rounded-2xl p-4 text-text-primary focus:border-brand outline-none transition-all placeholder:text-text-secondary/60 shadow-sm"
-                            placeholder="seu@email.com"
+                            placeholder="000.000.000-00"
                         />
                     </div>
                     <div class="space-y-1.5 text-left w-full">
