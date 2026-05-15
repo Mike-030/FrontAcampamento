@@ -90,6 +90,7 @@
                 if (event.eventable) {
                     campingData = { ...event.eventable };
                     // Format dates for inputs
+                    /** @type {(keyof typeof campingData)[]} */
                     const dateFields = [
                         "raffle_camper_subscription_start_date",
                         "raffle_camper_subscription_end_date",
@@ -104,9 +105,7 @@
                         "servant_registration_end_date",
                         "servant_payment_date",
                     ];
-                    for (const f of dateFields) {
-                        /** @type {keyof typeof campingData} */
-                        const field = f;
+                    for (const field of dateFields) {
                         if (campingData[field]) {
                             // @ts-ignore
                             campingData[field] = new Date(campingData[field])
@@ -209,7 +208,8 @@
 
             onSaveSuccess();
         } catch (err) {
-            errorMessage = err.message;
+            const error = /** @type {Error} */ (err);
+            errorMessage = error.message || String(err);
             console.error(err);
         } finally {
             loading = false;
