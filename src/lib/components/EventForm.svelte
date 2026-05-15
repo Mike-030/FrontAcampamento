@@ -1,7 +1,7 @@
 <script>
     import { onMount } from "svelte";
 
-    let { event = null, onCancel, token, onSaveSuccess } = $props();
+    let { event = null, onCancel, onDelete, token, onSaveSuccess } = $props();
 
     // Estado do formulário
     let loading = $state(false);
@@ -770,21 +770,34 @@
                 {/if}
             </section>
 
-            <div class="pt-8 border-t border-border-ui flex justify-end gap-4">
-                <button
-                    type="button"
-                    onclick={onCancel}
-                    class="px-6 py-4 rounded-xl text-sm font-bold text-text-secondary hover:bg-bg-primary border border-border-ui transition-all"
-                >
-                    Cancelar
-                </button>
-                <button
-                    type="submit"
-                    disabled={loading}
-                    class="px-8 py-4 bg-brand text-white rounded-xl text-sm font-black uppercase tracking-widest hover:brightness-110 shadow-xl shadow-brand/20 transition-all disabled:opacity-50 flex items-center gap-3"
-                >
-                    {loading ? "Salvando..." : "Salvar Evento"}
-                </button>
+            <div class="pt-8 border-t border-border-ui flex justify-between items-center gap-4">
+                <div>
+                    {#if event}
+                        <button
+                            type="button"
+                            onclick={onDelete}
+                            class="px-6 py-4 rounded-xl text-sm font-bold text-red-500 hover:bg-red-500 hover:text-white border border-red-500/20 hover:border-red-500 transition-all"
+                        >
+                            Excluir Evento
+                        </button>
+                    {/if}
+                </div>
+                <div class="flex gap-4">
+                    <button
+                        type="button"
+                        onclick={onCancel}
+                        class="px-6 py-4 rounded-xl text-sm font-bold text-text-secondary hover:bg-bg-primary border border-border-ui transition-all"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        class="px-8 py-4 bg-brand text-white rounded-xl text-sm font-black uppercase tracking-widest hover:brightness-110 shadow-xl shadow-brand/20 transition-all disabled:opacity-50 flex items-center gap-3"
+                    >
+                        {loading ? "Salvando..." : "Salvar Evento"}
+                    </button>
+                </div>
             </div>
         </form>
     </div>

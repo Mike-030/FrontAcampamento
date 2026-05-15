@@ -241,6 +241,49 @@
         activeTab = "event_form";
     }
 
+    /** @param {any} event */
+    function requestDeleteEvent(event) {
+        showModal(
+            "confirm",
+            "Tem certeza que deseja excluir este evento? Esta ação não pode ser desfeita.",
+            () => {
+                closeModal();
+                performDeleteEvent(event.id);
+            },
+        );
+    }
+
+    /** @param {number | string} eventId */
+    async function performDeleteEvent(eventId) {
+        try {
+            loading = true;
+            const response = await fetch(`${API_URL}/v1/events/${eventId}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept: "application/json",
+                },
+            });
+
+            if (response.ok || response.status === 204) {
+                showModal("success", "Evento excluído com sucesso!");
+                activeTab = "events";
+                fetchEvents();
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                showModal(
+                    "error",
+                    errorData.message || "Erro ao excluir o evento.",
+                );
+            }
+        } catch (err) {
+            console.error("Erro ao excluir evento:", err);
+            showModal("error", "Não foi possível conectar com o servidor.");
+        } finally {
+            loading = false;
+        }
+    }
+
     async function performUpdateProfile() {
         try {
             /** @type {Record<string, any>} */
@@ -364,6 +407,7 @@
             <EventForm
                 event={selectedEvent}
                 onCancel={() => (activeTab = "events")}
+                onDelete={() => requestDeleteEvent(selectedEvent)}
                 {token}
                 onSaveSuccess={() => {
                     activeTab = "events";
