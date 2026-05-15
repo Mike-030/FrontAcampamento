@@ -27,6 +27,7 @@
             userData.role === "admin",
     );
 
+    /** @type {{ isOpen: boolean, type: string, message: string, onConfirm: (() => void) | null }} */
     let modalState = $state({
         isOpen: false,
         type: "error",
@@ -111,6 +112,7 @@
         }
     }
 
+    /** @param {number | string} eventId */
     async function subscribe(eventId) {
         try {
             const payload = {
@@ -162,6 +164,7 @@
         }
     }
 
+    /** @param {number | string} subscriptionId */
     function requestCancelSubscription(subscriptionId) {
         showModal(
             "confirm",
@@ -173,6 +176,7 @@
         );
     }
 
+    /** @param {number | string} subscriptionId */
     async function performCancelSubscription(subscriptionId) {
         try {
             const response = await fetch(
@@ -202,6 +206,7 @@
         }
     }
 
+    /** @param {number | string} eventId */
     function requestSubscription(eventId) {
         showModal(
             "confirm",
@@ -224,11 +229,13 @@
         );
     }
 
+    /** @param {any} event */
     function openEventDetails(event) {
         selectedEvent = event;
         activeTab = "event_details";
     }
 
+    /** @param {any} event */
     function openEventForm(event = null) {
         selectedEvent = event;
         activeTab = "event_form";
@@ -309,8 +316,6 @@
     <Sidebar
         bind:activeTab
         {isAdmin}
-        {userData}
-        {defaultAvatar}
         {handleLogout}
         onAddEvent={() => openEventForm()}
     />

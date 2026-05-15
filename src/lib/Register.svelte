@@ -200,8 +200,8 @@
                 node.getBoundingClientRect().top + node.offsetHeight / 2;
             const items = node.querySelectorAll(".picker-item");
 
-            /** @type {{val: string} | null} */
-            let closestItem = null;
+            /** @type {string | null} */
+            let closestVal = null;
             let minDistance = Infinity;
 
             items.forEach((item) => {
@@ -213,12 +213,12 @@
                 if (distance < minDistance) {
                     minDistance = distance;
                     const valAttr = item.getAttribute("data-val");
-                    if (valAttr) closestItem = { val: valAttr };
+                    if (valAttr) closestVal = valAttr;
                 }
             });
 
-            if (closestItem) {
-                const val = parseInt(closestItem.val);
+            if (closestVal) {
+                const val = parseInt(closestVal);
                 if (node.id === "scroll-day" && selectedDay !== val)
                     selectedDay = val;
                 if (node.id === "scroll-month" && selectedMonth !== val)
