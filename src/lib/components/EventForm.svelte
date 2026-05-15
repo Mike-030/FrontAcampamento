@@ -66,7 +66,7 @@
                 place: event.place,
                 year: event.year,
                 start_date: event.start_date
-                    ? new Date(event.start_date).toISOString().slice(0, 16)
+                    ? new Date(event.start_date).toISOString().slice(0, 10)
                     : "",
                 duration_days: event.duration_days,
                 total_vacancies: event.total_vacancies,
@@ -81,7 +81,7 @@
                         sale_start_date: event.eventable.sale_start_date
                             ? new Date(event.eventable.sale_start_date)
                                   .toISOString()
-                                  .slice(0, 16)
+                                  .slice(0, 10)
                             : "",
                     };
                 }
@@ -99,18 +99,19 @@
                         "raffle_servant_date",
                         "camper_registration_start_date",
                         "camper_registration_end_date",
-                        "camper_payment_link",
                         "camper_payment_date",
                         "servant_registration_start_date",
                         "servant_registration_end_date",
-                        "servant_payment_link",
                         "servant_payment_date",
                     ];
-                    for (const field of dateFields) {
+                    for (const f of dateFields) {
+                        /** @type {keyof typeof campingData} */
+                        const field = f;
                         if (campingData[field]) {
+                            // @ts-ignore
                             campingData[field] = new Date(campingData[field])
                                 .toISOString()
-                                .slice(0, 16);
+                                .slice(0, 10);
                         }
                     }
                 }
@@ -175,12 +176,13 @@
                 eventableId = dataEventable.data.id;
             }
 
-            // 2. Salvar Event
             const eventPayload = {
                 ...formData,
                 eventable_id: eventableId,
                 eventable_type: eventType,
-                start_date: formData.start_date.replace("T", " ") + ":00",
+                start_date: formData.start_date.includes("T")
+                    ? formData.start_date.replace("T", " ") + ":00"
+                    : formData.start_date + " 00:00:00",
             };
 
             const methodEvent = isEditing ? "PUT" : "POST";
@@ -690,9 +692,9 @@
                                 <div>
                                     <label
                                         class="block text-[10px] font-bold text-text-secondary mb-2"
-                                        >Link Pgto Campista (Data)</label
+                                        >Link Pgto Campista</label
                                     ><input
-                                        type="date"
+                                        type="text"
                                         bind:value={
                                             campingData.camper_payment_link
                                         }
@@ -741,9 +743,9 @@
                                 <div>
                                     <label
                                         class="block text-[10px] font-bold text-text-secondary mb-2"
-                                        >Link Pgto Servo (Data)</label
+                                        >Link Pgto Servo</label
                                     ><input
-                                        type="date"
+                                        type="text"
                                         bind:value={
                                             campingData.servant_payment_link
                                         }
@@ -770,7 +772,9 @@
                 {/if}
             </section>
 
-            <div class="pt-8 border-t border-border-ui flex justify-between items-center gap-4">
+            <div
+                class="pt-8 border-t border-border-ui flex justify-between items-center gap-4"
+            >
                 <div>
                     {#if event}
                         <button

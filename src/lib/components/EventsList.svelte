@@ -8,12 +8,51 @@
     } = $props();
 
     let eventSearchQuery = $state("");
+    let showPastEvents = $state(false);
+
+    /** @param {any} event */
+    function isRegistrationPassed(event) {
+        if (!event) return false;
+        const now = new Date();
+        
+        // Se a data de início do evento já passou, está indisponível
+        if (event.start_date && new Date(event.start_date) < now) {
+            return true;
+        }
+        
+        // Para acampamento, checamos o fim das inscrições
+        if (event.eventable_type === "App\\Models\\Camping" && event.eventable) {
+            /** @type {number[]} */
+            const endDates = [];
+            if (event.eventable.camper_registration_end_date) {
+                endDates.push(new Date(event.eventable.camper_registration_end_date).getTime());
+            }
+            if (event.eventable.servant_registration_end_date) {
+                endDates.push(new Date(event.eventable.servant_registration_end_date).getTime());
+            }
+            
+            if (endDates.length > 0) {
+                const maxDate = new Date(Math.max(...endDates));
+                if (maxDate < now) return true;
+            }
+        }
+        
+        return false;
+    }
+
     let filteredEvents = $derived(
-        events.filter(
-            (e) =>
-                e.name &&
-                e.name.toLowerCase().includes(eventSearchQuery.toLowerCase()),
-        ),
+        events.filter((e) => {
+            const matchesSearch = e.name && e.name.toLowerCase().includes(eventSearchQuery.toLowerCase());
+            if (!matchesSearch) return false;
+            
+            const isPassed = isRegistrationPassed(e);
+            
+            if (isAdmin) {
+                return showPastEvents ? true : !isPassed;
+            } else {
+                return !isPassed;
+            }
+        }),
     );
 </script>
 
@@ -25,6 +64,19 @@
         placeholder="Pesquisar por nome do evento..."
         class="w-full bg-bg-secondary border-2 border-border-ui text-text-primary p-4 rounded-2xl focus:border-brand focus:ring-4 focus:ring-brand/20 transition-all outline-none"
     />
+    {#if isAdmin}
+        <div class="mt-4 flex items-center gap-3">
+            <input
+                id="show-past"
+                type="checkbox"
+                bind:checked={showPastEvents}
+                class="w-5 h-5 accent-brand rounded border-border-ui"
+            />
+            <label for="show-past" class="text-sm font-bold text-text-secondary cursor-pointer hover:text-text-primary transition-colors">
+                Exibir eventos passados
+            </label>
+        </div>
+    {/if}
 </div>
 {#if events.length === 0}
     <div
