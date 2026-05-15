@@ -1,14 +1,19 @@
 <script>
+    // Props recebidas pelo Header do componente pai (Dashboard)
     let {
         userData = {},
         defaultAvatar = "",
         activeTab = $bindable(""),
         handleLogout,
     } = $props();
+    } = $props();
+
+    // Estado local para controle de exibição do dropdown do menu do usuário
     let isProfileMenuOpen = $state(false);
 </script>
 
 <header class="flex justify-between items-start mb-12">
+    <!-- Seção Esquerda: Título da Página e Saudações -->
     <div>
         <div class="flex items-center gap-4 mb-2">
             <h2 class="text-4xl font-black text-text-primary">Painel Geral</h2>
@@ -24,13 +29,17 @@
         </p>
     </div>
 
+    <!-- Seção Direita: Status e Menu do Perfil do Usuário -->
     <div class="flex items-center gap-4 relative">
+        <!-- Indicador de Status Online -->
         <div class="flex flex-col items-end mr-2">
             <span class="text-xs font-bold opacity-50 uppercase tracking-widest"
                 >Acesso Rápido</span
             >
             <span class="text-[10px] text-emerald-500 font-bold">● ONLINE</span>
         </div>
+
+        <!-- Área Clicável: Avatar do Usuário -->
         <div class="relative">
             <button
                 onclick={() => (isProfileMenuOpen = !isProfileMenuOpen)}
@@ -50,7 +59,7 @@
                 </div>
             </button>
 
-            <!-- Dropdown Menu -->
+            <!-- Dropdown Menu de Perfil: Aberto ao clicar no Avatar -->
             {#if isProfileMenuOpen}
                 <div
                     class="absolute right-0 mt-4 w-64 bg-bg-secondary border border-border-ui rounded-3xl shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200"

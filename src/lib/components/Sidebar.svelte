@@ -1,5 +1,8 @@
 <script>
+    // Logo importada para exibição no topo
     import logo from "../../assets/LogoComunidadeSaoMiguel.png";
+    
+    // Props recebidas pelo componente Sidebar
     let {
         activeTab = $bindable(""),
         isAdmin = false,
@@ -11,12 +14,15 @@
 <aside
     class="w-64 bg-bg-secondary border-r border-border-ui flex flex-col p-6 fixed h-full shadow-lg z-10 transition-colors duration-300"
 >
+    <!-- Área de Exibição da Logo -->
     <div class="flex items-center gap-3 mb-10 overflow-hidden">
         <img src={logo} alt="Logo" class="w-auto object-contain" />
     </div>
 
+    <!-- Navegação e Links -->
     <nav class="flex-grow">
         <ul class="space-y-2">
+            <!-- Link: Lista de Eventos -->
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
             <li
@@ -44,7 +50,10 @@
                 </svg>
                 <span class="font-medium">Eventos</span>
             </li>
+            
+            <!-- Funcionalidades Restritas a Administradores -->
             {#if isAdmin}
+                <!-- Link: Gerenciamento de Usuários -->
                 <!-- svelte-ignore a11y_click_events_have_key_events -->
                 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
                 <li
@@ -70,6 +79,8 @@
                     </svg>
                     <span>Usuários</span>
                 </li>
+                
+                <!-- Link: Criação de um Novo Evento -->
                 <!-- svelte-ignore a11y_click_events_have_key_events -->
                 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
                 <li
@@ -96,6 +107,8 @@
                     <span>Criar Evento</span>
                 </li>
             {/if}
+            
+            <!-- Link: Inscrições do Usuário Logado -->
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
             <li
@@ -130,8 +143,9 @@
         </ul>
     </nav>
 
-    <!-- Perfil na Sidebar -->
+    <!-- Rodapé da Sidebar: Ações do Perfil -->
     <div class="pt-6 border-t border-border-ui space-y-4">
+        <!-- Botão para Sair da Conta -->
         <button
             onclick={handleLogout}
             class="w-full border border-text-primary/20 text-text-primary p-2.5 rounded-xl text-xs font-bold hover:bg-red-500 hover:text-white hover:border-red-500 transition-all"

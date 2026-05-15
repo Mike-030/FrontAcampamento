@@ -1,17 +1,21 @@
 <script>
     import logo from "../assets/LogoComunidadeSaoMiguel.png";
     import bgHero from "../assets/SaoMiguelArcanjo.png";
+    // Componentes de Interface
     import Modal from "./components/Modal.svelte";
 
+    // Props recebidas pelo componente de Login
     /** @type {{ onLoginSuccess: Function, onGoToRegister: Function }} */
     let { onLoginSuccess, onGoToRegister } = $props();
 
-    let cpf = $state("");
-    let password = $state("");
-    let loading = $state(false);
-    let showPassword = $state(false);
-    let rememberMe = $state(false);
+    // Estados do formulário de login
+    let cpf = $state(""); // CPF digitado pelo usuário
+    let password = $state(""); // Senha digitada pelo usuário
+    let loading = $state(false); // Controle de carregamento durante a requisição
+    let showPassword = $state(false); // Alterna a visualização da senha
+    let rememberMe = $state(false); // Opção para lembrar do login
 
+    // Função para aplicar máscara de CPF no input
     /** @param {Event} e */
     function handleCpfInput(e) {
         let value = /** @type {HTMLInputElement} */ (e.target).value.replace(
@@ -34,6 +38,7 @@
         cpf = value;
     }
 
+    // Estado do Modal de avisos/erros
     let modalState = $state({
         isOpen: false,
         type: "error",
@@ -41,6 +46,7 @@
         onConfirm: null,
     });
 
+    // Função para exibir o modal
     function showModal(type, message, onConfirm = null) {
         modalState = { isOpen: true, type, message, onConfirm };
     }
@@ -54,6 +60,7 @@
 
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
 
+    // Função que lida com o envio do formulário de login
     /** @param {Event} e */
     async function handleSubmit(e) {
         if (e) e.preventDefault();
@@ -246,6 +253,7 @@
 >
     <div class="flex-1 flex items-center justify-center p-4">
         <!-- Box Centralizado -->
+        <!-- Box Centralizado: Contém a imagem e o formulário -->
         <div
             class="w-full max-w-7xl md:h-[90vh] md:max-h-[850px] flex flex-col md:flex-row
                     bg-transparent md:bg-bg-secondary
@@ -253,6 +261,7 @@
                     shadow-none md:shadow-2xl
                     md:rounded-[3rem] overflow-hidden"
         >
+            <!-- Metade Esquerda: Imagem de Destaque -->
             <div class="hidden md:block md:w-1/2 relative bg-forest/10">
                 <img
                     src={bgHero}
@@ -280,6 +289,7 @@
                 </div>
             </div>
 
+            <!-- Metade Direita: Formulário de Login -->
             <div
                 class="w-full md:w-1/2 p-6 md:p-8 lg:p-12 flex flex-col justify-center items-center"
             >
@@ -309,6 +319,7 @@
                     onsubmit={handleSubmit}
                     class="w-full max-w-sm space-y-4 mt-6 px-4"
                 >
+                    <!-- Campo: CPF -->
                     <div class="space-y-1.5 text-left w-full">
                         <label
                             for="cpf"
@@ -326,6 +337,7 @@
                             placeholder="000.000.000-00"
                         />
                     </div>
+                    <!-- Campo: Senha -->
                     <div class="space-y-1.5 text-left w-full">
                         <label
                             for="password"
@@ -386,6 +398,7 @@
                         </div>
                     </div>
 
+                    <!-- Checkbox: Lembrar de Mim -->
                     <div class="flex items-center gap-2 mt-2 ml-1">
                         <input
                             type="checkbox"
@@ -400,6 +413,7 @@
                         >
                     </div>
 
+                    <!-- Botão de Entrar -->
                     <div class="pt-2">
                         <button
                             type="submit"

@@ -1,11 +1,13 @@
 <script>
+    // Imagens utilizadas
     import logo from "../assets/LogoComunidadeSaoMiguel.png";
     import bgHero from "../assets/SaoMiguelArcanjo.png";
 
+    // Props
     /** @type {{ onGoToLogin: Function }} */
     let { onGoToLogin } = $props();
 
-    let formData = $state({
+    // Estado dos dados do formulário de registro
         name: "",
         email: "",
         password: "",
@@ -18,15 +20,17 @@
         marital_status_id: "",
     });
 
-    let loading = $state(false);
-    let error = $state("");
-    let success = $state(false);
+    // Controle de estado da requisição e erros
+    let loading = $state(false); // Indica carregamento ao enviar
+    let error = $state(""); // Mensagem de erro (se houver)
+    let success = $state(false); // Indica sucesso no cadastro
 
+    // Campos com máscara (visualização para o usuário)
     let maskedCpf = $state("");
     let maskedPhone = $state("");
     let maskedDocument = $state("");
 
-    // Date Picker States
+    // Estados do Seletor de Data de Nascimento (Date Picker customizado)
     let selectedDay = $state(1);
     let selectedMonth = $state(1);
     let selectedYear = $state(2000);
@@ -64,6 +68,7 @@
 
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
 
+    // Funções para aplicar máscaras nos inputs
     /** @param {string} val */
     function applyCpfMask(val) {
         let v = val.replace(/\D/g, "");
@@ -97,6 +102,7 @@
         return v;
     }
 
+    // Função responsável por validar e submeter o formulário de cadastro
     /** @param {SubmitEvent} e */
     async function handleRegister(e) {
         if (e) e.preventDefault();
@@ -165,6 +171,7 @@
         }
     }
 
+    // Função que permite rolar as opções de data através do clique e arrasto do mouse
     /** @param {HTMLElement} node */
     function dragScroll(node) {
         let isDown = false;
@@ -262,7 +269,7 @@
         <div
             class="w-full max-w-5xl bg-bg-secondary border border-border-ui shadow-2xl rounded-[3rem] overflow-hidden flex flex-col md:flex-row transition-all duration-300"
         >
-            <!-- Lado Visual -->
+            <!-- Lado Visual: Exibido apenas em telas maiores (Desktop) -->
             <div
                 class="hidden md:block md:w-1/3 bg-bg-primary/30 border-r border-border-ui/50"
             >
@@ -316,7 +323,7 @@
                 </div>
             </div>
 
-            <!-- Formulário -->
+            <!-- Área do Formulário de Registro -->
             <div class="w-full md:w-2/3 p-6 md:p-14 lg:p-20 py-12">
                 <!-- LOGO MOBILE -->
                 <div class="flex justify-center md:hidden mb-6 -mt-4">
@@ -501,7 +508,7 @@
                                 />
                             </div>
 
-                            <!-- Data de Nascimento -->
+                            <!-- Campo customizado: Data de Nascimento (Seletor rolável) -->
                             <div class="space-y-3 md:col-span-2">
                                 <p
                                     class="text-text-secondary text-[10px] font-bold uppercase tracking-widest ml-1"
@@ -642,6 +649,7 @@
                             </div>
                         </div>
 
+                        <!-- Rodapé do formulário: Aviso de obrigatoriedade e Botão de Envio -->
                         <div class="pt-6">
                             <p
                                 class="text-[10px] text-text-secondary/60 text-center uppercase tracking-widest font-bold mb-4"

@@ -1,4 +1,5 @@
 <script>
+    // Componentes da Interface e Estrutura
     import Sidebar from "./components/Sidebar.svelte";
     import Header from "./components/Header.svelte";
     import ProfileForm from "./components/ProfileForm.svelte";
@@ -9,24 +10,28 @@
     import EventsList from "./components/EventsList.svelte";
     import MySubscriptions from "./components/MySubscriptions.svelte";
 
+    // Props recebidas
     let { onLogout } = $props();
 
+    // Estado principal do Dashboard
     /** @type {any[]} */
-    let events = $state([]);
+    let events = $state([]); // Lista de eventos disponíveis
     /** @type {any[]} */
-    let subscriptions = $state([]);
-    let loading = $state(true);
-    let activeTab = $state("events");
-    let selectedEvent = $state(null);
-    let userData = $state(
+    let subscriptions = $state([]); // Lista de inscrições do usuário
+    let loading = $state(true); // Controle de carregamento global
+    let activeTab = $state("events"); // Aba ativa (events, subscriptions, profile, etc.)
+    let selectedEvent = $state(null); // Evento selecionado para detalhes ou edição
+    let userData = $state( // Dados do usuário logado
         JSON.parse(localStorage.getItem("user_data") || "{}"),
     );
+    // Verificação de privilégios de administrador
     let isAdmin = $derived(
         userData.is_counselor === true ||
             userData.is_admin === true ||
             userData.role === "admin",
     );
 
+    // Estado do Modal global para confirmações e alertas
     /** @type {{ isOpen: boolean, type: string, message: string, onConfirm: (() => void) | null }} */
     let modalState = $state({
         isOpen: false,
@@ -58,6 +63,7 @@
             "&background=DE6E27&color=fff",
     );
 
+    // Efeito para carregar dados baseados na aba ativa
     $effect(() => {
         if (activeTab === "events") {
             fetchEvents();
@@ -66,6 +72,7 @@
         }
     });
 
+    // Função para buscar lista de eventos da API
     async function fetchEvents() {
         try {
             loading = true;
@@ -266,9 +273,10 @@
             });
 
             if (response.ok || response.status === 204) {
-                showModal("success", "Evento excluído com sucesso!");
-                activeTab = "events";
-                fetchEvents();
+                showModal("success", "Evento excluído com sucesso!", () => {
+                    activeTab = "events";
+                    fetchEvents();
+                });
             } else {
                 const errorData = await response.json().catch(() => ({}));
                 showModal(
@@ -356,6 +364,7 @@
 <div
     class="flex min-h-screen bg-bg-primary text-text-primary transition-colors duration-300 font-['Inter']"
 >
+    <!-- Componente: Sidebar (Navegação lateral) -->
     <Sidebar
         bind:activeTab
         {isAdmin}
@@ -365,7 +374,9 @@
 
     <!-- Main Content -->
     <main class="ml-64 flex-grow p-10">
+        <!-- Componente: Header (Cabeçalho com perfil) -->
         <Header {userData} {defaultAvatar} bind:activeTab {handleLogout} />
+        
         {#if loading}
             <div
                 class="flex flex-col items-center justify-center py-20 text-text-secondary"
@@ -376,6 +387,7 @@
                 <p class="animate-pulse">Buscando dados...</p>
             </div>
         {:else if activeTab === "events"}
+            <!-- Componente: Lista de Eventos -->
             <EventsList
                 {events}
                 {isAdmin}
@@ -384,34 +396,41 @@
                 {openEventDetails}
             />
         {:else if activeTab === "subscriptions"}
+            <!-- Componente: Minhas Inscrições -->
             <MySubscriptions
                 {subscriptions}
                 onGoToEvents={() => (activeTab = "events")}
                 {requestCancelSubscription}
             />
         {:else if activeTab === "users"}
+            <!-- Componente: Lista de Usuários (Admin) -->
             <UsersList {token} />
         {:else if activeTab === "profile"}
+            <!-- Componente: Formulário de Perfil -->
             <ProfileForm
                 bind:userData
                 updateProfile={requestUpdateProfile}
                 {defaultAvatar}
             />
         {:else if activeTab === "event_details" && selectedEvent}
+            <!-- Componente: Detalhes do Evento para inscrição -->
             <EventDetails
                 event={selectedEvent}
                 onSubscribe={requestSubscription}
                 onBack={() => (activeTab = "events")}
             />
         {:else if activeTab === "event_form"}
+            <!-- Componente: Formulário de Criação/Edição de Evento (Admin) -->
             <EventForm
                 event={selectedEvent}
                 onCancel={() => (activeTab = "events")}
                 onDelete={() => requestDeleteEvent(selectedEvent)}
                 {token}
                 onSaveSuccess={() => {
-                    activeTab = "events";
-                    fetchEvents();
+                    showModal("success", "Evento salvo com sucesso!", () => {
+                        activeTab = "events";
+                        fetchEvents();
+                    });
                 }}
             />
         {/if}
