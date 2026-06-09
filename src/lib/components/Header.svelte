@@ -6,7 +6,6 @@
         activeTab = $bindable(""),
         handleLogout,
     } = $props();
-    } = $props();
 
     // Estado local para controle de exibição do dropdown do menu do usuário
     let isProfileMenuOpen = $state(false);

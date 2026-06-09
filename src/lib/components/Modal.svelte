@@ -2,7 +2,6 @@
     // Props recebidas: estado geral do modal (tipo, mensagem, etc.) e a função para fechá-lo
     let { modalState = {}, closeModal } = $props();
 </script>
-</script>
 
 <!-- Renderização Condicional: O Modal só aparece se isOpen for true -->
 {#if modalState.isOpen}
@@ -87,7 +86,6 @@
                     </h3>
                 {/if}
 
-                {/if}
 
                 <!-- Mensagem Exibida no Modal -->
                 <p

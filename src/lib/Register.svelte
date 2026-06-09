@@ -8,6 +8,7 @@
     let { onGoToLogin } = $props();
 
     // Estado dos dados do formulário de registro
+    let formData = $state({
         name: "",
         email: "",
         password: "",
