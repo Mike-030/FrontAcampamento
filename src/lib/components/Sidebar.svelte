@@ -104,7 +104,7 @@
                         <path d="M12 5v14" />
                         <path d="M5 12h14" />
                     </svg>
-                    <span>Criar Evento</span>
+                    <span>Criar Atividade</span>
                 </li>
             {/if}
             

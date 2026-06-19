@@ -9,26 +9,27 @@
 
     let eventSearchQuery = $state("");
     let showPastEvents = $state(false);
+    let typeFilter = $state("all"); // "all", "camping", "event"
 
-    /** @param {any} event */
-    function isRegistrationPassed(event) {
-        if (!event) return false;
+    /** @param {any} activity */
+    function isRegistrationPassed(activity) {
+        if (!activity) return false;
         const now = new Date();
         
-        // Se a data de início do evento já passou, está indisponível
-        if (event.start_date && new Date(event.start_date) < now) {
+        // Se a data de início da atividade já passou, está indisponível
+        if (activity.start_date && new Date(activity.start_date) < now) {
             return true;
         }
         
         // Para acampamento, checamos o fim das inscrições
-        if (event.eventable_type === "App\\Models\\Camping" && event.eventable) {
+        if (activity.activitable_type === "App\\Models\\Camping" && activity.activitable) {
             /** @type {number[]} */
             const endDates = [];
-            if (event.eventable.camper_registration_end_date) {
-                endDates.push(new Date(event.eventable.camper_registration_end_date).getTime());
+            if (activity.activitable.camper_registration_end_date) {
+                endDates.push(new Date(activity.activitable.camper_registration_end_date).getTime());
             }
-            if (event.eventable.servant_registration_end_date) {
-                endDates.push(new Date(event.eventable.servant_registration_end_date).getTime());
+            if (activity.activitable.servant_registration_end_date) {
+                endDates.push(new Date(activity.activitable.servant_registration_end_date).getTime());
             }
             
             if (endDates.length > 0) {
@@ -44,6 +45,10 @@
         events.filter((e) => {
             const matchesSearch = e.name && e.name.toLowerCase().includes(eventSearchQuery.toLowerCase());
             if (!matchesSearch) return false;
+
+            // Filtro por tipo
+            if (typeFilter === "camping" && e.activitable_type !== "App\\Models\\Camping") return false;
+            if (typeFilter === "event" && e.activitable_type !== "App\\Models\\Event") return false;
             
             const isPassed = isRegistrationPassed(e);
             
@@ -57,33 +62,57 @@
 </script>
 
 <div class="mb-6">
-    <h2 class="text-3xl font-black mb-6">Eventos Disponíveis</h2>
+    <h2 class="text-3xl font-black mb-6">Atividades Disponíveis</h2>
     <input
         type="text"
         bind:value={eventSearchQuery}
-        placeholder="Pesquisar por nome do evento..."
+        placeholder="Pesquisar por nome da atividade..."
         class="w-full bg-bg-secondary border-2 border-border-ui text-text-primary p-4 rounded-2xl focus:border-brand focus:ring-4 focus:ring-brand/20 transition-all outline-none"
     />
-    {#if isAdmin}
-        <div class="mt-4 flex items-center gap-3">
-            <input
-                id="show-past"
-                type="checkbox"
-                bind:checked={showPastEvents}
-                class="w-5 h-5 accent-brand rounded border-border-ui"
-            />
-            <label for="show-past" class="text-sm font-bold text-text-secondary cursor-pointer hover:text-text-primary transition-colors">
-                Exibir eventos passados
-            </label>
+    <div class="mt-4 flex flex-wrap items-center gap-4">
+        <!-- Filtro por tipo -->
+        <div class="flex gap-2">
+            <button
+                onclick={() => typeFilter = "all"}
+                class="px-4 py-2 rounded-xl text-xs font-bold transition-all {typeFilter === 'all' ? 'bg-brand text-white shadow-lg shadow-brand/20' : 'bg-bg-secondary border border-border-ui text-text-secondary hover:text-text-primary'}"
+            >
+                Todos
+            </button>
+            <button
+                onclick={() => typeFilter = "camping"}
+                class="px-4 py-2 rounded-xl text-xs font-bold transition-all {typeFilter === 'camping' ? 'bg-brand text-white shadow-lg shadow-brand/20' : 'bg-bg-secondary border border-border-ui text-text-secondary hover:text-text-primary'}"
+            >
+                Acampamentos
+            </button>
+            <button
+                onclick={() => typeFilter = "event"}
+                class="px-4 py-2 rounded-xl text-xs font-bold transition-all {typeFilter === 'event' ? 'bg-brand text-white shadow-lg shadow-brand/20' : 'bg-bg-secondary border border-border-ui text-text-secondary hover:text-text-primary'}"
+            >
+                Eventos
+            </button>
         </div>
-    {/if}
+
+        {#if isAdmin}
+            <div class="flex items-center gap-3">
+                <input
+                    id="show-past"
+                    type="checkbox"
+                    bind:checked={showPastEvents}
+                    class="w-5 h-5 accent-brand rounded border-border-ui"
+                />
+                <label for="show-past" class="text-sm font-bold text-text-secondary cursor-pointer hover:text-text-primary transition-colors">
+                    Exibir atividades passadas
+                </label>
+            </div>
+        {/if}
+    </div>
 </div>
 {#if events.length === 0}
     <div
         class="text-center py-24 bg-bg-secondary/30 rounded-[3rem] border-2 border-dashed border-border-ui uppercase tracking-widest"
     >
         <p class="text-text-secondary text-xs font-bold mb-6">
-            Nenhum evento encontrado
+            Nenhuma atividade encontrada
         </p>
         <button
             onclick={fetchEvents}
@@ -96,7 +125,7 @@
         class="text-center py-24 bg-bg-secondary/30 rounded-[3rem] border-2 border-dashed border-border-ui uppercase tracking-widest"
     >
         <p class="text-text-secondary text-xs font-bold mb-6">
-            Nenhum evento corresponde à pesquisa.
+            Nenhuma atividade corresponde à pesquisa.
         </p>
     </div>
 {:else}
@@ -111,7 +140,7 @@
                     <h3
                         class="text-2xl font-black group-hover:text-brand transition-colors line-clamp-1"
                     >
-                        {event.name || "Evento"}
+                        {event.name || "Atividade"}
                     </h3>
                     <div
                         class="px-3 py-1 bg-brand/10 border border-brand/20 text-brand rounded-full"
@@ -119,17 +148,20 @@
                         <span
                             class="text-[10px] font-black uppercase tracking-widest whitespace-nowrap"
                         >
-                            {event.eventable_type === "App\\Models\\Festival"
-                                ? "Festival"
+                            {event.activitable_type === "App\\Models\\Event"
+                                ? "Evento"
                                 : "Acampamento"}
                         </span>
                     </div>
                 </div>
+                {#if event.category}
+                    <p class="text-xs text-text-secondary font-bold mb-4">{event.category.name}</p>
+                {/if}
                 <div
                     class="flex justify-between items-center pt-8 border-t border-border-ui"
                 >
                     <span class="text-[10px] font-black uppercase opacity-40"
-                        >Campanha 2026</span
+                        >Campanha {event.year || new Date().getFullYear()}</span
                     >
                     <div class="flex gap-2">
                         {#if isAdmin}

@@ -6,9 +6,14 @@
     // Estado do formulário
     let loading = $state(false);
     let errorMessage = $state("");
-    let eventType = $state("App\\Models\\Camping"); // Padrão
+    let activityType = $state("App\\Models\\Camping"); // Padrão
 
-    // Campos Gerais do Evento
+    // Categorias carregadas da API
+    /** @type {any[]} */
+    let categories = $state([]);
+    let loadingCategories = $state(true);
+
+    // Campos Gerais da Activity
     let formData = $state({
         name: "",
         place: "",
@@ -17,18 +22,19 @@
         duration_days: 1,
         total_vacancies: 0,
         image: "",
+        category_id: "",
     });
 
-    // Campos Específicos - Festival
-    let festivalData = $state({
+    // Campos Específicos - Evento (tabela events)
+    let eventData = $state({
         minimal_age: 0,
         is_paid_festival: false,
         ticket_price: 0,
         sale_start_date: "",
-        payment_link: 0,
+        payment_link: "",
     });
 
-    // Campos Específicos - Acampamento
+    // Campos Específicos - Acampamento (tabela campings)
     let campingData = $state({
         notice: "",
         term: "",
@@ -36,6 +42,9 @@
         servant_fee: 0,
         minimal_age: 0,
         maximal_age: 99,
+        planned_man_vacancies: 0,
+        planned_woman_vacancies: 0,
+        planned_couple_vacancies: 0,
         raffle_man_vacancies: 0,
         raffle_woman_vacancies: 0,
         raffle_couple_vacancies: 0,
@@ -56,11 +65,25 @@
         servant_payment_date: "",
     });
 
+    // Categorias filtradas com base no tipo de atividade
+    let filteredCategories = $derived(
+        categories.filter((c) => {
+            if (activityType === "App\\Models\\Camping") {
+                return c.type === "Acampamento";
+            } else {
+                return c.type === "Evento";
+            }
+        }),
+    );
+
     const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
-    onMount(() => {
+    onMount(async () => {
+        // Carregar categorias
+        await fetchCategories();
+
         if (event) {
-            // Edit Mode
+            // Edit Mode — preencher campos a partir dos dados da activity
             formData = {
                 name: event.name,
                 place: event.place,
@@ -71,25 +94,27 @@
                 duration_days: event.duration_days,
                 total_vacancies: event.total_vacancies,
                 image: event.image || "",
+                category_id: event.category_id || "",
             };
 
-            if (event.eventable_type.includes("Festival")) {
-                eventType = "App\\Models\\Festival";
-                if (event.eventable) {
-                    festivalData = {
-                        ...event.eventable,
-                        sale_start_date: event.eventable.sale_start_date
-                            ? new Date(event.eventable.sale_start_date)
+            if (event.activitable_type?.includes("Event")) {
+                activityType = "App\\Models\\Event";
+                if (event.activitable) {
+                    eventData = {
+                        ...event.activitable,
+                        sale_start_date: event.activitable.sale_start_date
+                            ? new Date(event.activitable.sale_start_date)
                                   .toISOString()
                                   .slice(0, 10)
                             : "",
+                        payment_link: event.activitable.payment_link || "",
                     };
                 }
             } else {
-                eventType = "App\\Models\\Camping";
-                if (event.eventable) {
-                    campingData = { ...event.eventable };
-                    // Format dates for inputs
+                activityType = "App\\Models\\Camping";
+                if (event.activitable) {
+                    campingData = { ...campingData, ...event.activitable };
+                    // Formatar datas para inputs
                     /** @type {(keyof typeof campingData)[]} */
                     const dateFields = [
                         "raffle_camper_subscription_start_date",
@@ -118,91 +143,78 @@
         }
     });
 
+    async function fetchCategories() {
+        try {
+            loadingCategories = true;
+            const response = await fetch(`${API_URL}/v1/categories`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept: "application/json",
+                },
+            });
+            const data = await response.json();
+            if (response.ok) {
+                categories = data.data || data || [];
+            }
+        } catch (err) {
+            console.error("Erro ao buscar categorias:", err);
+        } finally {
+            loadingCategories = false;
+        }
+    }
+
     async function handleSubmit() {
         loading = true;
         errorMessage = "";
 
         try {
             const isEditing = !!event;
-            let eventableId = isEditing ? event.eventable_id : null;
 
-            // 1. Salvar Eventable (Camping ou Festival)
-            const eventableEndpoint =
-                eventType === "App\\Models\\Camping"
-                    ? "/v1/campings"
-                    : "/v1/festivals";
-
-            if (eventType === "App\\Models\\Camping") {
+            // Calcular vagas totais e preparar dados específicos
+            if (activityType === "App\\Models\\Camping") {
                 const man = Number(campingData.raffle_man_vacancies || 0);
                 const woman = Number(campingData.raffle_woman_vacancies || 0);
                 const couple = Number(campingData.raffle_couple_vacancies || 0);
                 campingData.raffle_total_vacancies = man + woman + couple * 2;
                 formData.total_vacancies = campingData.raffle_total_vacancies;
-            } else if (eventType === "App\\Models\\Festival") {
-                festivalData.is_paid_festival = !!festivalData.is_paid_festival;
+            } else if (activityType === "App\\Models\\Event") {
+                eventData.is_paid_festival = !!eventData.is_paid_festival;
                 formData.total_vacancies = 999999;
             }
 
-            const eventablePayload =
-                eventType === "App\\Models\\Camping"
+            const activitableData =
+                activityType === "App\\Models\\Camping"
                     ? campingData
-                    : festivalData;
+                    : eventData;
 
-            const methodEventable = isEditing ? "PUT" : "POST";
-            const urlEventable = isEditing
-                ? `${API_URL}${eventableEndpoint}/${eventableId}`
-                : `${API_URL}${eventableEndpoint}`;
-
-            const resEventable = await fetch(urlEventable, {
-                method: methodEventable,
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                },
-                body: JSON.stringify(eventablePayload),
-            });
-
-            const dataEventable = await resEventable.json();
-            if (!resEventable.ok) {
-                throw new Error(
-                    dataEventable.message ||
-                        "Erro ao salvar os detalhes específicos do evento.",
-                );
-            }
-
-            if (!isEditing) {
-                eventableId = dataEventable.data.id;
-            }
-
-            const eventPayload = {
+            const payload = {
                 ...formData,
-                eventable_id: eventableId,
-                eventable_type: eventType,
+                activitable_type: activityType,
+                activitable_data: activitableData,
                 start_date: formData.start_date.includes("T")
                     ? formData.start_date.replace("T", " ") + ":00"
                     : formData.start_date + " 00:00:00",
             };
 
-            const methodEvent = isEditing ? "PUT" : "POST";
-            const urlEvent = isEditing
-                ? `${API_URL}/v1/events/${event.id}`
-                : `${API_URL}/v1/events`;
+            const method = isEditing ? "PUT" : "POST";
+            const url = isEditing
+                ? `${API_URL}/v1/activities/${event.id}`
+                : `${API_URL}/v1/activities`;
 
-            const resEvent = await fetch(urlEvent, {
-                method: methodEvent,
+            const response = await fetch(url, {
+                method,
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json",
                     Accept: "application/json",
                 },
-                body: JSON.stringify(eventPayload),
+                body: JSON.stringify(payload),
             });
 
-            if (!resEvent.ok) {
-                const dataEvent = await resEvent.json();
+            if (!response.ok) {
+                const data = await response.json();
                 throw new Error(
-                    dataEvent.message || "Erro ao salvar o evento geral.",
+                    data.message || "Erro ao salvar a atividade.",
                 );
             }
 
@@ -219,7 +231,7 @@
 
 <div>
     <h2 class="text-3xl font-black mb-6">
-        {event ? "Editar Evento" : "Adicionar Evento"}
+        {event ? "Editar Atividade" : "Adicionar Atividade"}
     </h2>
 
     <div
@@ -245,13 +257,13 @@
                 <h3
                     class="text-l font-black text-brand uppercase tracking-widest mb-6"
                 >
-                    1. Tipo de Evento
+                    1. Tipo de Atividade
                 </h3>
                 <div class="flex gap-4">
                     <label class="flex-1 cursor-pointer">
                         <input
                             type="radio"
-                            bind:group={eventType}
+                            bind:group={activityType}
                             value="App\Models\Camping"
                             class="hidden peer"
                             disabled={!!event}
@@ -267,8 +279,8 @@
                     <label class="flex-1 cursor-pointer">
                         <input
                             type="radio"
-                            bind:group={eventType}
-                            value="App\Models\Festival"
+                            bind:group={activityType}
+                            value="App\Models\Event"
                             class="hidden peer"
                             disabled={!!event}
                         />
@@ -276,7 +288,7 @@
                             class="p-4 rounded-2xl border-2 border-border-ui bg-bg-primary text-center peer-checked:border-brand peer-checked:bg-brand/5 transition-all"
                         >
                             <span class="font-bold text-text-primary"
-                                >Festival</span
+                                >Evento</span
                             >
                         </div>
                     </label>
@@ -294,7 +306,7 @@
                     <div>
                         <label
                             class="block text-[10px] uppercase font-bold text-text-secondary mb-2"
-                            >Nome do Evento *</label
+                            >Nome da Atividade *</label
                         >
                         <input
                             type="text"
@@ -353,6 +365,28 @@
                             class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-all"
                         />
                     </div>
+                    <div>
+                        <label
+                            class="block text-[10px] uppercase font-bold text-text-secondary mb-2"
+                            >Categoria *</label
+                        >
+                        {#if loadingCategories}
+                            <div class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-secondary animate-pulse">
+                                Carregando categorias...
+                            </div>
+                        {:else}
+                            <select
+                                bind:value={formData.category_id}
+                                required
+                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-all"
+                            >
+                                <option value="" disabled>Selecione uma categoria</option>
+                                {#each filteredCategories as cat}
+                                    <option value={cat.id}>{cat.name}</option>
+                                {/each}
+                            </select>
+                        {/if}
+                    </div>
 
                     <div class="md:col-span-2">
                         <label
@@ -377,7 +411,7 @@
                     3. Configurações Específicas
                 </h3>
 
-                {#if eventType === "App\\Models\\Festival"}
+                {#if activityType === "App\\Models\\Event"}
                     <div
                         class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-bg-primary/50 p-6 rounded-3xl border border-border-ui"
                     >
@@ -388,7 +422,7 @@
                             >
                             <input
                                 type="number"
-                                bind:value={festivalData.minimal_age}
+                                bind:value={eventData.minimal_age}
                                 required
                                 min="0"
                                 class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
@@ -401,7 +435,7 @@
                             >
                             <input
                                 type="number"
-                                bind:value={festivalData.ticket_price}
+                                bind:value={eventData.ticket_price}
                                 required
                                 min="0"
                                 class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
@@ -414,7 +448,7 @@
                             >
                             <input
                                 type="date"
-                                bind:value={festivalData.sale_start_date}
+                                bind:value={eventData.sale_start_date}
                                 required
                                 class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
                             />
@@ -426,18 +460,18 @@
                             >
                             <input
                                 type="text"
-                                bind:value={festivalData.payment_link}
+                                bind:value={eventData.payment_link}
                                 class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
                             />
                         </div>
                         <div class="md:col-span-2 flex items-center gap-3 mt-2">
                             <input
                                 type="checkbox"
-                                bind:checked={festivalData.is_paid_festival}
+                                bind:checked={eventData.is_paid_festival}
                                 class="w-5 h-5 accent-brand"
                             />
                             <label class="text-sm font-bold text-text-primary"
-                                >Festival Pago</label
+                                >Evento Pago</label
                             >
                         </div>
                     </div>
@@ -524,41 +558,97 @@
                                 class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
                             />
                         </div>
-                        <div>
-                            <label
-                                class="block text-[10px] uppercase font-bold text-text-secondary mb-2"
-                                >Vagas Sorteio - Homem</label
+
+                        <!-- Vagas Planejadas -->
+                        <div
+                            class="md:col-span-3 mt-4 border-t border-border-ui pt-4"
+                        >
+                            <p
+                                class="text-[10px] font-black text-brand uppercase tracking-widest mb-4"
                             >
-                            <input
-                                type="number"
-                                bind:value={campingData.raffle_man_vacancies}
-                                required
-                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
-                            />
+                                Vagas Planejadas
+                            </p>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label
+                                        class="block text-[10px] font-bold text-text-secondary mb-2"
+                                        >Vagas Planejadas - Homem</label
+                                    ><input
+                                        type="number"
+                                        bind:value={campingData.planned_man_vacancies}
+                                        min="0"
+                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
+                                    />
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-[10px] font-bold text-text-secondary mb-2"
+                                        >Vagas Planejadas - Mulher</label
+                                    ><input
+                                        type="number"
+                                        bind:value={campingData.planned_woman_vacancies}
+                                        min="0"
+                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
+                                    />
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-[10px] font-bold text-text-secondary mb-2"
+                                        >Vagas Planejadas - Casal</label
+                                    ><input
+                                        type="number"
+                                        bind:value={campingData.planned_couple_vacancies}
+                                        min="0"
+                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
+                                    />
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label
-                                class="block text-[10px] uppercase font-bold text-text-secondary mb-2"
-                                >Vagas Sorteio - Mulher</label
+
+                        <!-- Vagas Sorteio -->
+                        <div
+                            class="md:col-span-3 mt-4 border-t border-border-ui pt-4"
+                        >
+                            <p
+                                class="text-[10px] font-black text-brand uppercase tracking-widest mb-4"
                             >
-                            <input
-                                type="number"
-                                bind:value={campingData.raffle_woman_vacancies}
-                                required
-                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
-                            />
-                        </div>
-                        <div>
-                            <label
-                                class="block text-[10px] uppercase font-bold text-text-secondary mb-2"
-                                >Vagas Sorteio - Casal</label
-                            >
-                            <input
-                                type="number"
-                                bind:value={campingData.raffle_couple_vacancies}
-                                required
-                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
-                            />
+                                Vagas do Sorteio
+                            </p>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label
+                                        class="block text-[10px] font-bold text-text-secondary mb-2"
+                                        >Vagas Sorteio - Homem</label
+                                    ><input
+                                        type="number"
+                                        bind:value={campingData.raffle_man_vacancies}
+                                        required
+                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-[10px] font-bold text-text-secondary mb-2"
+                                        >Vagas Sorteio - Mulher</label
+                                    ><input
+                                        type="number"
+                                        bind:value={campingData.raffle_woman_vacancies}
+                                        required
+                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-[10px] font-bold text-text-secondary mb-2"
+                                        >Vagas Sorteio - Casal</label
+                                    ><input
+                                        type="number"
+                                        bind:value={campingData.raffle_couple_vacancies}
+                                        required
+                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
+                                    />
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Datas de Sorteio -->
@@ -749,7 +839,6 @@
                                         bind:value={
                                             campingData.servant_payment_link
                                         }
-                                        required
                                         class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
                                     />
                                 </div>
@@ -762,7 +851,6 @@
                                         bind:value={
                                             campingData.servant_payment_date
                                         }
-                                        required
                                         class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
                                     />
                                 </div>
@@ -782,7 +870,7 @@
                             onclick={onDelete}
                             class="px-6 py-4 rounded-xl text-sm font-bold text-red-500 hover:bg-red-500 hover:text-white border border-red-500/20 hover:border-red-500 transition-all"
                         >
-                            Excluir Evento
+                            Excluir Atividade
                         </button>
                     {/if}
                 </div>
@@ -799,7 +887,7 @@
                         disabled={loading}
                         class="px-8 py-4 bg-brand text-white rounded-xl text-sm font-black uppercase tracking-widest hover:brightness-110 shadow-xl shadow-brand/20 transition-all disabled:opacity-50 flex items-center gap-3"
                     >
-                        {loading ? "Salvando..." : "Salvar Evento"}
+                        {loading ? "Salvando..." : "Salvar Atividade"}
                     </button>
                 </div>
             </div>

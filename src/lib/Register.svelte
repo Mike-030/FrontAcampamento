@@ -15,7 +15,6 @@
         password_confirmation: "",
         cpf: "",
         phone: "",
-        document: "",
         sex: "",
         birthday: "",
         marital_status_id: "",
@@ -29,7 +28,6 @@
     // Campos com máscara (visualização para o usuário)
     let maskedCpf = $state("");
     let maskedPhone = $state("");
-    let maskedDocument = $state("");
 
     // Estados do Seletor de Data de Nascimento (Date Picker customizado)
     let selectedDay = $state(1);
@@ -91,17 +89,7 @@
         return v;
     }
 
-    /** @param {string} val */
-    function applyRgMask(val) {
-        let v = val.replace(/\D/g, "");
-        if (v.length > 9) v = v.slice(0, 9);
-        if (v.length > 8)
-            v = `${v.slice(0, 2)}.${v.slice(2, 5)}.${v.slice(5, 8)}-${v.slice(8)}`;
-        else if (v.length > 5)
-            v = `${v.slice(0, 2)}.${v.slice(2, 5)}.${v.slice(5)}`;
-        else if (v.length > 2) v = `${v.slice(0, 2)}.${v.slice(2)}`;
-        return v;
-    }
+
 
     // Função responsável por validar e submeter o formulário de cadastro
     /** @param {SubmitEvent} e */
@@ -140,10 +128,9 @@
             ...formData,
             cpf: maskedCpf.replace(/\D/g, ""),
             phone: maskedPhone.replace(/\D/g, ""),
-            document: maskedDocument.replace(/\D/g, ""),
             birthday: `${selectedYear}-${String(selectedMonth).padStart(2, "0")}-${String(selectedDay).padStart(2, "0")}`,
             is_counselor: 0,
-            picture: "default.png",
+            photo: "default.png",
         };
 
         try {
@@ -490,24 +477,7 @@
                                 </select>
                             </div>
 
-                            <div class="space-y-1.5 md:col-span-2">
-                                <label
-                                    for="document"
-                                    class="text-text-secondary text-[10px] font-bold uppercase tracking-widest ml-1"
-                                    >RG</label
-                                >
-                                <input
-                                    id="document"
-                                    value={maskedDocument}
-                                    oninput={(e) =>
-                                        (maskedDocument = applyRgMask(
-                                            e.currentTarget.value,
-                                        ))}
-                                    maxlength="12"
-                                    placeholder="00.000.000-0"
-                                    class="w-full bg-bg-primary/50 border border-border-ui rounded-2xl p-4 text-text-primary focus:border-brand outline-none transition-all placeholder:text-text-secondary/60"
-                                />
-                            </div>
+
 
                             <!-- Campo customizado: Data de Nascimento (Seletor rolável) -->
                             <div class="space-y-3 md:col-span-2">

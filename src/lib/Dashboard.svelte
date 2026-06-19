@@ -72,13 +72,13 @@
         }
     });
 
-    // Função para buscar lista de eventos da API
+    // Função para buscar lista de atividades da API
     async function fetchEvents() {
         try {
             loading = true;
             const endpoint = isAdmin
-                ? `${API_URL}/v1/events`
-                : `${API_URL}/v1/events?available=true`;
+                ? `${API_URL}/v1/activities`
+                : `${API_URL}/v1/activities?available=true`;
             const response = await fetch(endpoint, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -90,7 +90,7 @@
                 events = data.data || [];
             }
         } catch (err) {
-            console.error("Erro ao buscar eventos:", err);
+            console.error("Erro ao buscar atividades:", err);
         } finally {
             loading = false;
         }
@@ -252,7 +252,7 @@
     function requestDeleteEvent(event) {
         showModal(
             "confirm",
-            "Tem certeza que deseja excluir este evento? Esta ação não pode ser desfeita.",
+            "Tem certeza que deseja excluir esta atividade? Esta ação não pode ser desfeita.",
             () => {
                 closeModal();
                 performDeleteEvent(event.id);
@@ -264,7 +264,7 @@
     async function performDeleteEvent(eventId) {
         try {
             loading = true;
-            const response = await fetch(`${API_URL}/v1/events/${eventId}`, {
+            const response = await fetch(`${API_URL}/v1/activities/${eventId}`, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -273,7 +273,7 @@
             });
 
             if (response.ok || response.status === 204) {
-                showModal("success", "Evento excluído com sucesso!", () => {
+                showModal("success", "Atividade excluída com sucesso!", () => {
                     activeTab = "events";
                     fetchEvents();
                 });
@@ -281,11 +281,11 @@
                 const errorData = await response.json().catch(() => ({}));
                 showModal(
                     "error",
-                    errorData.message || "Erro ao excluir o evento.",
+                    errorData.message || "Erro ao excluir a atividade.",
                 );
             }
         } catch (err) {
-            console.error("Erro ao excluir evento:", err);
+            console.error("Erro ao excluir atividade:", err);
             showModal("error", "Não foi possível conectar com o servidor.");
         } finally {
             loading = false;
@@ -427,7 +427,7 @@
                 onDelete={() => requestDeleteEvent(selectedEvent)}
                 {token}
                 onSaveSuccess={() => {
-                    showModal("success", "Evento salvo com sucesso!", () => {
+                    showModal("success", "Atividade salva com sucesso!", () => {
                         activeTab = "events";
                         fetchEvents();
                     });
