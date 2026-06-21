@@ -1,10 +1,8 @@
 <script>
-    // Logo importada para exibição no topo
-    import logo from "../../assets/LogoComunidadeSaoMiguel.png";
-    
     // Props recebidas pelo componente Sidebar
     let {
         activeTab = $bindable(""),
+        isExpanded = $bindable(false),
         isAdmin = false,
         handleLogout,
         onAddEvent = () => {},
@@ -12,11 +10,18 @@
 </script>
 
 <aside
-    class="w-64 bg-bg-secondary border-r border-border-ui flex flex-col p-6 fixed h-full shadow-lg z-10 transition-colors duration-300"
+    class="{isExpanded ? 'w-64' : 'w-24'} bg-bg-secondary border-r border-border-ui flex flex-col py-6 px-4 fixed h-full shadow-lg z-10 transition-all duration-300"
 >
-    <!-- Área de Exibição da Logo -->
-    <div class="flex items-center gap-3 mb-10 overflow-hidden">
-        <img src={logo} alt="Logo" class="w-auto object-contain" />
+    <!-- Botão de Menu Retrátil -->
+    <div class="flex items-center mb-10 {isExpanded ? 'justify-end' : 'justify-center'} overflow-hidden">
+        <button
+            onclick={() => (isExpanded = !isExpanded)}
+            class="p-2 rounded-xl text-text-secondary hover:bg-text-primary/5 hover:text-brand transition-all flex-shrink-0"
+        >
+            <svg class="transition-transform duration-300 {isExpanded ? 'rotate-180' : ''}" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </button>
     </div>
 
     <!-- Navegação e Links -->
@@ -27,10 +32,11 @@
             <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
             <li
                 onclick={() => (activeTab = "events")}
-                class="flex items-center gap-3 p-3 rounded-xl {activeTab ===
+                class="flex items-center rounded-xl {activeTab ===
                 'events'
                     ? 'bg-brand text-white shadow-lg shadow-brand/20'
-                    : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer"
+                    : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer {isExpanded ? 'p-3 gap-3 justify-start' : 'w-12 h-12 justify-center mx-auto'}"
+                title="Eventos"
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -42,13 +48,16 @@
                     stroke-width="2.5"
                     stroke-linecap="round"
                     stroke-linejoin="round"
+                    class="flex-shrink-0"
                 >
                     <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
                     <line x1="16" x2="16" y1="2" y2="6" />
                     <line x1="8" x2="8" y1="2" y2="6" />
                     <line x1="3" x2="21" y1="10" y2="10" />
                 </svg>
-                <span class="font-medium">Eventos</span>
+                {#if isExpanded}
+                    <span class="font-medium whitespace-nowrap">Eventos</span>
+                {/if}
             </li>
             
             <!-- Funcionalidades Restritas a Administradores -->
@@ -58,10 +67,11 @@
                 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
                 <li
                     onclick={() => (activeTab = "users")}
-                    class="flex items-center gap-3 p-3 rounded-xl {activeTab ===
+                    class="flex items-center rounded-xl {activeTab ===
                     'users'
                         ? 'bg-brand text-white shadow-lg shadow-brand/20'
-                        : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer"
+                        : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer {isExpanded ? 'p-3 gap-3 justify-start' : 'w-12 h-12 justify-center mx-auto'}"
+                    title="Usuários"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -73,11 +83,14 @@
                         stroke-width="2.5"
                         stroke-linecap="round"
                         stroke-linejoin="round"
+                        class="flex-shrink-0"
                     >
                         <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                         <circle cx="12" cy="7" r="4" />
                     </svg>
-                    <span>Usuários</span>
+                    {#if isExpanded}
+                        <span class="font-medium whitespace-nowrap">Usuários</span>
+                    {/if}
                 </li>
                 
                 <!-- Link: Criação de um Novo Evento -->
@@ -85,10 +98,11 @@
                 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
                 <li
                     onclick={onAddEvent}
-                    class="flex items-center gap-3 p-3 rounded-xl {activeTab ===
+                    class="flex items-center rounded-xl {activeTab ===
                     'event_form'
                         ? 'bg-brand text-white shadow-lg shadow-brand/20'
-                        : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer"
+                        : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer {isExpanded ? 'p-3 gap-3 justify-start' : 'w-12 h-12 justify-center mx-auto'}"
+                    title="Criar Atividade"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -100,11 +114,14 @@
                         stroke-width="2.5"
                         stroke-linecap="round"
                         stroke-linejoin="round"
+                        class="flex-shrink-0"
                     >
                         <path d="M12 5v14" />
                         <path d="M5 12h14" />
                     </svg>
-                    <span>Criar Atividade</span>
+                    {#if isExpanded}
+                        <span class="font-medium whitespace-nowrap">Criar Atividade</span>
+                    {/if}
                 </li>
             {/if}
             
@@ -113,10 +130,11 @@
             <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
             <li
                 onclick={() => (activeTab = "subscriptions")}
-                class="flex items-center gap-3 p-3 rounded-xl {activeTab ===
+                class="flex items-center rounded-xl {activeTab ===
                 'subscriptions'
                     ? 'bg-brand text-white shadow-lg shadow-brand/20'
-                    : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer"
+                    : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer {isExpanded ? 'p-3 gap-3 justify-start' : 'w-12 h-12 justify-center mx-auto'}"
+                title="Minhas Inscrições"
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -128,6 +146,7 @@
                     stroke-width="2.5"
                     stroke-linecap="round"
                     stroke-linejoin="round"
+                    class="flex-shrink-0"
                 >
                     <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
                     <path
@@ -138,19 +157,29 @@
                     <path d="M8 11h.01" />
                     <path d="M8 16h.01" />
                 </svg>
-                <span>Minhas Inscrições</span>
+                {#if isExpanded}
+                    <span class="font-medium whitespace-nowrap">Minhas Inscrições</span>
+                {/if}
             </li>
         </ul>
     </nav>
 
     <!-- Rodapé da Sidebar: Ações do Perfil -->
-    <div class="pt-6 border-t border-border-ui space-y-4">
+    <div class="pt-6 border-t border-border-ui space-y-4 overflow-hidden flex flex-col {isExpanded ? 'items-stretch' : 'items-center'}">
         <!-- Botão para Sair da Conta -->
         <button
             onclick={handleLogout}
-            class="w-full border border-text-primary/20 text-text-primary p-2.5 rounded-xl text-xs font-bold hover:bg-red-500 hover:text-white hover:border-red-500 transition-all"
+            title="Sair"
+            class="flex items-center justify-center rounded-xl border border-text-primary/20 text-text-primary text-xs font-bold hover:bg-red-500 hover:text-white hover:border-red-500 transition-all {isExpanded ? 'w-full gap-2 p-2.5' : 'w-12 h-12'}"
         >
-            Sair
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" x2="9" y1="12" y2="12"></line>
+            </svg>
+            {#if isExpanded}
+                <span>Sair</span>
+            {/if}
         </button>
     </div>
 </aside>

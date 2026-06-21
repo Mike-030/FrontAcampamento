@@ -136,29 +136,60 @@
             <div
                 class="bg-bg-secondary border border-border-ui p-8 rounded-[2.5rem] hover:shadow-2xl hover:-translate-y-1 transition-all group overflow-hidden relative"
             >
-                <div class="flex justify-between items-start mb-6">
+                <div class="flex justify-between items-start mb-4">
                     <h3
                         class="text-2xl font-black group-hover:text-brand transition-colors line-clamp-1"
                     >
                         {event.name || "Atividade"}
                     </h3>
-                    <div
-                        class="px-3 py-1 bg-brand/10 border border-brand/20 text-brand rounded-full"
-                    >
-                        <span
-                            class="text-[10px] font-black uppercase tracking-widest whitespace-nowrap"
-                        >
-                            {event.activitable_type === "App\\Models\\Event"
-                                ? "Evento"
-                                : "Acampamento"}
-                        </span>
-                    </div>
                 </div>
                 {#if event.category}
-                    <p class="text-xs text-text-secondary font-bold mb-4">{event.category.name}</p>
+                    <p class="text-xs text-text-secondary font-bold mb-3">{event.category.name}</p>
                 {/if}
+
+                <!-- Info grid -->
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    {#if event.start_date}
+                        <div class="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-text-secondary"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                            <span class="text-xs text-text-secondary font-medium">
+                                {new Date(event.start_date).toLocaleDateString("pt-BR")}
+                            </span>
+                        </div>
+                    {/if}
+                    {#if event.place}
+                        <div class="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-text-secondary"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                            <span class="text-xs text-text-secondary font-medium line-clamp-1">
+                                {event.place}
+                            </span>
+                        </div>
+                    {/if}
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-text-secondary"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <span class="text-xs text-text-secondary font-medium">
+                            {event.total_vacancies > 0 ? `${event.total_vacancies} vagas` : "Vagas ilimitadas"}
+                        </span>
+                    </div>
+                    {#if event.activitable?.camper_fee || event.activitable?.ticket_price}
+                        <div class="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            <span class="text-xs text-brand font-bold">
+                                R$ {parseFloat(event.activitable.camper_fee || event.activitable.ticket_price).toFixed(2).replace(".", ",")}
+                            </span>
+                        </div>
+                    {:else}
+                        <div class="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            <span class="text-xs text-green-500 font-bold">
+                                Gratuito
+                            </span>
+                        </div>
+                    {/if}
+                </div>
+
                 <div
-                    class="flex justify-between items-center pt-8 border-t border-border-ui"
+                    class="flex justify-between items-center pt-6 border-t border-border-ui"
                 >
                     <span class="text-[10px] font-black uppercase opacity-40"
                         >Campanha {event.year || new Date().getFullYear()}</span

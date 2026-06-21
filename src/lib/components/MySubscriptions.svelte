@@ -46,13 +46,6 @@
                     <h3 class="text-2xl font-black group-hover:text-brand transition-colors line-clamp-1">
                         {sub.event?.name || "Inscrição"}
                     </h3>
-                    <div class="flex items-center gap-2">
-                        <div class="px-3 py-1 bg-brand/10 border border-brand/20 text-brand rounded-full">
-                            <span class="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
-                                {sub.event?.eventable_type === "App\\Models\\Festival" ? "Festival" : "Acampamento"}
-                            </span>
-                        </div>
-                    </div>
                 </div>
                 <p class="text-text-secondary text-sm leading-relaxed mb-4">
                     <strong>Status:</strong>

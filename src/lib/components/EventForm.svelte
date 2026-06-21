@@ -6,7 +6,7 @@
     // Estado do formulário
     let loading = $state(false);
     let errorMessage = $state("");
-    let activityType = $state("App\\Models\\Camping"); // Padrão
+    let activityType = $state("App\\Models\\Camping");
 
     // Categorias carregadas da API
     /** @type {any[]} */
@@ -17,7 +17,6 @@
     let formData = $state({
         name: "",
         place: "",
-        year: new Date().getFullYear(),
         start_date: "",
         duration_days: 1,
         total_vacancies: 0,
@@ -26,29 +25,24 @@
     });
 
     // Campos Específicos - Evento (tabela events)
+    // is_paid_festival é auto-preenchido: ticket_price > 0
     let eventData = $state({
         minimal_age: 0,
-        is_paid_festival: false,
         ticket_price: 0,
         sale_start_date: "",
         payment_link: "",
     });
 
     // Campos Específicos - Acampamento (tabela campings)
+    // minimal_age, maximal_age e raffle_*_vacancies são auto-preenchidos pelo backend
     let campingData = $state({
         notice: "",
         term: "",
         camper_fee: 0,
         servant_fee: 0,
-        minimal_age: 0,
-        maximal_age: 99,
         planned_man_vacancies: 0,
         planned_woman_vacancies: 0,
         planned_couple_vacancies: 0,
-        raffle_man_vacancies: 0,
-        raffle_woman_vacancies: 0,
-        raffle_couple_vacancies: 0,
-        raffle_total_vacancies: 0,
         raffle_camper_subscription_start_date: "",
         raffle_camper_subscription_end_date: "",
         raffle_camper_date: "",
@@ -65,29 +59,27 @@
         servant_payment_date: "",
     });
 
-    // Categorias filtradas com base no tipo de atividade
+    // Apenas categorias de acampamento (eventos são auto-atribuídos pelo backend)
     let filteredCategories = $derived(
-        categories.filter((c) => {
-            if (activityType === "App\\Models\\Camping") {
-                return c.type === "Acampamento";
-            } else {
-                return c.type === "Evento";
-            }
-        }),
+        categories.filter((c) => c.type === "Acampamento"),
     );
+
+    // Indicador de evento pago (auto: ticket_price > 0)
+    let isPaidEvent = $derived(Number(eventData.ticket_price) > 0);
+
+    // Indicador de vagas ilimitadas para eventos (total_vacancies <= 0)
+    let isUnlimitedVacancies = $derived(Number(formData.total_vacancies) <= 0);
 
     const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
     onMount(async () => {
-        // Carregar categorias
         await fetchCategories();
 
         if (event) {
-            // Edit Mode — preencher campos a partir dos dados da activity
+            // Edit Mode
             formData = {
                 name: event.name,
                 place: event.place,
-                year: event.year,
                 start_date: event.start_date
                     ? new Date(event.start_date).toISOString().slice(0, 10)
                     : "",
@@ -101,7 +93,8 @@
                 activityType = "App\\Models\\Event";
                 if (event.activitable) {
                     eventData = {
-                        ...event.activitable,
+                        minimal_age: event.activitable.minimal_age || 0,
+                        ticket_price: event.activitable.ticket_price || 0,
                         sale_start_date: event.activitable.sale_start_date
                             ? new Date(event.activitable.sale_start_date)
                                   .toISOString()
@@ -113,8 +106,34 @@
             } else {
                 activityType = "App\\Models\\Camping";
                 if (event.activitable) {
-                    campingData = { ...campingData, ...event.activitable };
-                    // Formatar datas para inputs
+                    campingData = {
+                        notice: event.activitable.notice || "",
+                        term: event.activitable.term || "",
+                        camper_fee: event.activitable.camper_fee || 0,
+                        servant_fee: event.activitable.servant_fee || 0,
+                        planned_man_vacancies:
+                            event.activitable.planned_man_vacancies || 0,
+                        planned_woman_vacancies:
+                            event.activitable.planned_woman_vacancies || 0,
+                        planned_couple_vacancies:
+                            event.activitable.planned_couple_vacancies || 0,
+                        raffle_camper_subscription_start_date: "",
+                        raffle_camper_subscription_end_date: "",
+                        raffle_camper_date: "",
+                        raffle_servant_subscription_start_date: "",
+                        raffle_servant_subscription_end_date: "",
+                        raffle_servant_date: "",
+                        camper_registration_start_date: "",
+                        camper_registration_end_date: "",
+                        camper_payment_link:
+                            event.activitable.camper_payment_link || "",
+                        camper_payment_date: "",
+                        servant_registration_start_date: "",
+                        servant_registration_end_date: "",
+                        servant_payment_link:
+                            event.activitable.servant_payment_link || "",
+                        servant_payment_date: "",
+                    };
                     /** @type {(keyof typeof campingData)[]} */
                     const dateFields = [
                         "raffle_camper_subscription_start_date",
@@ -131,9 +150,11 @@
                         "servant_payment_date",
                     ];
                     for (const field of dateFields) {
-                        if (campingData[field]) {
+                        if (event.activitable[field]) {
                             // @ts-ignore
-                            campingData[field] = new Date(campingData[field])
+                            campingData[field] = new Date(
+                                event.activitable[field],
+                            )
                                 .toISOString()
                                 .slice(0, 10);
                         }
@@ -170,16 +191,19 @@
         try {
             const isEditing = !!event;
 
-            // Calcular vagas totais e preparar dados específicos
             if (activityType === "App\\Models\\Camping") {
-                const man = Number(campingData.raffle_man_vacancies || 0);
-                const woman = Number(campingData.raffle_woman_vacancies || 0);
-                const couple = Number(campingData.raffle_couple_vacancies || 0);
-                campingData.raffle_total_vacancies = man + woman + couple * 2;
-                formData.total_vacancies = campingData.raffle_total_vacancies;
+                // Total de vagas = soma das vagas planejadas
+                const man = Number(campingData.planned_man_vacancies || 0);
+                const woman = Number(campingData.planned_woman_vacancies || 0);
+                const couple = Number(
+                    campingData.planned_couple_vacancies || 0,
+                );
+                formData.total_vacancies = man + woman + couple * 2;
             } else if (activityType === "App\\Models\\Event") {
-                eventData.is_paid_festival = !!eventData.is_paid_festival;
-                formData.total_vacancies = 999999;
+                // Se total_vacancies <= 0, vagas ilimitadas (0)
+                if (Number(formData.total_vacancies) <= 0) {
+                    formData.total_vacancies = 0;
+                }
             }
 
             const activitableData =
@@ -213,9 +237,7 @@
 
             if (!response.ok) {
                 const data = await response.json();
-                throw new Error(
-                    data.message || "Erro ao salvar a atividade.",
-                );
+                throw new Error(data.message || "Erro ao salvar a atividade.");
             }
 
             onSaveSuccess();
@@ -252,7 +274,7 @@
             }}
             class="space-y-12"
         >
-            <!-- SECTION: TIPO -->
+            <!-- SECTION 1: TIPO -->
             <section>
                 <h3
                     class="text-l font-black text-brand uppercase tracking-widest mb-6"
@@ -295,7 +317,7 @@
                 </div>
             </section>
 
-            <!-- SECTION: GERAL -->
+            <!-- SECTION 2: GERAL -->
             <section>
                 <h3
                     class="text-l font-black text-brand uppercase tracking-widest mb-6"
@@ -330,19 +352,6 @@
                     <div>
                         <label
                             class="block text-[10px] uppercase font-bold text-text-secondary mb-2"
-                            >Ano *</label
-                        >
-                        <input
-                            type="number"
-                            bind:value={formData.year}
-                            required
-                            min="2000"
-                            class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-all"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-[10px] uppercase font-bold text-text-secondary mb-2"
                             >Data de Início *</label
                         >
                         <input
@@ -368,29 +377,6 @@
                     <div>
                         <label
                             class="block text-[10px] uppercase font-bold text-text-secondary mb-2"
-                            >Categoria *</label
-                        >
-                        {#if loadingCategories}
-                            <div class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-secondary animate-pulse">
-                                Carregando categorias...
-                            </div>
-                        {:else}
-                            <select
-                                bind:value={formData.category_id}
-                                required
-                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-all"
-                            >
-                                <option value="" disabled>Selecione uma categoria</option>
-                                {#each filteredCategories as cat}
-                                    <option value={cat.id}>{cat.name}</option>
-                                {/each}
-                            </select>
-                        {/if}
-                    </div>
-
-                    <div class="md:col-span-2">
-                        <label
-                            class="block text-[10px] uppercase font-bold text-text-secondary mb-2"
                             >URL da Imagem</label
                         >
                         <input
@@ -400,10 +386,41 @@
                             placeholder="Link ou path da Imagem"
                         />
                     </div>
+
+                    {#if activityType === "App\\Models\\Camping"}
+                        <div>
+                            <label
+                                class="block text-[10px] uppercase font-bold text-text-secondary mb-2"
+                                >Categoria *</label
+                            >
+                            {#if loadingCategories}
+                                <div
+                                    class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-secondary animate-pulse"
+                                >
+                                    Carregando categorias...
+                                </div>
+                            {:else}
+                                <select
+                                    bind:value={formData.category_id}
+                                    required
+                                    class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-all"
+                                >
+                                    <option value="" disabled
+                                        >Selecione uma categoria</option
+                                    >
+                                    {#each filteredCategories as cat}
+                                        <option value={cat.id}
+                                            >{cat.name}</option
+                                        >
+                                    {/each}
+                                </select>
+                            {/if}
+                        </div>
+                    {/if}
                 </div>
             </section>
 
-            <!-- SECTION: ESPECIFICO -->
+            <!-- SECTION 3: ESPECIFICO -->
             <section>
                 <h3
                     class="text-l font-black text-brand uppercase tracking-widest mb-6"
@@ -412,6 +429,7 @@
                 </h3>
 
                 {#if activityType === "App\\Models\\Event"}
+                    <!-- ═══ EVENTO ═══ -->
                     <div
                         class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-bg-primary/50 p-6 rounded-3xl border border-border-ui"
                     >
@@ -431,7 +449,7 @@
                         <div>
                             <label
                                 class="block text-[10px] uppercase font-bold text-text-secondary mb-2"
-                                >Preço do Ingresso</label
+                                >Preço do Ingresso (R$)</label
                             >
                             <input
                                 type="number"
@@ -440,6 +458,17 @@
                                 min="0"
                                 class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
                             />
+                            {#if isPaidEvent}
+                                <span
+                                    class="text-[10px] text-brand font-bold mt-1 block"
+                                    >Evento Pago</span
+                                >
+                            {:else}
+                                <span
+                                    class="text-[10px] text-green-500 font-bold mt-1 block"
+                                    >Evento Gratuito</span
+                                >
+                            {/if}
                         </div>
                         <div>
                             <label
@@ -464,395 +493,384 @@
                                 class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
                             />
                         </div>
-                        <div class="md:col-span-2 flex items-center gap-3 mt-2">
-                            <input
-                                type="checkbox"
-                                bind:checked={eventData.is_paid_festival}
-                                class="w-5 h-5 accent-brand"
-                            />
-                            <label class="text-sm font-bold text-text-primary"
-                                >Evento Pago</label
+                        <div>
+                            <label
+                                class="block text-[10px] uppercase font-bold text-text-secondary mb-2"
+                                >Total de Vagas</label
                             >
+                            <input
+                                type="number"
+                                bind:value={formData.total_vacancies}
+                                min="0"
+                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
+                            />
+                            {#if isUnlimitedVacancies}
+                                <span
+                                    class="text-[10px] text-text-secondary font-bold mt-1 block"
+                                    >0 = Vagas ilimitadas</span
+                                >
+                            {/if}
                         </div>
                     </div>
                 {:else}
+                    <!-- ═══ ACAMPAMENTO ═══ -->
                     <div
-                        class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-bg-primary/50 p-6 rounded-3xl border border-border-ui"
+                        class="bg-bg-primary/50 p-6 rounded-3xl border border-border-ui space-y-8"
                     >
-                        <div
-                            class="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6"
-                        >
-                            <div>
-                                <label
-                                    class="block text-[10px] uppercase font-bold text-text-secondary mb-2"
-                                    >Link do Edital</label
-                                >
-                                <input
-                                    type="text"
-                                    bind:value={campingData.notice}
-                                    class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
-                                />
-                            </div>
-                            <div>
-                                <label
-                                    class="block text-[10px] uppercase font-bold text-text-secondary mb-2"
-                                    >Link dos Termos</label
-                                >
-                                <input
-                                    type="text"
-                                    bind:value={campingData.term}
-                                    class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
-                                />
-                            </div>
-                        </div>
-
+                        <!-- GERAL (Links e Vagas) -->
                         <div>
-                            <label
-                                class="block text-[10px] uppercase font-bold text-text-secondary mb-2"
-                                >Idade Mínima</label
-                            >
-                            <input
-                                type="number"
-                                bind:value={campingData.minimal_age}
-                                required
-                                min="0"
-                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
-                            />
-                        </div>
-                        <div>
-                            <label
-                                class="block text-[10px] uppercase font-bold text-text-secondary mb-2"
-                                >Idade Máxima</label
-                            >
-                            <input
-                                type="number"
-                                bind:value={campingData.maximal_age}
-                                required
-                                min="0"
-                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
-                            />
-                        </div>
-                        <div>
-                            <label
-                                class="block text-[10px] uppercase font-bold text-text-secondary mb-2"
-                                >Taxa Campista (R$)</label
-                            >
-                            <input
-                                type="number"
-                                bind:value={campingData.camper_fee}
-                                required
-                                step="0.01"
-                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
-                            />
-                        </div>
-                        <div>
-                            <label
-                                class="block text-[10px] uppercase font-bold text-text-secondary mb-2"
-                                >Taxa Servo (R$)</label
-                            >
-                            <input
-                                type="number"
-                                bind:value={campingData.servant_fee}
-                                required
-                                step="0.01"
-                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
-                            />
-                        </div>
-
-                        <!-- Vagas Planejadas -->
-                        <div
-                            class="md:col-span-3 mt-4 border-t border-border-ui pt-4"
-                        >
                             <p
                                 class="text-[10px] font-black text-brand uppercase tracking-widest mb-4"
                             >
-                                Vagas Planejadas
+                                Geral
                             </p>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-bold text-text-secondary mb-2"
-                                        >Vagas Planejadas - Homem</label
-                                    ><input
-                                        type="number"
-                                        bind:value={campingData.planned_man_vacancies}
-                                        min="0"
-                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-bold text-text-secondary mb-2"
-                                        >Vagas Planejadas - Mulher</label
-                                    ><input
-                                        type="number"
-                                        bind:value={campingData.planned_woman_vacancies}
-                                        min="0"
-                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-bold text-text-secondary mb-2"
-                                        >Vagas Planejadas - Casal</label
-                                    ><input
-                                        type="number"
-                                        bind:value={campingData.planned_couple_vacancies}
-                                        min="0"
-                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Vagas Sorteio -->
-                        <div
-                            class="md:col-span-3 mt-4 border-t border-border-ui pt-4"
-                        >
-                            <p
-                                class="text-[10px] font-black text-brand uppercase tracking-widest mb-4"
+                            <div
+                                class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6"
                             >
-                                Vagas do Sorteio
-                            </p>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
                                     <label
-                                        class="block text-[10px] font-bold text-text-secondary mb-2"
-                                        >Vagas Sorteio - Homem</label
-                                    ><input
-                                        type="number"
-                                        bind:value={campingData.raffle_man_vacancies}
-                                        required
-                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-bold text-text-secondary mb-2"
-                                        >Vagas Sorteio - Mulher</label
-                                    ><input
-                                        type="number"
-                                        bind:value={campingData.raffle_woman_vacancies}
-                                        required
-                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-bold text-text-secondary mb-2"
-                                        >Vagas Sorteio - Casal</label
-                                    ><input
-                                        type="number"
-                                        bind:value={campingData.raffle_couple_vacancies}
-                                        required
-                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Datas de Sorteio -->
-                        <div
-                            class="md:col-span-3 mt-4 border-t border-border-ui pt-4"
-                        >
-                            <p
-                                class="text-[10px] font-black text-brand uppercase tracking-widest mb-4"
-                            >
-                                Datas do Sorteio
-                            </p>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-bold text-text-secondary mb-2"
-                                        >Início Inscrição Campista</label
-                                    ><input
-                                        type="date"
-                                        bind:value={
-                                            campingData.raffle_camper_subscription_start_date
-                                        }
-                                        required
-                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-bold text-text-secondary mb-2"
-                                        >Fim Inscrição Campista</label
-                                    ><input
-                                        type="date"
-                                        bind:value={
-                                            campingData.raffle_camper_subscription_end_date
-                                        }
-                                        required
-                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-bold text-text-secondary mb-2"
-                                        >Data Sorteio Campista</label
-                                    ><input
-                                        type="date"
-                                        bind:value={
-                                            campingData.raffle_camper_date
-                                        }
-                                        required
-                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-bold text-text-secondary mb-2"
-                                        >Início Inscrição Servo</label
-                                    ><input
-                                        type="date"
-                                        bind:value={
-                                            campingData.raffle_servant_subscription_start_date
-                                        }
-                                        required
-                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-bold text-text-secondary mb-2"
-                                        >Fim Inscrição Servo</label
-                                    ><input
-                                        type="date"
-                                        bind:value={
-                                            campingData.raffle_servant_subscription_end_date
-                                        }
-                                        required
-                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-bold text-text-secondary mb-2"
-                                        >Data Sorteio Servo</label
-                                    ><input
-                                        type="date"
-                                        bind:value={
-                                            campingData.raffle_servant_date
-                                        }
-                                        required
-                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Datas de Inscrição Direta / Pagamento -->
-                        <div
-                            class="md:col-span-3 mt-4 border-t border-border-ui pt-4"
-                        >
-                            <p
-                                class="text-[10px] font-black text-brand uppercase tracking-widest mb-4"
-                            >
-                                Datas de Registro
-                            </p>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-bold text-text-secondary mb-2"
-                                        >Início Registro Campista</label
-                                    ><input
-                                        type="date"
-                                        bind:value={
-                                            campingData.camper_registration_start_date
-                                        }
-                                        required
-                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-bold text-text-secondary mb-2"
-                                        >Fim Registro Campista</label
-                                    ><input
-                                        type="date"
-                                        bind:value={
-                                            campingData.camper_registration_end_date
-                                        }
-                                        required
-                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-bold text-text-secondary mb-2"
-                                        >Link Pgto Campista</label
-                                    ><input
+                                        class="block text-[10px] uppercase font-bold text-text-secondary mb-2"
+                                        >Link do Edital</label
+                                    >
+                                    <input
                                         type="text"
-                                        bind:value={
-                                            campingData.camper_payment_link
-                                        }
-                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
+                                        bind:value={campingData.notice}
+                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
                                     />
                                 </div>
                                 <div>
                                     <label
-                                        class="block text-[10px] font-bold text-text-secondary mb-2"
-                                        >Data Pgto Campista</label
-                                    ><input
-                                        type="date"
-                                        bind:value={
-                                            campingData.camper_payment_date
-                                        }
-                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-bold text-text-secondary mb-2"
-                                        >Início Registro Servo</label
-                                    ><input
-                                        type="date"
-                                        bind:value={
-                                            campingData.servant_registration_start_date
-                                        }
-                                        required
-                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-bold text-text-secondary mb-2"
-                                        >Fim Registro Servo</label
-                                    ><input
-                                        type="date"
-                                        bind:value={
-                                            campingData.servant_registration_end_date
-                                        }
-                                        required
-                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-bold text-text-secondary mb-2"
-                                        >Link Pgto Servo</label
-                                    ><input
+                                        class="block text-[10px] uppercase font-bold text-text-secondary mb-2"
+                                        >Link dos Termos</label
+                                    >
+                                    <input
                                         type="text"
-                                        bind:value={
-                                            campingData.servant_payment_link
-                                        }
-                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
+                                        bind:value={campingData.term}
+                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
                                     />
                                 </div>
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-bold text-text-secondary mb-2"
-                                        >Data Pgto Servo</label
-                                    ><input
-                                        type="date"
-                                        bind:value={
-                                            campingData.servant_payment_date
-                                        }
-                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
-                                    />
+                            </div>
+
+                            <div>
+                                <p
+                                    class="block text-[10px] font-bold text-text-secondary mb-2 uppercase tracking-widest"
+                                >
+                                    Vagas Planejadas
+                                </p>
+                                <div
+                                    class="grid grid-cols-1 md:grid-cols-3 gap-4"
+                                >
+                                    <div>
+                                        <label
+                                            class="block text-[10px] font-bold text-text-secondary mb-2"
+                                            >Homem</label
+                                        >
+                                        <input
+                                            type="number"
+                                            bind:value={
+                                                campingData.planned_man_vacancies
+                                            }
+                                            required
+                                            min="0"
+                                            class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label
+                                            class="block text-[10px] font-bold text-text-secondary mb-2"
+                                            >Mulher</label
+                                        >
+                                        <input
+                                            type="number"
+                                            bind:value={
+                                                campingData.planned_woman_vacancies
+                                            }
+                                            required
+                                            min="0"
+                                            class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label
+                                            class="block text-[10px] font-bold text-text-secondary mb-2"
+                                            >Casal</label
+                                        >
+                                        <input
+                                            type="number"
+                                            bind:value={
+                                                campingData.planned_couple_vacancies
+                                            }
+                                            required
+                                            min="0"
+                                            class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
+                                        />
+                                    </div>
+                                </div>
+                                <p
+                                    class="text-[10px] text-text-secondary font-bold mt-2"
+                                >
+                                    As vagas de sorteio serão preenchidas
+                                    automaticamente com os mesmos valores.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div
+                            class="grid grid-cols-1 xl:grid-cols-2 gap-8 border-t border-border-ui pt-8"
+                        >
+                            <!-- ÁREA DO CAMPISTA -->
+                            <div
+                                class="bg-bg-secondary p-6 rounded-2xl border border-border-ui"
+                            >
+                                <p
+                                    class="text-xs font-black text-brand uppercase tracking-widest mb-6"
+                                >
+                                    Campistas
+                                </p>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label
+                                            class="block text-[10px] uppercase font-bold text-text-secondary mb-2"
+                                            >Taxa de Inscrição (R$)</label
+                                        >
+                                        <input
+                                            type="number"
+                                            bind:value={campingData.camper_fee}
+                                            required
+                                            step="0.01"
+                                            class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
+                                        />
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4 pt-2">
+                                        <div>
+                                            <label
+                                                class="block text-[10px] font-bold text-text-secondary mb-2"
+                                                >Início Inscrição (Sorteio)</label
+                                            >
+                                            <input
+                                                type="date"
+                                                bind:value={
+                                                    campingData.raffle_camper_subscription_start_date
+                                                }
+                                                required
+                                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label
+                                                class="block text-[10px] font-bold text-text-secondary mb-2"
+                                                >Fim Inscrição (Sorteio)</label
+                                            >
+                                            <input
+                                                type="date"
+                                                bind:value={
+                                                    campingData.raffle_camper_subscription_end_date
+                                                }
+                                                required
+                                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
+                                            />
+                                        </div>
+                                        <div class="col-span-2">
+                                            <label
+                                                class="block text-[10px] font-bold text-text-secondary mb-2"
+                                                >Data do Sorteio</label
+                                            >
+                                            <input
+                                                type="date"
+                                                bind:value={
+                                                    campingData.raffle_camper_date
+                                                }
+                                                required
+                                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="grid grid-cols-2 gap-4 pt-4 mt-2 border-t border-border-ui"
+                                    >
+                                        <div>
+                                            <label
+                                                class="block text-[10px] font-bold text-text-secondary mb-2"
+                                                >Início Registro (Geral)</label
+                                            >
+                                            <input
+                                                type="date"
+                                                bind:value={
+                                                    campingData.camper_registration_start_date
+                                                }
+                                                required
+                                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label
+                                                class="block text-[10px] font-bold text-text-secondary mb-2"
+                                                >Fim Registro (Geral)</label
+                                            >
+                                            <input
+                                                type="date"
+                                                bind:value={
+                                                    campingData.camper_registration_end_date
+                                                }
+                                                required
+                                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
+                                            />
+                                        </div>
+                                        <div class="col-span-2">
+                                            <label
+                                                class="block text-[10px] font-bold text-text-secondary mb-2"
+                                                >Link de Pagamento</label
+                                            >
+                                            <input
+                                                type="text"
+                                                bind:value={
+                                                    campingData.camper_payment_link
+                                                }
+                                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
+                                            />
+                                        </div>
+                                        <div class="col-span-2">
+                                            <label
+                                                class="block text-[10px] font-bold text-text-secondary mb-2"
+                                                >Data Limite de Pgto</label
+                                            >
+                                            <input
+                                                type="date"
+                                                bind:value={
+                                                    campingData.camper_payment_date
+                                                }
+                                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ÁREA DO SERVO -->
+                            <div
+                                class="bg-bg-secondary p-6 rounded-2xl border border-border-ui"
+                            >
+                                <p
+                                    class="text-xs font-black text-brand uppercase tracking-widest mb-6"
+                                >
+                                    Servos
+                                </p>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label
+                                            class="block text-[10px] uppercase font-bold text-text-secondary mb-2"
+                                            >Taxa de Inscrição (R$)</label
+                                        >
+                                        <input
+                                            type="number"
+                                            bind:value={campingData.servant_fee}
+                                            required
+                                            step="0.01"
+                                            class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
+                                        />
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4 pt-2">
+                                        <div>
+                                            <label
+                                                class="block text-[10px] font-bold text-text-secondary mb-2"
+                                                >Início Inscrição (Sorteio)</label
+                                            >
+                                            <input
+                                                type="date"
+                                                bind:value={
+                                                    campingData.raffle_servant_subscription_start_date
+                                                }
+                                                required
+                                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label
+                                                class="block text-[10px] font-bold text-text-secondary mb-2"
+                                                >Fim Inscrição (Sorteio)</label
+                                            >
+                                            <input
+                                                type="date"
+                                                bind:value={
+                                                    campingData.raffle_servant_subscription_end_date
+                                                }
+                                                required
+                                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
+                                            />
+                                        </div>
+                                        <div class="col-span-2">
+                                            <label
+                                                class="block text-[10px] font-bold text-text-secondary mb-2"
+                                                >Data do Sorteio</label
+                                            >
+                                            <input
+                                                type="date"
+                                                bind:value={
+                                                    campingData.raffle_servant_date
+                                                }
+                                                required
+                                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="grid grid-cols-2 gap-4 pt-4 mt-2 border-t border-border-ui"
+                                    >
+                                        <div>
+                                            <label
+                                                class="block text-[10px] font-bold text-text-secondary mb-2"
+                                                >Início Registro (Geral)</label
+                                            >
+                                            <input
+                                                type="date"
+                                                bind:value={
+                                                    campingData.servant_registration_start_date
+                                                }
+                                                required
+                                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label
+                                                class="block text-[10px] font-bold text-text-secondary mb-2"
+                                                >Fim Registro (Geral)</label
+                                            >
+                                            <input
+                                                type="date"
+                                                bind:value={
+                                                    campingData.servant_registration_end_date
+                                                }
+                                                required
+                                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
+                                            />
+                                        </div>
+                                        <div class="col-span-2">
+                                            <label
+                                                class="block text-[10px] font-bold text-text-secondary mb-2"
+                                                >Link de Pagamento</label
+                                            >
+                                            <input
+                                                type="text"
+                                                bind:value={
+                                                    campingData.servant_payment_link
+                                                }
+                                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
+                                            />
+                                        </div>
+                                        <div class="col-span-2">
+                                            <label
+                                                class="block text-[10px] font-bold text-text-secondary mb-2"
+                                                >Data Limite de Pgto</label
+                                            >
+                                            <input
+                                                type="date"
+                                                bind:value={
+                                                    campingData.servant_payment_date
+                                                }
+                                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -860,6 +878,7 @@
                 {/if}
             </section>
 
+            <!-- BOTÕES -->
             <div
                 class="pt-8 border-t border-border-ui flex justify-between items-center gap-4"
             >

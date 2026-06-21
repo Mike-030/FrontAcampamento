@@ -99,15 +99,6 @@
                 </div>
                 <div class="flex flex-col items-end gap-2">
                     <div
-                        class="px-4 py-2 bg-brand/10 border border-brand/20 text-brand rounded-2xl"
-                    >
-                        <span
-                            class="text-[10px] md:text-xs font-black uppercase tracking-widest text-center block"
-                        >
-                            {isCamping ? "Acampamento" : "Evento"}
-                        </span>
-                    </div>
-                    <div
                         class="px-6 py-3 bg-brand/10 border border-brand/20 text-brand rounded-2xl"
                     >
                         <span

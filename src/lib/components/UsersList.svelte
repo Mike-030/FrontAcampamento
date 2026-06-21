@@ -182,6 +182,26 @@
         }
         return phone;
     }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return "-";
+        try {
+            return new Date(dateStr).toLocaleDateString("pt-BR");
+        } catch {
+            return dateStr;
+        }
+    }
+
+    function formatSex(sex) {
+        if (sex === "M") return "Masculino";
+        if (sex === "F") return "Feminino";
+        return "-";
+    }
+
+    function formatCurrency(value) {
+        if (!value && value !== 0) return "-";
+        return `R$ ${parseFloat(value).toFixed(2).replace(".", ",")}`;
+    }
 </script>
 
 <div class="space-y-8 animate-fade-in">
@@ -233,11 +253,6 @@
                                         {user.email}
                                     </p>
                                 </div>
-                                <div
-                                    class="px-3 py-1 bg-text-primary/5 text-text-secondary rounded-full text-[10px] font-bold uppercase tracking-wider"
-                                >
-                                    {formatCPF(user.cpf) || "Sem CPF"}
-                                </div>
                             </div>
                             <div
                                 class="flex justify-end pt-4 border-t border-border-ui"
@@ -280,7 +295,7 @@
                 class="bg-bg-secondary border border-border-ui p-8 rounded-[2.5rem] mb-8"
             >
                 <h2 class="text-2xl font-black mb-6">Informações do Usuário</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div>
                         <p
                             class="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-1"
@@ -315,6 +330,47 @@
                             {formatPhone(selectedUser.phone)}
                         </p>
                     </div>
+                    <div>
+                        <p
+                            class="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-1"
+                        >
+                            Sexo
+                        </p>
+                        <p class="font-medium">{formatSex(selectedUser.sex)}</p>
+                    </div>
+                    <div>
+                        <p
+                            class="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-1"
+                        >
+                            Data de Nascimento
+                        </p>
+                        <p class="font-medium">{formatDate(selectedUser.birthday)}</p>
+                    </div>
+                    {#if selectedUser.marital_status}
+                        <div>
+                            <p
+                                class="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-1"
+                            >
+                                Estado Civil
+                            </p>
+                            <p class="font-medium">{selectedUser.marital_status.title || "-"}</p>
+                        </div>
+                    {/if}
+                    {#if selectedUser.address}
+                        <div class="md:col-span-2 lg:col-span-3">
+                            <p
+                                class="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-1"
+                            >
+                                Endereço
+                            </p>
+                            <p class="font-medium">
+                                {selectedUser.address.street || ""}{selectedUser.address.number ? `, ${selectedUser.address.number}` : ""}
+                                {selectedUser.address.neighborhood ? ` - ${selectedUser.address.neighborhood}` : ""}
+                                {selectedUser.address.city ? `, ${selectedUser.address.city}` : ""}
+                                {selectedUser.address.cep ? ` - CEP: ${selectedUser.address.cep}` : ""}
+                            </p>
+                        </div>
+                    {/if}
                 </div>
             </div>
 
@@ -368,9 +424,11 @@
                                         Status de Pagamento
                                     </p>
                                     <p class="font-medium text-sm">
-                                        {sub.paid_the_fee
-                                            ? "Confirmado"
-                                            : "Pendente"}
+                                        <span class="px-2 py-0.5 rounded text-xs font-bold {sub.paid_the_fee ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'}">
+                                            {sub.paid_the_fee
+                                                ? "Confirmado"
+                                                : "Pendente"}
+                                        </span>
                                     </p>
                                 </div>
                                 <div>
@@ -383,7 +441,7 @@
                                         {sub.subscription_type || "-"}
                                     </p>
                                 </div>
-                                {#if sub.event?.eventable_type !== "App\\Models\\Festival"}
+                                {#if sub.event?.activitable_type !== "App\\Models\\Event"}
                                     <div>
                                         <p
                                             class="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-1"
@@ -400,6 +458,42 @@
                                                     ? "Sim"
                                                     : "Não"}
                                             </span>
+                                        </p>
+                                    </div>
+                                {/if}
+                                {#if sub.event?.category}
+                                    <div>
+                                        <p
+                                            class="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-1"
+                                        >
+                                            Categoria
+                                        </p>
+                                        <p class="font-medium text-sm">
+                                            {sub.event.category.name}
+                                        </p>
+                                    </div>
+                                {/if}
+                                {#if sub.event?.year}
+                                    <div>
+                                        <p
+                                            class="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-1"
+                                        >
+                                            Ano
+                                        </p>
+                                        <p class="font-medium text-sm">
+                                            {sub.event.year}
+                                        </p>
+                                    </div>
+                                {/if}
+                                {#if sub.event?.activitable?.camper_fee || sub.event?.activitable?.ticket_price}
+                                    <div>
+                                        <p
+                                            class="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-1"
+                                        >
+                                            Valor
+                                        </p>
+                                        <p class="font-medium text-sm text-brand">
+                                            {formatCurrency(sub.event.activitable.camper_fee || sub.event.activitable.ticket_price)}
                                         </p>
                                     </div>
                                 {/if}
@@ -433,7 +527,7 @@
                 <h3 class="text-2xl font-black mb-6">Editar Inscrição</h3>
 
                 <div class="space-y-6">
-                    {#if editingSubscription.event?.eventable_type === "App\\Models\\Festival"}
+                    {#if editingSubscription.event?.activitable_type === "App\\Models\\Event"}
                         <div>
                             <label
                                 class="block text-xs font-bold uppercase tracking-widest text-text-secondary mb-2"

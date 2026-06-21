@@ -26,10 +26,11 @@
     );
     // Verificação de privilégios de administrador
     let isAdmin = $derived(
-        userData.is_counselor === true ||
-            userData.is_admin === true ||
+        userData.is_admin === true ||
             userData.role === "admin",
     );
+
+    let isSidebarExpanded = $state(false);
 
     // Estado do Modal global para confirmações e alertas
     /** @type {{ isOpen: boolean, type: string, message: string, onConfirm: (() => void) | null }} */
@@ -367,13 +368,14 @@
     <!-- Componente: Sidebar (Navegação lateral) -->
     <Sidebar
         bind:activeTab
+        bind:isExpanded={isSidebarExpanded}
         {isAdmin}
         {handleLogout}
         onAddEvent={() => openEventForm()}
     />
 
     <!-- Main Content -->
-    <main class="ml-64 flex-grow p-10">
+    <main class="{isSidebarExpanded ? 'ml-64' : 'ml-20'} flex-grow p-10 transition-all duration-300">
         <!-- Componente: Header (Cabeçalho com perfil) -->
         <Header {userData} {defaultAvatar} bind:activeTab {handleLogout} />
         

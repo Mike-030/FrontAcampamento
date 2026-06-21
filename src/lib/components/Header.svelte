@@ -1,4 +1,6 @@
 <script>
+    import logo from "../../assets/LogoComunidadeSaoMiguel.png";
+
     // Props recebidas pelo Header do componente pai (Dashboard)
     let {
         userData = {},
@@ -12,32 +14,13 @@
 </script>
 
 <header class="flex justify-between items-start mb-12">
-    <!-- Seção Esquerda: Título da Página e Saudações -->
-    <div>
-        <div class="flex items-center gap-4 mb-2">
-            <h2 class="text-4xl font-black text-text-primary">Painel Geral</h2>
-            <span
-                class="bg-brand/10 px-3 py-1 rounded-full text-[10px] font-bold text-brand uppercase tracking-tighter self-center"
-                >Versão 1.0</span
-            >
-        </div>
-        <p class="text-text-secondary text-sm">
-            Bem-vindo de volta, <span class="text-text-primary font-bold"
-                >{userData.name}</span
-            >!
-        </p>
+    <!-- Seção Esquerda: Logo -->
+    <div class="flex items-center">
+        <img src={logo} alt="Logo" class="h-24 w-auto object-contain" />
     </div>
 
     <!-- Seção Direita: Status e Menu do Perfil do Usuário -->
     <div class="flex items-center gap-4 relative">
-        <!-- Indicador de Status Online -->
-        <div class="flex flex-col items-end mr-2">
-            <span class="text-xs font-bold opacity-50 uppercase tracking-widest"
-                >Acesso Rápido</span
-            >
-            <span class="text-[10px] text-emerald-500 font-bold">● ONLINE</span>
-        </div>
-
         <!-- Área Clicável: Avatar do Usuário -->
         <div class="relative">
             <button
