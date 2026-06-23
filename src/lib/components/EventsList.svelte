@@ -195,14 +195,6 @@
                         >Campanha {event.year || new Date().getFullYear()}</span
                     >
                     <div class="flex gap-2">
-                        {#if isAdmin}
-                            <button
-                                onclick={() => openEventForm(event)}
-                                class="px-5 py-2 bg-text-primary text-bg-primary rounded-full text-[10px] font-bold hover:bg-brand hover:text-white transition-all"
-                            >
-                                Gerenciar
-                            </button>
-                        {/if}
                         <button
                             onclick={() => openEventDetails(event)}
                             class="px-5 py-2 bg-text-primary text-bg-primary rounded-full text-[10px] font-bold hover:bg-brand hover:text-white transition-all"

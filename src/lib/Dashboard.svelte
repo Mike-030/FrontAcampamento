@@ -11,6 +11,7 @@
     import MySubscriptions from "./components/MySubscriptions.svelte";
     import RafflePanel from "./components/RafflePanel.svelte";
     import SectorManager from "./components/SectorManager.svelte";
+    import ManageActivities from "./components/ManageActivities.svelte";
 
     // Props recebidas
     let { onLogout } = $props();
@@ -451,6 +452,14 @@
                         fetchEvents();
                     });
                 }}
+            />
+        {:else if activeTab === "manage_activities" && isAdmin}
+            <!-- Componente: Gerenciamento de Atividades (Admin) -->
+            <ManageActivities
+                {events}
+                {token}
+                {fetchEvents}
+                {requestDeleteEvent}
             />
         {:else if activeTab === "raffle" && isAdmin}
             <!-- Componente: Painel de Sorteio (Admin) -->

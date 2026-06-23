@@ -1,5 +1,6 @@
 <script>
     import { onMount } from "svelte";
+    import Modal from "./Modal.svelte";
 
     let { event = null, onCancel, onDelete, token, onSaveSuccess } = $props();
 
@@ -71,8 +72,22 @@
     // Indicador de evento pago (auto: ticket_price > 0)
     let isPaidEvent = $derived(Number(eventData.ticket_price) > 0);
 
-    // Indicador de vagas ilimitadas para eventos (total_vacancies <= 0)
     let isUnlimitedVacancies = $derived(Number(formData.total_vacancies) <= 0);
+
+    let modalState = $state({
+        isOpen: false,
+        type: "error",
+        message: "",
+        onConfirm: null,
+    });
+
+    function showModal(type, message, onConfirm = null) {
+        modalState = { isOpen: true, type, message, onConfirm };
+    }
+
+    function closeModal() {
+        modalState.isOpen = false;
+    }
 
     const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
@@ -313,7 +328,14 @@
         <form
             onsubmit={(e) => {
                 e.preventDefault();
-                handleSubmit();
+                if (event) {
+                    showModal("confirm", "Tem certeza que deseja salvar as alterações nesta atividade?", async () => {
+                        closeModal();
+                        await handleSubmit();
+                    });
+                } else {
+                    handleSubmit();
+                }
             }}
             class="space-y-12"
         >
@@ -976,3 +998,5 @@
         </form>
     </div>
 </div>
+
+<Modal {modalState} {closeModal} />

@@ -130,7 +130,14 @@
         editingSubscription = null;
     }
 
-    async function saveSubscription() {
+    function saveSubscription() {
+        showModal("confirm", "Tem certeza que deseja salvar as alterações nesta inscrição?", async () => {
+            closeModal();
+            await executeSaveSubscription();
+        });
+    }
+
+    async function executeSaveSubscription() {
         try {
             const response = await fetch(
                 `${API_URL}/v1/subscriptions/${editingSubscription.id}`,
@@ -235,37 +242,37 @@
                     </p>
                 </div>
             {:else}
-                <div
-                    class="grid grid-cols-1 xl:grid-cols-2 gap-8 text-text-primary"
-                >
-                    {#each filteredUsers as user}
-                        <div
-                            class="bg-bg-secondary border border-border-ui p-6 rounded-[2.5rem] hover:shadow-2xl hover:-translate-y-1 transition-all group"
-                        >
-                            <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <h3
-                                        class="text-xl font-black group-hover:text-brand transition-colors"
-                                    >
-                                        {user.name}
-                                    </h3>
-                                    <p class="text-text-secondary text-sm mt-1">
-                                        {user.email}
-                                    </p>
-                                </div>
-                            </div>
-                            <div
-                                class="flex justify-end pt-4 border-t border-border-ui"
-                            >
-                                <button
-                                    onclick={() => viewUserProfile(user)}
-                                    class="px-5 py-2 bg-text-primary text-bg-primary rounded-full text-[10px] font-bold hover:bg-brand hover:text-white transition-all"
-                                >
-                                    Ver Perfil
-                                </button>
-                            </div>
-                        </div>
-                    {/each}
+                <div class="bg-bg-secondary border border-border-ui rounded-[2rem] overflow-hidden shadow-xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-text-primary">
+                            <thead class="text-xs uppercase bg-bg-primary border-b border-border-ui">
+                                <tr>
+                                    <th class="px-6 py-4 font-bold text-text-secondary">Nome</th>
+                                    <th class="px-6 py-4 font-bold text-text-secondary">Email</th>
+                                    <th class="px-6 py-4 font-bold text-text-secondary">CPF</th>
+                                    <th class="px-6 py-4 font-bold text-text-secondary text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {#each filteredUsers as user}
+                                    <tr class="border-b border-border-ui hover:bg-text-primary/5 transition-colors">
+                                        <td class="px-6 py-4 font-medium">{user.name}</td>
+                                        <td class="px-6 py-4">{user.email}</td>
+                                        <td class="px-6 py-4">{formatCPF(user.cpf)}</td>
+                                        <td class="px-6 py-4 flex justify-end gap-2">
+                                            <button
+                                                onclick={() => viewUserProfile(user)}
+                                                class="px-5 py-2 bg-text-primary text-bg-primary rounded-full text-[10px] font-bold hover:bg-brand hover:text-white transition-all"
+                                                title="Ver Perfil"
+                                            >
+                                                Ver Perfil
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {/each}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             {/if}
         </div>
