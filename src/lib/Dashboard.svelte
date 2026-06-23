@@ -4,10 +4,10 @@
     import Header from "./components/Header.svelte";
     import ProfileForm from "./components/ProfileForm.svelte";
     import Modal from "./components/Modal.svelte";
-    import EventDetails from "./components/EventDetails.svelte";
-    import EventForm from "./components/EventForm.svelte";
+    import ActivityDetails from "./components/ActivityDetails.svelte";
+    import ActivityForm from "./components/ActivityForm.svelte";
     import UsersList from "./components/UsersList.svelte";
-    import EventsList from "./components/EventsList.svelte";
+    import ActivitiesList from "./components/ActivitiesList.svelte";
     import MySubscriptions from "./components/MySubscriptions.svelte";
     import RafflePanel from "./components/RafflePanel.svelte";
     import SectorManager from "./components/SectorManager.svelte";
@@ -408,7 +408,7 @@
             </div>
         {:else if activeTab === "events"}
             <!-- Componente: Lista de Eventos -->
-            <EventsList
+            <ActivitiesList
                 {events}
                 {isAdmin}
                 {fetchEvents}
@@ -434,14 +434,14 @@
             />
         {:else if activeTab === "event_details" && selectedEvent}
             <!-- Componente: Detalhes do Evento para inscrição -->
-            <EventDetails
+            <ActivityDetails
                 event={selectedEvent}
                 onSubscribe={requestSubscription}
                 onBack={() => (activeTab = "events")}
             />
         {:else if activeTab === "event_form"}
             <!-- Componente: Formulário de Criação/Edição de Evento (Admin) -->
-            <EventForm
+            <ActivityForm
                 event={selectedEvent}
                 onCancel={() => (activeTab = "events")}
                 onDelete={() => requestDeleteEvent(selectedEvent)}

@@ -212,9 +212,12 @@
     /** @param {string|number} categoryId */
     async function fetchSectors(categoryId) {
         try {
-            const res = await fetch(`${API_URL}/v1/categories/${categoryId}/sectors`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await fetch(
+                `${API_URL}/v1/categories/${categoryId}/sectors`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                },
+            );
             if (res.ok) {
                 const data = await res.json();
                 sectorVacancies = data.data || [];
@@ -281,21 +284,29 @@
             }
 
             // Save sector vacancies if camping
-            if (activityType === "App\\Models\\Camping" && sectorVacancies.length > 0) {
-                await Promise.all(sectorVacancies.map(sv => 
-                    fetch(`${API_URL}/v1/categories/${formData.category_id}/sectors/${sv.sector_id}`, {
-                        method: "PUT",
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            "Content-Type": "application/json",
-                            Accept: "application/json",
-                        },
-                        body: JSON.stringify({
-                            base_vacancies: sv.base_vacancies,
-                            raffle_vacancies: sv.base_vacancies
-                        })
-                    })
-                ));
+            if (
+                activityType === "App\\Models\\Camping" &&
+                sectorVacancies.length > 0
+            ) {
+                await Promise.all(
+                    sectorVacancies.map((sv) =>
+                        fetch(
+                            `${API_URL}/v1/categories/${formData.category_id}/sectors/${sv.sector_id}`,
+                            {
+                                method: "PUT",
+                                headers: {
+                                    Authorization: `Bearer ${token}`,
+                                    "Content-Type": "application/json",
+                                    Accept: "application/json",
+                                },
+                                body: JSON.stringify({
+                                    base_vacancies: sv.base_vacancies,
+                                    raffle_vacancies: sv.base_vacancies,
+                                }),
+                            },
+                        ),
+                    ),
+                );
             }
 
             onSaveSuccess();
@@ -311,7 +322,7 @@
 
 <div>
     <h2 class="text-3xl font-black mb-6">
-        {event ? "Editar Atividade" : "Adicionar Atividade"}
+        {event ? "Editar Atividade" : "Criar Atividade"}
     </h2>
 
     <div
@@ -329,10 +340,14 @@
             onsubmit={(e) => {
                 e.preventDefault();
                 if (event) {
-                    showModal("confirm", "Tem certeza que deseja salvar as alterações nesta atividade?", async () => {
-                        closeModal();
-                        await handleSubmit();
-                    });
+                    showModal(
+                        "confirm",
+                        "Tem certeza que deseja salvar as alterações nesta atividade?",
+                        async () => {
+                            closeModal();
+                            await handleSubmit();
+                        },
+                    );
                 } else {
                     handleSubmit();
                 }
@@ -938,22 +953,39 @@
                                     </div>
 
                                     {#if sectorVacancies.length > 0}
-                                        <div class="pt-4 mt-2 border-t border-border-ui">
-                                            <p class="text-xs font-bold text-text-secondary uppercase tracking-widest mb-4">Vagas por Setor</p>
+                                        <div
+                                            class="pt-4 mt-2 border-t border-border-ui"
+                                        >
+                                            <p
+                                                class="text-xs font-bold text-text-secondary uppercase tracking-widest mb-4"
+                                            >
+                                                Vagas por Setor
+                                            </p>
                                             <div class="grid grid-cols-2 gap-4">
                                                 {#each sectorVacancies as sv}
                                                     <div>
-                                                        <label class="block text-[10px] font-bold text-text-secondary mb-2">{sv.name}</label>
+                                                        <label
+                                                            class="block text-[10px] font-bold text-text-secondary mb-2"
+                                                            >{sv.name}</label
+                                                        >
                                                         <input
                                                             type="number"
-                                                            bind:value={sv.base_vacancies}
+                                                            bind:value={
+                                                                sv.base_vacancies
+                                                            }
                                                             min="0"
                                                             class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
                                                         />
                                                     </div>
                                                 {/each}
                                             </div>
-                                            <p class="text-[10px] text-text-secondary mt-2">O número de vagas preenchido no sorteio usará esses mesmos valores.</p>
+                                            <p
+                                                class="text-[10px] text-text-secondary mt-2"
+                                            >
+                                                O número de vagas preenchido no
+                                                sorteio usará esses mesmos
+                                                valores.
+                                            </p>
                                         </div>
                                     {/if}
                                 </div>

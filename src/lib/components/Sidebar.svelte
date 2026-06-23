@@ -46,7 +46,7 @@
     <!-- Navegação e Links -->
     <nav class="flex-grow">
         <ul class="space-y-2">
-            <!-- Link: Lista de Eventos -->
+            <!-- Link: Lista de Atividades -->
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
             <li
@@ -56,7 +56,7 @@
                     : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer {isExpanded
                     ? 'p-3 gap-3 justify-start'
                     : 'w-12 h-12 justify-center mx-auto'}"
-                title="Eventos"
+                title="Atividades"
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -76,7 +76,8 @@
                     <line x1="3" x2="21" y1="10" y2="10" />
                 </svg>
                 {#if isExpanded}
-                    <span class="font-medium whitespace-nowrap">Eventos</span>
+                    <span class="font-medium whitespace-nowrap">Atividades</span
+                    >
                 {/if}
             </li>
 

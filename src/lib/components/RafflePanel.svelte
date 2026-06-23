@@ -7,7 +7,12 @@
     let raffleLoading = $state(null); // activity_id being raffled
 
     /** @type {{ show: boolean, type: string, message: string, details: any }} */
-    let notification = $state({ show: false, type: "", message: "", details: null });
+    let notification = $state({
+        show: false,
+        type: "",
+        message: "",
+        details: null,
+    });
 
     const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
@@ -108,7 +113,8 @@
                 notification = {
                     show: true,
                     type: "error",
-                    message: data.message || "Erro ao realizar o sorteio de servos.",
+                    message:
+                        data.message || "Erro ao realizar o sorteio de servos.",
                     details: null,
                 };
             }
@@ -159,40 +165,8 @@
 </script>
 
 <div class="space-y-8">
-    <div class="flex items-center gap-4">
-        <div
-            class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center"
-        >
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="text-amber-500"
-            >
-                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 9 7 9 7" />
-                <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C17 4 15 7 15 7" />
-                <path d="M4 22h16" />
-                <path
-                    d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"
-                />
-                <path
-                    d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"
-                />
-                <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
-            </svg>
-        </div>
-        <div>
-            <h2 class="text-3xl font-black">Sorteio</h2>
-            <p class="text-text-secondary text-sm font-medium">
-                Gerencie os sorteios dos acampamentos ativos
-            </p>
-        </div>
+    <div>
+        <h2 class="text-3xl font-black mb-6">Menu de Sorteios</h2>
     </div>
 
     {#if notification.show}
@@ -206,10 +180,17 @@
                 {#if notification.details}
                     {#if notification.details.sectors}
                         <!-- Sorteio de Servos -->
-                        <div class="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                        <div
+                            class="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs"
+                        >
                             {#each notification.details.sectors as sector}
-                                <div class="bg-bg-primary/50 rounded-xl p-3 border border-border-ui">
-                                    <p class="text-text-secondary uppercase tracking-widest font-bold mb-1 truncate" title={sector.sector_name}>
+                                <div
+                                    class="bg-bg-primary/50 rounded-xl p-3 border border-border-ui"
+                                >
+                                    <p
+                                        class="text-text-secondary uppercase tracking-widest font-bold mb-1 truncate"
+                                        title={sector.sector_name}
+                                    >
                                         {sector.sector_name}
                                     </p>
                                     <p class="text-text-primary font-black">
@@ -224,34 +205,52 @@
                     {:else if notification.details.male}
                         <!-- Sorteio de Campistas -->
                         <div class="mt-3 grid grid-cols-3 gap-3 text-xs">
-                            <div class="bg-bg-primary/50 rounded-xl p-3 border border-border-ui">
-                                <p class="text-text-secondary uppercase tracking-widest font-bold mb-1">
+                            <div
+                                class="bg-bg-primary/50 rounded-xl p-3 border border-border-ui"
+                            >
+                                <p
+                                    class="text-text-secondary uppercase tracking-widest font-bold mb-1"
+                                >
                                     Masculino
                                 </p>
                                 <p class="text-text-primary font-black">
-                                    {notification.details.male.selected}/{notification.details.male.vacancies} vagas
+                                    {notification.details.male
+                                        .selected}/{notification.details.male
+                                        .vacancies} vagas
                                 </p>
                                 <p class="text-text-secondary mt-1">
                                     {notification.details.male.subscribers} inscritos
                                 </p>
                             </div>
-                            <div class="bg-bg-primary/50 rounded-xl p-3 border border-border-ui">
-                                <p class="text-text-secondary uppercase tracking-widest font-bold mb-1">
+                            <div
+                                class="bg-bg-primary/50 rounded-xl p-3 border border-border-ui"
+                            >
+                                <p
+                                    class="text-text-secondary uppercase tracking-widest font-bold mb-1"
+                                >
                                     Feminino
                                 </p>
                                 <p class="text-text-primary font-black">
-                                    {notification.details.female.selected}/{notification.details.female.vacancies} vagas
+                                    {notification.details.female
+                                        .selected}/{notification.details.female
+                                        .vacancies} vagas
                                 </p>
                                 <p class="text-text-secondary mt-1">
                                     {notification.details.female.subscribers} inscritos
                                 </p>
                             </div>
-                            <div class="bg-bg-primary/50 rounded-xl p-3 border border-border-ui">
-                                <p class="text-text-secondary uppercase tracking-widest font-bold mb-1">
+                            <div
+                                class="bg-bg-primary/50 rounded-xl p-3 border border-border-ui"
+                            >
+                                <p
+                                    class="text-text-secondary uppercase tracking-widest font-bold mb-1"
+                                >
                                     Casais
                                 </p>
                                 <p class="text-text-primary font-black">
-                                    {notification.details.couple.selected}/{notification.details.couple.vacancies} vagas
+                                    {notification.details.couple
+                                        .selected}/{notification.details.couple
+                                        .vacancies} vagas
                                 </p>
                                 <p class="text-text-secondary mt-1">
                                     {notification.details.couple.subscribers} inscritos
@@ -333,30 +332,6 @@
                             >
                                 {camping.name}
                             </h3>
-                            {#if camping.category}
-                                <span
-                                    class="inline-block mt-1 px-3 py-1 bg-brand/10 border border-brand/20 text-brand rounded-full text-[10px] font-black uppercase tracking-widest"
-                                >
-                                    {camping.category}
-                                </span>
-                            {/if}
-                        </div>
-                        <div
-                            class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center flex-shrink-0"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="18"
-                                height="18"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2.5"
-                                class="text-amber-500"
-                            >
-                                <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
-                                <path d="M4 22h16" />
-                            </svg>
                         </div>
                     </div>
 
@@ -373,9 +348,7 @@
                                 <div
                                     class="bg-bg-primary/60 rounded-xl p-3 border border-border-ui text-center"
                                 >
-                                    <p
-                                        class="text-lg font-black text-blue-400"
-                                    >
+                                    <p class="text-lg font-black text-blue-400">
                                         {camping.planned_man_vacancies}
                                     </p>
                                     <p
@@ -387,9 +360,7 @@
                                 <div
                                     class="bg-bg-primary/60 rounded-xl p-3 border border-border-ui text-center"
                                 >
-                                    <p
-                                        class="text-lg font-black text-pink-400"
-                                    >
+                                    <p class="text-lg font-black text-pink-400">
                                         {camping.planned_woman_vacancies}
                                     </p>
                                     <p
@@ -416,17 +387,31 @@
                         </div>
 
                         <!-- Inscritos -->
-                        <div
-                            class="flex justify-between items-center p-4 bg-bg-primary/40 rounded-xl border border-border-ui"
-                        >
-                            <span
-                                class="text-[10px] text-text-secondary uppercase tracking-widest font-bold"
-                                >Total de Inscritos (Campistas)</span
+                        <div class="grid grid-cols-2 gap-3">
+                            <div
+                                class="p-3 bg-bg-primary/40 rounded-xl border border-border-ui"
                             >
-                            <span
-                                class="text-text-primary font-black text-lg"
-                                >{camping.total_camper_subscribers}</span
+                                <p
+                                    class="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-1"
+                                >
+                                    Inscritos Campistas
+                                </p>
+                                <p class="text-xl font-black text-text-primary">
+                                    {camping.total_camper_subscribers}
+                                </p>
+                            </div>
+                            <div
+                                class="p-3 bg-bg-primary/40 rounded-xl border border-border-ui"
                             >
+                                <p
+                                    class="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-1"
+                                >
+                                    Inscritos Servos
+                                </p>
+                                <p class="text-xl font-black text-text-primary">
+                                    {camping.total_servant_subscribers}
+                                </p>
+                            </div>
                         </div>
 
                         <!-- Datas de sorteio -->
@@ -439,9 +424,7 @@
                                 >
                                     Sorteio Campistas
                                 </p>
-                                <p
-                                    class="text-sm font-black text-text-primary"
-                                >
+                                <p class="text-sm font-black text-text-primary">
                                     {formatDate(camping.raffle_camper_date)}
                                 </p>
                                 {#if isDateReached(camping.raffle_camper_date)}
@@ -464,9 +447,7 @@
                                 >
                                     Sorteio Servos
                                 </p>
-                                <p
-                                    class="text-sm font-black text-text-primary"
-                                >
+                                <p class="text-sm font-black text-text-primary">
                                     {formatDate(camping.raffle_servant_date)}
                                 </p>
                                 {#if isDateReached(camping.raffle_servant_date)}
@@ -492,17 +473,6 @@
                                 <div
                                     class="flex items-center justify-center gap-2 px-4 py-4 bg-green-500/10 border border-green-500/20 text-green-400 rounded-2xl text-xs font-black uppercase tracking-widest"
                                 >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="16"
-                                        height="16"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="3"
-                                    >
-                                        <path d="M20 6 9 17l-5-5" />
-                                    </svg>
                                     Sorteado ({camping.selected_campers})
                                 </div>
                             {:else}
@@ -513,8 +483,7 @@
                                         )}
                                     disabled={!isDateReached(
                                         camping.raffle_camper_date,
-                                    ) ||
-                                        raffleLoading === camping.activity_id}
+                                    ) || raffleLoading === camping.activity_id}
                                     class="flex items-center justify-center gap-2 px-4 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all
                                     {isDateReached(camping.raffle_camper_date)
                                         ? 'bg-brand text-white shadow-lg shadow-brand/20 hover:-translate-y-0.5 hover:brightness-110 active:scale-95 cursor-pointer'
@@ -526,25 +495,6 @@
                                         ></div>
                                         Sorteando...
                                     {:else}
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="16"
-                                            height="16"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            stroke-width="2.5"
-                                        >
-                                            <path
-                                                d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 9 7 9 7"
-                                            />
-                                            <path
-                                                d="M18 9h1.5a2.5 2.5 0 0 0 0-5C17 4 15 7 15 7"
-                                            />
-                                            <path
-                                                d="M18 2H6v7a6 6 0 0 0 12 0V2Z"
-                                            />
-                                        </svg>
                                         Sortear Campistas
                                     {/if}
                                 </button>
@@ -555,17 +505,6 @@
                                 <div
                                     class="flex items-center justify-center gap-2 px-4 py-4 bg-green-500/10 border border-green-500/20 text-green-400 rounded-2xl text-xs font-black uppercase tracking-widest"
                                 >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="16"
-                                        height="16"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="3"
-                                    >
-                                        <path d="M20 6 9 17l-5-5" />
-                                    </svg>
                                     Sorteado ({camping.selected_servants})
                                 </div>
                             {:else}
@@ -576,8 +515,7 @@
                                         )}
                                     disabled={!isDateReached(
                                         camping.raffle_servant_date,
-                                    ) ||
-                                        raffleLoading === camping.activity_id}
+                                    ) || raffleLoading === camping.activity_id}
                                     class="flex items-center justify-center gap-2 px-4 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all
                                     {isDateReached(camping.raffle_servant_date)
                                         ? 'bg-brand text-white shadow-lg shadow-brand/20 hover:-translate-y-0.5 hover:brightness-110 active:scale-95 cursor-pointer'
@@ -589,18 +527,6 @@
                                         ></div>
                                         Sorteando...
                                     {:else}
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="16"
-                                            height="16"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            stroke-width="2.5"
-                                        >
-                                            <circle cx="12" cy="12" r="10" />
-                                            <polyline points="12 6 12 12 16 14" />
-                                        </svg>
                                         Sortear Servos
                                     {/if}
                                 </button>
