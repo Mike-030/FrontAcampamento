@@ -9,6 +9,7 @@
     import UsersList from "./components/UsersList.svelte";
     import EventsList from "./components/EventsList.svelte";
     import MySubscriptions from "./components/MySubscriptions.svelte";
+    import RafflePanel from "./components/RafflePanel.svelte";
 
     // Props recebidas
     let { onLogout } = $props();
@@ -70,6 +71,9 @@
             fetchEvents();
         } else if (activeTab === "subscriptions") {
             fetchSubscriptions();
+        } else {
+            // Tabs that manage their own loading state
+            loading = false;
         }
     });
 
@@ -435,6 +439,9 @@
                     });
                 }}
             />
+        {:else if activeTab === "raffle" && isAdmin}
+            <!-- Componente: Painel de Sorteio (Admin) -->
+            <RafflePanel {token} />
         {/if}
     </main>
 

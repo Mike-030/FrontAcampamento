@@ -156,6 +156,7 @@
                                 : "Não definida"}</span
                         >
                     </li>
+                    {#if !isCamping}
                     <li
                         class="flex justify-between items-center p-5 bg-bg-primary/50 rounded-2xl border border-border-ui"
                     >
@@ -168,6 +169,7 @@
                             >{event.total_vacancies || "Ilimitadas"}</span
                         >
                     </li>
+                    {/if}
                     <li
                         class="flex justify-between items-center p-5 bg-bg-primary/50 rounded-2xl border border-border-ui"
                     >

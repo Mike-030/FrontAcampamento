@@ -123,6 +123,39 @@
                         <span class="font-medium whitespace-nowrap">Criar Atividade</span>
                     {/if}
                 </li>
+
+                <!-- Link: Sorteio -->
+                <!-- svelte-ignore a11y_click_events_have_key_events -->
+                <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+                <li
+                    onclick={() => (activeTab = "raffle")}
+                    class="flex items-center rounded-xl {activeTab ===
+                    'raffle'
+                        ? 'bg-brand text-white shadow-lg shadow-brand/20'
+                        : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer {isExpanded ? 'p-3 gap-3 justify-start' : 'w-12 h-12 justify-center mx-auto'}"
+                    title="Sorteio"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="flex-shrink-0"
+                    >
+                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 9 7 9 7" />
+                        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C17 4 15 7 15 7" />
+                        <path d="M4 22h16" />
+                        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+                    </svg>
+                    {#if isExpanded}
+                        <span class="font-medium whitespace-nowrap">Sorteio</span>
+                    {/if}
+                </li>
             {/if}
             
             <!-- Link: Inscrições do Usuário Logado -->
