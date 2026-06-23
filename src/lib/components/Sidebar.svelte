@@ -124,9 +124,6 @@
                     {/if}
                 </li>
 
-                <!-- Link: Sorteio -->
-                <!-- svelte-ignore a11y_click_events_have_key_events -->
-                <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
                 <li
                     onclick={() => (activeTab = "raffle")}
                     class="flex items-center rounded-xl {activeTab ===
@@ -154,6 +151,38 @@
                     </svg>
                     {#if isExpanded}
                         <span class="font-medium whitespace-nowrap">Sorteio</span>
+                    {/if}
+                </li>
+
+                <!-- Link: Setores -->
+                <!-- svelte-ignore a11y_click_events_have_key_events -->
+                <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+                <li
+                    onclick={() => (activeTab = "sectors")}
+                    class="flex items-center rounded-xl {activeTab ===
+                    'sectors'
+                        ? 'bg-brand text-white shadow-lg shadow-brand/20'
+                        : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer {isExpanded ? 'p-3 gap-3 justify-start' : 'w-12 h-12 justify-center mx-auto'}"
+                    title="Setores"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="flex-shrink-0"
+                    >
+                        <rect width="18" height="18" x="3" y="3" rx="2" />
+                        <path d="M3 9h18" />
+                        <path d="M9 21V9" />
+                    </svg>
+                    {#if isExpanded}
+                        <span class="font-medium whitespace-nowrap">Setores</span>
                     {/if}
                 </li>
             {/if}

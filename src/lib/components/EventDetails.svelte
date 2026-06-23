@@ -54,6 +54,14 @@
         }
         return text;
     });
+
+    let isServo = $derived(subscriptionTypeText.includes("Servo"));
+    let sector1 = $state("");
+    let sector2 = $state("");
+
+    function handleSubscribe() {
+        onSubscribe(event.id, isServo ? "Servo" : "Campista", sector1, sector2);
+    }
 </script>
 
 <div class="flex flex-col gap-6">
@@ -240,6 +248,35 @@
                 {/if}
             </div>
 
+            <!-- Setores (apenas para servos) -->
+            {#if isServo && event.category?.sectors && event.category.sectors.length > 0}
+                <div class="pt-8 border-t border-border-ui space-y-4">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-text-secondary">Preferência de Setor</h3>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-1">
+                            <label for="sector1" class="block text-xs font-bold text-text-secondary mb-1 uppercase tracking-wider">1ª Opção <span class="text-brand">*</span></label>
+                            <select id="sector1" bind:value={sector1} required class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-brand transition-colors">
+                                <option value="">Selecione...</option>
+                                {#each event.category.sectors as sector}
+                                    <option value={sector.id}>{sector.name}</option>
+                                {/each}
+                            </select>
+                        </div>
+                        <div class="flex-1">
+                            <label for="sector2" class="block text-xs font-bold text-text-secondary mb-1 uppercase tracking-wider">2ª Opção</label>
+                            <select id="sector2" bind:value={sector2} class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-brand transition-colors">
+                                <option value="">Selecione (Opcional)...</option>
+                                {#each event.category.sectors as sector}
+                                    {#if sector.id != sector1}
+                                        <option value={sector.id}>{sector.name}</option>
+                                    {/if}
+                                {/each}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            {/if}
+
             <!-- Botões Inferiores -->
             <div
                 class="pt-8 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-border-ui"
@@ -268,8 +305,9 @@
                 </div>
 
                 <button
-                    onclick={() => onSubscribe(event.id)}
-                    class="w-full md:w-auto px-10 py-5 bg-brand text-white rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-brand/20 hover:-translate-y-1 hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3"
+                    onclick={handleSubscribe}
+                    disabled={isServo && !sector1}
+                    class="w-full md:w-auto px-10 py-5 bg-brand text-white rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-brand/20 hover:-translate-y-1 hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:brightness-100"
                 >
                     Se Inscrever
                 </button>

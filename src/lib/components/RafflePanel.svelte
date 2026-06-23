@@ -80,6 +80,51 @@
         }
     }
 
+    /** @param {number} activityId */
+    async function performServantRaffle(activityId) {
+        raffleLoading = activityId;
+        try {
+            const response = await fetch(
+                `${API_URL}/v1/raffles/${activityId}/servants`,
+                {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                    },
+                },
+            );
+            const data = await response.json();
+            if (response.ok) {
+                notification = {
+                    show: true,
+                    type: "success",
+                    message: data.message,
+                    details: data.data,
+                };
+                await fetchRaffleData();
+            } else {
+                notification = {
+                    show: true,
+                    type: "error",
+                    message: data.message || "Erro ao realizar o sorteio de servos.",
+                    details: null,
+                };
+            }
+        } catch (err) {
+            console.error("Erro ao realizar sorteio de servos:", err);
+            notification = {
+                show: true,
+                type: "error",
+                message: "Não foi possível conectar com o servidor.",
+                details: null,
+            };
+        } finally {
+            raffleLoading = null;
+        }
+    }
+
     /** @param {string | null} dateStr */
     function isDateReached(dateStr) {
         if (!dateStr) return false;
@@ -159,50 +204,61 @@
             <div class="flex-1">
                 <p class="font-bold text-sm">{notification.message}</p>
                 {#if notification.details}
-                    <div class="mt-3 grid grid-cols-3 gap-3 text-xs">
-                        <div
-                            class="bg-bg-primary/50 rounded-xl p-3 border border-border-ui"
-                        >
-                            <p class="text-text-secondary uppercase tracking-widest font-bold mb-1">
-                                Masculino
-                            </p>
-                            <p class="text-text-primary font-black">
-                                {notification.details.male.selected}/{notification
-                                    .details.male.vacancies} vagas
-                            </p>
-                            <p class="text-text-secondary mt-1">
-                                {notification.details.male.subscribers} inscritos
-                            </p>
+                    {#if notification.details.sectors}
+                        <!-- Sorteio de Servos -->
+                        <div class="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                            {#each notification.details.sectors as sector}
+                                <div class="bg-bg-primary/50 rounded-xl p-3 border border-border-ui">
+                                    <p class="text-text-secondary uppercase tracking-widest font-bold mb-1 truncate" title={sector.sector_name}>
+                                        {sector.sector_name}
+                                    </p>
+                                    <p class="text-text-primary font-black">
+                                        {sector.selected}/{sector.vacancies} vagas
+                                    </p>
+                                    <p class="text-text-secondary mt-1">
+                                        {sector.subscribers} inscritos
+                                    </p>
+                                </div>
+                            {/each}
                         </div>
-                        <div
-                            class="bg-bg-primary/50 rounded-xl p-3 border border-border-ui"
-                        >
-                            <p class="text-text-secondary uppercase tracking-widest font-bold mb-1">
-                                Feminino
-                            </p>
-                            <p class="text-text-primary font-black">
-                                {notification.details.female.selected}/{notification
-                                    .details.female.vacancies} vagas
-                            </p>
-                            <p class="text-text-secondary mt-1">
-                                {notification.details.female.subscribers} inscritos
-                            </p>
+                    {:else if notification.details.male}
+                        <!-- Sorteio de Campistas -->
+                        <div class="mt-3 grid grid-cols-3 gap-3 text-xs">
+                            <div class="bg-bg-primary/50 rounded-xl p-3 border border-border-ui">
+                                <p class="text-text-secondary uppercase tracking-widest font-bold mb-1">
+                                    Masculino
+                                </p>
+                                <p class="text-text-primary font-black">
+                                    {notification.details.male.selected}/{notification.details.male.vacancies} vagas
+                                </p>
+                                <p class="text-text-secondary mt-1">
+                                    {notification.details.male.subscribers} inscritos
+                                </p>
+                            </div>
+                            <div class="bg-bg-primary/50 rounded-xl p-3 border border-border-ui">
+                                <p class="text-text-secondary uppercase tracking-widest font-bold mb-1">
+                                    Feminino
+                                </p>
+                                <p class="text-text-primary font-black">
+                                    {notification.details.female.selected}/{notification.details.female.vacancies} vagas
+                                </p>
+                                <p class="text-text-secondary mt-1">
+                                    {notification.details.female.subscribers} inscritos
+                                </p>
+                            </div>
+                            <div class="bg-bg-primary/50 rounded-xl p-3 border border-border-ui">
+                                <p class="text-text-secondary uppercase tracking-widest font-bold mb-1">
+                                    Casais
+                                </p>
+                                <p class="text-text-primary font-black">
+                                    {notification.details.couple.selected}/{notification.details.couple.vacancies} vagas
+                                </p>
+                                <p class="text-text-secondary mt-1">
+                                    {notification.details.couple.subscribers} inscritos
+                                </p>
+                            </div>
                         </div>
-                        <div
-                            class="bg-bg-primary/50 rounded-xl p-3 border border-border-ui"
-                        >
-                            <p class="text-text-secondary uppercase tracking-widest font-bold mb-1">
-                                Casais
-                            </p>
-                            <p class="text-text-primary font-black">
-                                {notification.details.couple.selected}/{notification
-                                    .details.couple.vacancies} vagas
-                            </p>
-                            <p class="text-text-secondary mt-1">
-                                {notification.details.couple.subscribers} inscritos
-                            </p>
-                        </div>
-                    </div>
+                    {/if}
                 {/if}
             </div>
             <button
@@ -494,7 +550,7 @@
                                 </button>
                             {/if}
 
-                            <!-- Botão Sortear Servos (futuro) -->
+                            <!-- Botão Sortear Servos -->
                             {#if camping.servant_raffle_done}
                                 <div
                                     class="flex items-center justify-center gap-2 px-4 py-4 bg-green-500/10 border border-green-500/20 text-green-400 rounded-2xl text-xs font-black uppercase tracking-widest"
@@ -514,23 +570,39 @@
                                 </div>
                             {:else}
                                 <button
-                                    disabled={true}
-                                    class="flex items-center justify-center gap-2 px-4 py-4 rounded-2xl text-xs font-black uppercase tracking-widest bg-text-primary/5 text-text-secondary/40 cursor-not-allowed border border-border-ui"
-                                    title="Sorteio de servos será implementado posteriormente"
+                                    onclick={() =>
+                                        performServantRaffle(
+                                            camping.activity_id,
+                                        )}
+                                    disabled={!isDateReached(
+                                        camping.raffle_servant_date,
+                                    ) ||
+                                        raffleLoading === camping.activity_id}
+                                    class="flex items-center justify-center gap-2 px-4 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all
+                                    {isDateReached(camping.raffle_servant_date)
+                                        ? 'bg-brand text-white shadow-lg shadow-brand/20 hover:-translate-y-0.5 hover:brightness-110 active:scale-95 cursor-pointer'
+                                        : 'bg-text-primary/5 text-text-secondary/40 cursor-not-allowed border border-border-ui'}"
                                 >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="16"
-                                        height="16"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="2.5"
-                                    >
-                                        <circle cx="12" cy="12" r="10" />
-                                        <polyline points="12 6 12 12 16 14" />
-                                    </svg>
-                                    Sortear Servos
+                                    {#if raffleLoading === camping.activity_id}
+                                        <div
+                                            class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
+                                        ></div>
+                                        Sorteando...
+                                    {:else}
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2.5"
+                                        >
+                                            <circle cx="12" cy="12" r="10" />
+                                            <polyline points="12 6 12 12 16 14" />
+                                        </svg>
+                                        Sortear Servos
+                                    {/if}
                                 </button>
                             {/if}
                         </div>

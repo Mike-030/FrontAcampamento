@@ -59,6 +59,10 @@
         servant_payment_date: "",
     });
 
+    // Vagas por setor para acampamento
+    /** @type {any[]} */
+    let sectorVacancies = $state([]);
+
     // Apenas categorias de acampamento (eventos são auto-atribuídos pelo backend)
     let filteredCategories = $derived(
         categories.filter((c) => c.type === "Acampamento"),
@@ -184,6 +188,27 @@
         }
     }
 
+    $effect(() => {
+        if (activityType === "App\\Models\\Camping" && formData.category_id) {
+            fetchSectors(formData.category_id);
+        }
+    });
+
+    /** @param {string|number} categoryId */
+    async function fetchSectors(categoryId) {
+        try {
+            const res = await fetch(`${API_URL}/v1/categories/${categoryId}/sectors`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                sectorVacancies = data.data || [];
+            }
+        } catch (error) {
+            console.error("Erro ao buscar setores da categoria", error);
+        }
+    }
+
     async function handleSubmit() {
         loading = true;
         errorMessage = "";
@@ -238,6 +263,24 @@
             if (!response.ok) {
                 const data = await response.json();
                 throw new Error(data.message || "Erro ao salvar a atividade.");
+            }
+
+            // Save sector vacancies if camping
+            if (activityType === "App\\Models\\Camping" && sectorVacancies.length > 0) {
+                await Promise.all(sectorVacancies.map(sv => 
+                    fetch(`${API_URL}/v1/categories/${formData.category_id}/sectors/${sv.sector_id}`, {
+                        method: "PUT",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                            Accept: "application/json",
+                        },
+                        body: JSON.stringify({
+                            base_vacancies: sv.base_vacancies,
+                            raffle_vacancies: sv.base_vacancies
+                        })
+                    })
+                ));
             }
 
             onSaveSuccess();
@@ -871,6 +914,26 @@
                                             />
                                         </div>
                                     </div>
+
+                                    {#if sectorVacancies.length > 0}
+                                        <div class="pt-4 mt-2 border-t border-border-ui">
+                                            <p class="text-xs font-bold text-text-secondary uppercase tracking-widest mb-4">Vagas por Setor</p>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                {#each sectorVacancies as sv}
+                                                    <div>
+                                                        <label class="block text-[10px] font-bold text-text-secondary mb-2">{sv.name}</label>
+                                                        <input
+                                                            type="number"
+                                                            bind:value={sv.base_vacancies}
+                                                            min="0"
+                                                            class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none"
+                                                        />
+                                                    </div>
+                                                {/each}
+                                            </div>
+                                            <p class="text-[10px] text-text-secondary mt-2">O número de vagas preenchido no sorteio usará esses mesmos valores.</p>
+                                        </div>
+                                    {/if}
                                 </div>
                             </div>
                         </div>

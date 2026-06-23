@@ -10,6 +10,7 @@
     import EventsList from "./components/EventsList.svelte";
     import MySubscriptions from "./components/MySubscriptions.svelte";
     import RafflePanel from "./components/RafflePanel.svelte";
+    import SectorManager from "./components/SectorManager.svelte";
 
     // Props recebidas
     let { onLogout } = $props();
@@ -124,12 +125,17 @@
         }
     }
 
-    /** @param {number | string} eventId */
-    async function subscribe(eventId) {
+    /** 
+     * @param {number | string} eventId 
+     * @param {string} type
+     * @param {string|number|null} sector1
+     * @param {string|number|null} sector2
+     */
+    async function subscribe(eventId, type = "Campista", sector1 = null, sector2 = null) {
         try {
             const payload = {
                 subscription_date: new Date().toISOString().split("T")[0],
-                subscription_type: "Campista",
+                subscription_type: type,
                 was_selected: false,
                 substitute_position: 0,
                 paid_the_fee: false,
@@ -140,6 +146,8 @@
                 selection_method_id: 1, // Ex: Sorteio
                 user_id: userData.id,
                 event_id: eventId,
+                sector_id: sector1 || undefined,
+                sector2_id: sector2 || undefined,
             };
 
             const response = await fetch(`${API_URL}/v1/subscriptions`, {
@@ -218,14 +226,19 @@
         }
     }
 
-    /** @param {number | string} eventId */
-    function requestSubscription(eventId) {
+    /** 
+     * @param {number | string} eventId 
+     * @param {string} type
+     * @param {string|number|null} sector1
+     * @param {string|number|null} sector2
+     */
+    function requestSubscription(eventId, type = "Campista", sector1 = null, sector2 = null) {
         showModal(
             "confirm",
             "Ao confirmar, você será redirecionado para suas inscrições. Deseja continuar?",
             () => {
                 closeModal();
-                subscribe(eventId);
+                subscribe(eventId, type, sector1, sector2);
             },
         );
     }
@@ -442,6 +455,9 @@
         {:else if activeTab === "raffle" && isAdmin}
             <!-- Componente: Painel de Sorteio (Admin) -->
             <RafflePanel {token} />
+        {:else if activeTab === "sectors" && isAdmin}
+            <!-- Componente: Gerenciamento de Setores (Admin) -->
+            <SectorManager {token} />
         {/if}
     </main>
 
