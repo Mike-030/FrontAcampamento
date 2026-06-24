@@ -3,9 +3,7 @@
     import logo from "../assets/LogoComunidadeSaoMiguel.png";
     import bgHero from "../assets/SaoMiguelArcanjo.png";
 
-    // Props
-    /** @type {{ onGoToLogin: Function }} */
-    let { onGoToLogin } = $props();
+    import { goto } from '$app/navigation';
 
     // Estado dos dados do formulário de registro
     let formData = $state({
@@ -147,7 +145,7 @@
 
             if (response.ok) {
                 success = true;
-                setTimeout(() => onGoToLogin(), 3000);
+                setTimeout(() => goto('/login'), 3000);
             } else {
                 error = data.message || "Erro ao realizar cadastro.";
                 if (data.errors) error = Object.values(data.errors)[0][0];
@@ -227,7 +225,7 @@
 
 <!-- BOTÃO FLUTUANTE DE VOLTAR -->
 <button
-    onclick={() => onGoToLogin()}
+    onclick={() => goto('/login')}
     class="fixed top-4 left-4 md:top-6 md:left-6 z-50
            bg-bg-secondary/80 backdrop-blur-md
            w-12 h-12 md:w-14 md:h-14
@@ -643,7 +641,7 @@
 
                     <footer class="mt-10 text-center">
                         <button
-                            onclick={() => onGoToLogin()}
+                            onclick={() => goto('/login')}
                             class="text-text-secondary text-sm hover:text-text-primary transition-all"
                         >
                             Já tem uma conta? <span

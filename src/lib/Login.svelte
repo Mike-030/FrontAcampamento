@@ -4,9 +4,8 @@
     // Componentes de Interface
     import Modal from "./components/Modal.svelte";
 
-    // Props recebidas pelo componente de Login
-    /** @type {{ onLoginSuccess: Function, onGoToRegister: Function }} */
-    let { onLoginSuccess, onGoToRegister } = $props();
+    import { setLogin } from '$lib/stores/auth.js';
+    import { goto } from '$app/navigation';
 
     // Estados do formulário de login
     let cpf = $state(""); // CPF digitado pelo usuário
@@ -83,7 +82,8 @@
             const data = await response.json();
 
             if (response.ok) {
-                onLoginSuccess(data.token, data.data);
+                setLogin(data.token, data.data, rememberMe);
+                goto('/dashboard');
             } else {
                 showModal(
                     "error",
@@ -427,7 +427,7 @@
 
                 <footer class="mt-10 mb-12 text-center w-full">
                     <button
-                        onclick={() => onGoToRegister()}
+                        onclick={() => goto('/register')}
                         class="text-text-secondary text-sm hover:text-text-primary transition-all"
                         >Novo por aqui? <span
                             class="text-brand font-black hover:underline"

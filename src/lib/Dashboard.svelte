@@ -14,8 +14,8 @@
     import ManageActivities from "./components/ManageActivities.svelte";
     import InboxTab from "./components/InboxTab.svelte";
 
-    // Props recebidas
-    let { onLogout } = $props();
+    import { token as auth_token, user as auth_user, setLogout, updateUser } from '$lib/stores/auth.js';
+    import { goto } from '$app/navigation';
 
     // Estado principal do Dashboard
     /** @type {any[]} */
@@ -27,7 +27,7 @@
     let selectedEvent = $state(null); // Evento selecionado para detalhes ou edição
     let selectedInboxMessage = $state(null); // Mensagem selecionada para visualização
     let userData = $state( // Dados do usuário logado
-        JSON.parse(localStorage.getItem("user_data") || "{}"),
+        $auth_user || {}
     );
     // Verificação de privilégios de administrador
     let isAdmin = $derived(
@@ -60,7 +60,7 @@
     }
 
     const API_URL = import.meta.env.VITE_API_URL;
-    const token = localStorage.getItem("auth_token");
+    const token = $derived($auth_token);
 
     // Fallback para imagem caso o usuário não tenha uma
     let defaultAvatar = $derived(
@@ -347,7 +347,7 @@
             if (response.ok) {
                 const responseData = await response.json();
                 userData = { ...userData, ...responseData.data };
-                localStorage.setItem("user_data", JSON.stringify(userData));
+                updateUser(userData);
                 showModal("success", "Perfil atualizado com sucesso!");
             } else {
                 const errorData = await response.json().catch(() => ({}));
@@ -381,9 +381,8 @@
     }
 
     function performLogout() {
-        localStorage.removeItem("auth_token");
-        localStorage.removeItem("user_data");
-        onLogout();
+        setLogout();
+        goto('/login');
     }
 </script>
 
