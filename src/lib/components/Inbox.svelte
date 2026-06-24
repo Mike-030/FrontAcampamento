@@ -1,6 +1,8 @@
 <script>
     import { onMount } from "svelte";
 
+    let { activeTab = $bindable(), onOpenMessage } = $props();
+
     const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
     let token = "";
 
@@ -46,6 +48,17 @@
             }
         } catch (err) {
             console.error("Erro ao marcar mensagem como lida", err);
+        }
+    }
+
+    async function handleMessageClick(message) {
+        if (!message.is_read) {
+            await markAsRead(message.id);
+        }
+        isOpen = false;
+        activeTab = "inbox";
+        if (onOpenMessage) {
+            onOpenMessage(message);
         }
     }
 
@@ -101,24 +114,22 @@
             <div class="overflow-y-auto flex-grow p-2 space-y-2 max-h-[300px] scrollbar-thin">
                 {#if loading && messages.length === 0}
                     <div class="text-center p-4 text-text-secondary text-sm font-medium">Carregando...</div>
-                {:else if messages.length === 0}
-                    <div class="text-center p-4 text-text-secondary text-sm font-medium">Nenhuma notificação</div>
+                {:else if messages.filter(m => !m.is_read).length === 0}
+                    <div class="text-center p-4 text-text-secondary text-sm font-medium">Nenhuma nova notificação</div>
                 {:else}
-                    {#each messages as message}
-                        <div class="p-3 rounded-xl {message.is_read ? 'bg-bg-primary/30 opacity-70' : 'bg-brand/5 border border-brand/20'} transition-all">
-                            <div class="flex justify-between items-start mb-1">
-                                <h4 class="text-xs font-bold {message.is_read ? 'text-text-secondary' : 'text-brand'}">{message.title}</h4>
-                                {#if !message.is_read}
-                                    <button onclick={() => markAsRead(message.id)} class="text-text-secondary hover:text-brand" title="Marcar como lida">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                                    </button>
-                                {/if}
+                    {#each messages.filter(m => !m.is_read) as message}
+                        <button
+                            onclick={() => handleMessageClick(message)}
+                            class="w-full text-left p-3 rounded-xl bg-brand/5 border border-brand/20 hover:bg-brand/10 transition-all group cursor-pointer"
+                        >
+                            <div class="flex justify-between items-start">
+                                <h4 class="text-xs font-bold text-brand group-hover:underline">{message.title}</h4>
+                                <div class="w-2 h-2 rounded-full bg-brand flex-shrink-0 mt-1"></div>
                             </div>
-                            <p class="text-[11px] text-text-primary leading-tight">{message.content}</p>
                             <div class="text-[9px] text-text-secondary mt-2 text-right">
                                 {new Date(message.created_at).toLocaleDateString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                             </div>
-                        </div>
+                        </button>
                     {/each}
                 {/if}
             </div>

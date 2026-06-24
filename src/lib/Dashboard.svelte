@@ -12,6 +12,7 @@
     import RafflePanel from "./components/RafflePanel.svelte";
     import SectorManager from "./components/SectorManager.svelte";
     import ManageActivities from "./components/ManageActivities.svelte";
+    import InboxTab from "./components/InboxTab.svelte";
 
     // Props recebidas
     let { onLogout } = $props();
@@ -24,6 +25,7 @@
     let loading = $state(true); // Controle de carregamento global
     let activeTab = $state("events"); // Aba ativa (events, subscriptions, profile, etc.)
     let selectedEvent = $state(null); // Evento selecionado para detalhes ou edição
+    let selectedInboxMessage = $state(null); // Mensagem selecionada para visualização
     let userData = $state( // Dados do usuário logado
         JSON.parse(localStorage.getItem("user_data") || "{}"),
     );
@@ -255,6 +257,11 @@
         );
     }
 
+    function handleOpenMessage(message) {
+        selectedInboxMessage = message;
+        activeTab = "inbox";
+    }
+
     /** @param {any} event */
     function openEventDetails(event) {
         selectedEvent = event;
@@ -395,7 +402,7 @@
     <!-- Main Content -->
     <main class="{isSidebarExpanded ? 'ml-64' : 'ml-20'} flex-grow p-10 transition-all duration-300">
         <!-- Componente: Header (Cabeçalho com perfil) -->
-        <Header {userData} {defaultAvatar} bind:activeTab {handleLogout} />
+        <Header {userData} {defaultAvatar} bind:activeTab {handleLogout} onOpenMessage={handleOpenMessage} />
         
         {#if loading}
             <div
@@ -415,6 +422,9 @@
                 {openEventForm}
                 {openEventDetails}
             />
+        {:else if activeTab === "inbox"}
+            <!-- Componente: Caixa de Entrada -->
+            <InboxTab bind:selectedMessage={selectedInboxMessage} />
         {:else if activeTab === "subscriptions"}
             <!-- Componente: Minhas Inscrições -->
             <MySubscriptions
