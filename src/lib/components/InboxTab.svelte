@@ -9,13 +9,11 @@
     let messages = $state([]);
     let loading = $state(false);
 
-    let modalOpen = $state(false);
     let viewingMessage = $state(null);
 
     $effect(() => {
         if (selectedMessage) {
             viewingMessage = selectedMessage;
-            modalOpen = true;
         }
     });
 
@@ -75,17 +73,44 @@
             msg.is_read = true; // Optimistic update
         }
         viewingMessage = msg;
-        modalOpen = true;
     }
 
     function closeMessage() {
-        modalOpen = false;
         viewingMessage = null;
         selectedMessage = null;
     }
 </script>
 
-<div class="space-y-8">
+{#if viewingMessage}
+<div class="space-y-6 animate-in fade-in duration-300">
+    <!-- Action bar -->
+    <div class="flex items-center gap-4 border-b border-border-ui pb-4">
+        <button onclick={closeMessage} aria-label="Voltar" class="flex items-center gap-2 px-4 py-2 rounded-xl text-text-secondary hover:text-text-primary hover:bg-bg-secondary transition-all font-medium text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            Voltar para a lista
+        </button>
+        <div class="flex-1"></div>
+        <button onclick={() => { deleteMessage(viewingMessage.id); closeMessage(); }} aria-label="Excluir" class="flex items-center gap-2 px-4 py-2 rounded-xl text-red-500 hover:bg-red-500/10 transition-colors font-medium text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+            Excluir
+        </button>
+    </div>
+
+    <!-- Message Content -->
+    <div class="bg-bg-secondary rounded-3xl border border-border-ui p-8 shadow-sm">
+        <h2 class="text-3xl font-black mb-4 text-text-primary">{viewingMessage.title}</h2>
+        <div class="flex items-center gap-2 text-sm text-text-secondary mb-8 pb-6 border-b border-border-ui/50">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Recebida em: {new Date(viewingMessage.created_at).toLocaleDateString("pt-BR")} às {new Date(viewingMessage.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
+        </div>
+        
+        <div class="prose prose-sm max-w-none text-text-primary whitespace-pre-wrap leading-relaxed">
+            {viewingMessage.content}
+        </div>
+    </div>
+</div>
+{:else}
+<div class="space-y-8 animate-in fade-in duration-300">
     <div class="flex justify-between items-end">
         <div>
             <h2 class="text-3xl font-black mb-2">Caixa de Entrada</h2>
@@ -247,100 +272,4 @@
         </div>
     </div>
 </div>
-
-{#if modalOpen && viewingMessage}
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <!-- Backdrop -->
-        <!-- svelte-ignore a11y_click_events_have_key_events -->
-        <!-- svelte-ignore a11y_no_static_element_interactions -->
-        <div
-            class="absolute inset-0 bg-bg-primary/80 backdrop-blur-sm"
-            onclick={closeMessage}
-        ></div>
-
-        <!-- Modal Content -->
-        <div
-            class="relative bg-bg-secondary w-full max-w-2xl rounded-3xl shadow-2xl border border-border-ui overflow-hidden animate-in fade-in zoom-in-95 duration-200"
-        >
-            <!-- Modal Header -->
-            <div
-                class="px-6 py-4 border-b border-border-ui flex justify-between items-center bg-bg-primary/50"
-            >
-                <h3 class="font-black text-lg text-text-primary">
-                    {viewingMessage.title}
-                </h3>
-                <button
-                    onclick={closeMessage}
-                    class="p-2 text-text-secondary hover:text-red-500 hover:bg-red-500/10 rounded-full transition-colors"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        ><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg
-                    >
-                </button>
-            </div>
-
-            <!-- Modal Body -->
-            <div class="p-6">
-                <div
-                    class="text-sm text-text-secondary mb-6 flex items-center gap-2"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        ><circle cx="12" cy="12" r="10" /><polyline
-                            points="12 6 12 12 16 14"
-                        /></svg
-                    >
-                    Recebida em: {new Date(
-                        viewingMessage.created_at,
-                    ).toLocaleDateString("pt-BR")} às {new Date(
-                        viewingMessage.created_at,
-                    ).toLocaleTimeString("pt-BR")}
-                </div>
-
-                <div
-                    class="prose prose-sm max-w-none text-text-primary whitespace-pre-wrap leading-relaxed bg-bg-primary/30 p-6 rounded-2xl border border-border-ui"
-                >
-                    {viewingMessage.content}
-                </div>
-            </div>
-
-            <!-- Modal Footer -->
-            <div
-                class="px-6 py-4 border-t border-border-ui bg-bg-primary/50 flex justify-end gap-3"
-            >
-                <button
-                    onclick={closeMessage}
-                    class="px-6 py-2.5 rounded-xl font-bold text-sm bg-text-primary/5 text-text-primary hover:bg-text-primary/10 transition-colors"
-                >
-                    Fechar
-                </button>
-                <button
-                    onclick={() => {
-                        deleteMessage(viewingMessage.id);
-                        closeMessage();
-                    }}
-                    class="px-6 py-2.5 rounded-xl font-bold text-sm bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-colors"
-                >
-                    Excluir Mensagem
-                </button>
-            </div>
-        </div>
-    </div>
 {/if}

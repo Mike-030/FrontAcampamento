@@ -57,10 +57,29 @@
 
     let isServo = $derived(subscriptionTypeText.includes("Servo"));
     let sector1 = $state("");
-    let sector2 = $state("");
 
-    function handleSubscribe() {
-        onSubscribe(event.id, isServo ? "Servo" : "Campista", sector1, sector2);
+    let showPaymentModal = $state(false);
+    let isProcessingPayment = $state(false);
+
+    function handleSubscribeClick() {
+        if (eventFee > 0) {
+            showPaymentModal = true;
+        } else {
+            finalizeSubscription();
+        }
+    }
+
+    function finalizeSubscription() {
+        showPaymentModal = false;
+        onSubscribe(event.id, isServo ? "Servo" : "Campista", sector1 === 'none' ? null : sector1, null);
+    }
+
+    function simulatePayment() {
+        isProcessingPayment = true;
+        setTimeout(() => {
+            isProcessingPayment = false;
+            finalizeSubscription();
+        }, 2000);
     }
 </script>
 
@@ -254,22 +273,12 @@
                     <h3 class="text-sm font-bold uppercase tracking-wider text-text-secondary">Preferência de Setor</h3>
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex-1">
-                            <label for="sector1" class="block text-xs font-bold text-text-secondary mb-1 uppercase tracking-wider">1ª Opção <span class="text-brand">*</span></label>
+                            <label for="sector1" class="block text-xs font-bold text-text-secondary mb-1 uppercase tracking-wider">Opção de Setor <span class="text-brand">*</span></label>
                             <select id="sector1" bind:value={sector1} required class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-brand transition-colors">
                                 <option value="">Selecione...</option>
+                                <option value="none">Sem setor de preferência</option>
                                 {#each event.category.sectors as sector}
                                     <option value={sector.id}>{sector.name}</option>
-                                {/each}
-                            </select>
-                        </div>
-                        <div class="flex-1">
-                            <label for="sector2" class="block text-xs font-bold text-text-secondary mb-1 uppercase tracking-wider">2ª Opção</label>
-                            <select id="sector2" bind:value={sector2} class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-brand transition-colors">
-                                <option value="">Selecione (Opcional)...</option>
-                                {#each event.category.sectors as sector}
-                                    {#if sector.id != sector1}
-                                        <option value={sector.id}>{sector.name}</option>
-                                    {/if}
                                 {/each}
                             </select>
                         </div>
@@ -305,7 +314,7 @@
                 </div>
 
                 <button
-                    onclick={handleSubscribe}
+                    onclick={handleSubscribeClick}
                     disabled={isServo && !sector1}
                     class="w-full md:w-auto px-10 py-5 bg-brand text-white rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-brand/20 hover:-translate-y-1 hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:brightness-100"
                 >
@@ -315,3 +324,43 @@
         </div>
     </div>
 </div>
+
+{#if showPaymentModal}
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-bg-primary border border-border-ui w-full max-w-md rounded-[3rem] p-8 shadow-2xl relative overflow-hidden">
+            <h3 class="text-2xl font-black mb-6 text-center">Pagamento da Inscrição</h3>
+            <p class="text-text-secondary text-center text-sm font-bold uppercase tracking-wider mb-8">
+                Valor: <span class="text-brand">R$ {parseFloat(eventFee).toFixed(2).replace(".", ",")}</span>
+            </p>
+            
+            <div class="flex flex-col gap-4">
+                {#if isProcessingPayment}
+                    <div class="flex flex-col items-center justify-center py-8">
+                        <div class="w-12 h-12 border-4 border-brand border-t-transparent rounded-full animate-spin mb-4"></div>
+                        <p class="text-sm font-bold text-text-secondary uppercase tracking-widest animate-pulse">Processando Pagamento...</p>
+                    </div>
+                {:else}
+                    <div class="bg-bg-secondary p-6 rounded-3xl border border-border-ui text-center mb-4">
+                        <p class="text-xs text-text-secondary mb-2">Simulação de Pagamento via PIX</p>
+                        <div class="w-48 h-48 bg-white mx-auto border-4 border-border-ui rounded-xl mb-4 flex items-center justify-center">
+                            <span class="text-border-ui font-black uppercase tracking-widest text-xs">QR CODE</span>
+                        </div>
+                    </div>
+                    
+                    <button
+                        onclick={simulatePayment}
+                        class="w-full px-6 py-4 bg-brand text-white font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-brand/20 hover:brightness-110 active:scale-95 transition-all"
+                    >
+                        Simular Pagamento
+                    </button>
+                    <button
+                        onclick={() => showPaymentModal = false}
+                        class="w-full px-6 py-4 bg-bg-secondary text-text-primary font-black uppercase tracking-widest rounded-2xl hover:bg-border-ui transition-all"
+                    >
+                        Cancelar
+                    </button>
+                {/if}
+            </div>
+        </div>
+    </div>
+{/if}

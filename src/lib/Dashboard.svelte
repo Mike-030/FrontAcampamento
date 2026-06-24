@@ -13,6 +13,9 @@
     import SectorManager from "./components/SectorManager.svelte";
     import ManageActivities from "./components/ManageActivities.svelte";
     import InboxTab from "./components/InboxTab.svelte";
+    import QuestionManager from "./components/QuestionManager.svelte";
+    import ReviewPanel from "./components/ReviewPanel.svelte";
+    import QuestionnaireForm from "./components/QuestionnaireForm.svelte";
 
     import { token as auth_token, user as auth_user, setLogout, updateUser } from '$lib/stores/auth.js';
     import { goto } from '$app/navigation';
@@ -26,6 +29,7 @@
     let activeTab = $state("events"); // Aba ativa (events, subscriptions, profile, etc.)
     let selectedEvent = $state(null); // Evento selecionado para detalhes ou edição
     let selectedInboxMessage = $state(null); // Mensagem selecionada para visualização
+    let selectedSubscriptionId = $state(null); // ID da inscrição selecionada para responder questionário
     let userData = $state( // Dados do usuário logado
         $auth_user || {}
     );
@@ -430,6 +434,10 @@
                 {subscriptions}
                 onGoToEvents={() => (activeTab = "events")}
                 {requestCancelSubscription}
+                onOpenQuestionnaire={(id) => {
+                    selectedSubscriptionId = id;
+                    activeTab = "questionnaire";
+                }}
             />
         {:else if activeTab === "users"}
             <!-- Componente: Lista de Usuários (Admin) -->
@@ -469,6 +477,10 @@
                 {token}
                 {fetchEvents}
                 {requestDeleteEvent}
+                onEditEvent={(evt) => {
+                    selectedEvent = evt;
+                    activeTab = "event_form";
+                }}
             />
         {:else if activeTab === "raffle" && isAdmin}
             <!-- Componente: Painel de Sorteio (Admin) -->
@@ -476,6 +488,22 @@
         {:else if activeTab === "sectors" && isAdmin}
             <!-- Componente: Gerenciamento de Setores (Admin) -->
             <SectorManager {token} />
+        {:else if activeTab === "questions_admin" && isAdmin}
+            <QuestionManager {token} />
+        {:else if activeTab === "counselor_review" && isAdmin}
+            <ReviewPanel />
+        {:else if activeTab === "questionnaire" && selectedSubscriptionId}
+            <QuestionnaireForm
+                {token}
+                preRegistrationId={selectedSubscriptionId}
+                onBack={() => (activeTab = "subscriptions")}
+                {showModal}
+                {closeModal}
+                onSuccess={() => {
+                    activeTab = "subscriptions";
+                    fetchSubscriptions();
+                }}
+            />
         {/if}
     </main>
 

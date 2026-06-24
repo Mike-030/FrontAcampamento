@@ -2,7 +2,8 @@
     let {
         subscriptions = [],
         onGoToEvents,
-        requestCancelSubscription
+        requestCancelSubscription,
+        onOpenQuestionnaire
     } = $props();
 
     let mySubSearchQuery = $state("");
@@ -49,20 +50,35 @@
                 </div>
                 <p class="text-text-secondary text-sm leading-relaxed mb-4">
                     <strong>Status:</strong>
-                    {sub.paid_the_fee ? "Confirmado" : "Pagamento pendente"} <br />
+                    {#if sub.is_approved}
+                        <span class="text-green-500 font-bold">Inscrição Confirmada</span>
+                    {:else if sub.paid_the_fee}
+                        <span>Aguardando Sorteio/Avaliação</span>
+                    {:else}
+                        <span>Pagamento pendente</span>
+                    {/if}
+                    <br />
                     <strong>Tipo:</strong>
                     {sub.subscription_type} <br />
                     <strong>Sorteado:</strong>
                     {sub.was_selected ? "Sim" : "Não"}
                 </p>
-                <div class="flex justify-end items-center pt-6 border-t border-border-ui mt-4">
-                    <button
-                        onclick={() => requestCancelSubscription(sub.id)}
-                        class="px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl text-[10px] font-bold transition-all uppercase tracking-wider"
-                    >
-                        Cancelar Inscrição
-                    </button>
-                </div>
+                {#if sub.subscription_type === 'Campista' && sub.was_selected && !sub.has_answered_form}
+                    <div class="flex justify-end items-center pt-6 border-t border-border-ui mt-4">
+                        <button
+                            onclick={() => onOpenQuestionnaire(sub.id)}
+                            class="px-6 py-3 bg-brand text-white hover:brightness-110 rounded-xl text-xs font-black transition-all uppercase tracking-wider shadow-lg"
+                        >
+                            Prosseguir com a inscrição
+                        </button>
+                    </div>
+                {:else if sub.has_answered_form && !sub.is_approved}
+                    <div class="flex justify-end items-center pt-6 border-t border-border-ui mt-4">
+                        <span class="text-xs font-bold text-text-secondary uppercase tracking-widest">
+                            Aguardando Avaliação dos Conselheiros
+                        </span>
+                    </div>
+                {/if}
             </div>
         {/each}
     </div>

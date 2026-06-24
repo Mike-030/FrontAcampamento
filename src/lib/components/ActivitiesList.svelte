@@ -123,20 +123,20 @@
         </div>
 
         {#if isAdmin}
-            <div class="flex items-center gap-3">
-                <input
-                    id="show-past"
-                    type="checkbox"
-                    bind:checked={showPastEvents}
-                    class="w-5 h-5 accent-brand rounded border-border-ui"
-                />
-                <label
-                    for="show-past"
-                    class="text-sm font-bold text-text-secondary cursor-pointer hover:text-text-primary transition-colors"
-                >
+            <label class="flex items-center gap-3 cursor-pointer group">
+                <div class="relative">
+                    <input 
+                        type="checkbox" 
+                        bind:checked={showPastEvents}
+                        class="sr-only"
+                    >
+                    <div class="w-10 h-6 bg-bg-secondary border-2 border-border-ui rounded-full transition-colors group-hover:border-brand peer-checked:bg-brand"></div>
+                    <div class="absolute top-1 left-1 bg-text-secondary w-4 h-4 rounded-full transition-transform duration-300 {showPastEvents ? 'translate-x-4 bg-white' : ''}"></div>
+                </div>
+                <span class="text-sm font-bold text-text-secondary group-hover:text-text-primary transition-colors">
                     Exibir atividades passadas
-                </label>
-            </div>
+                </span>
+            </label>
         {/if}
     </div>
 </div>

@@ -14,16 +14,23 @@
         details: null,
     });
 
+    let isViewingList = $state(false);
+    let listData = $state([]);
+    let listTitle = $state("");
+    let listLoading = $state(false);
+
+    let showPast = $state(false);
+
     const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
     $effect(() => {
-        fetchRaffleData();
+        fetchRaffleData(showPast);
     });
 
-    async function fetchRaffleData() {
+    async function fetchRaffleData(includePast) {
         try {
             loading = true;
-            const response = await fetch(`${API_URL}/v1/raffles`, {
+            const response = await fetch(`${API_URL}/v1/raffles?include_past=${includePast ? '1' : '0'}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     Accept: "application/json",
@@ -63,7 +70,7 @@
                     message: data.message,
                     details: data.data,
                 };
-                await fetchRaffleData();
+                await fetchRaffleData(showPast);
             } else {
                 notification = {
                     show: true,
@@ -108,7 +115,7 @@
                     message: data.message,
                     details: data.data,
                 };
-                await fetchRaffleData();
+                await fetchRaffleData(showPast);
             } else {
                 notification = {
                     show: true,
@@ -162,11 +169,46 @@
     function closeNotification() {
         notification.show = false;
     }
+
+    async function viewRaffleList(activityId, activityName, type) {
+        listTitle = `Lista de ${type}s - ${activityName}`;
+        isViewingList = true;
+        listLoading = true;
+        listData = [];
+        try {
+            const response = await fetch(`${API_URL}/v1/raffles/${activityId}/list?type=${type}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                listData = data.data || [];
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            listLoading = false;
+        }
+    }
 </script>
 
 <div class="space-y-8">
-    <div>
-        <h2 class="text-3xl font-black mb-6">Menu de Sorteios</h2>
+    <div class="flex items-center justify-between flex-wrap gap-4 mb-6">
+        <h2 class="text-3xl font-black">Menu de Sorteios</h2>
+        
+        <label class="flex items-center gap-3 cursor-pointer group">
+            <div class="relative">
+                <input 
+                    type="checkbox" 
+                    bind:checked={showPast}
+                    class="sr-only"
+                >
+                <div class="w-10 h-6 bg-bg-secondary border-2 border-border-ui rounded-full transition-colors group-hover:border-brand peer-checked:bg-brand"></div>
+                <div class="absolute top-1 left-1 bg-text-secondary w-4 h-4 rounded-full transition-transform duration-300 {showPast ? 'translate-x-4 bg-white' : ''}"></div>
+            </div>
+            <span class="text-sm font-bold text-text-secondary group-hover:text-text-primary transition-colors">
+                Exibir acampamentos passados
+            </span>
+        </label>
     </div>
 
     {#if notification.show}
@@ -280,7 +322,69 @@
         </div>
     {/if}
 
-    {#if loading}
+    {#if isViewingList}
+        <div class="space-y-6 animate-in fade-in duration-300">
+            <div class="flex items-center gap-4 border-b border-border-ui pb-4">
+                <button onclick={() => isViewingList = false} class="flex items-center gap-2 px-4 py-2 rounded-xl text-text-secondary hover:text-text-primary hover:bg-bg-secondary transition-all font-medium text-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                    Voltar
+                </button>
+                <h3 class="font-black text-lg text-text-primary">
+                    {listTitle}
+                </h3>
+            </div>
+            <div class="bg-bg-secondary rounded-3xl border border-border-ui overflow-hidden shadow-sm p-6">
+                {#if listLoading}
+                    <div class="text-center py-10 text-text-secondary animate-pulse">Carregando lista...</div>
+                {:else}
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="border-b border-border-ui text-text-secondary uppercase text-[10px] tracking-wider">
+                                    <th class="p-3 font-bold">Posição</th>
+                                    <th class="p-3 font-bold">Nome</th>
+                                    <th class="p-3 font-bold">Setor Preferido</th>
+                                    <th class="p-3 font-bold text-center">Confirmação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {#each listData as item, i}
+                                    <tr class="border-b border-border-ui/50 hover:bg-bg-primary/30 {item.is_quitter ? 'opacity-50' : ''}">
+                                        <td class="p-3">
+                                            {#if item.is_selected}
+                                                <span class="px-2 py-1 bg-green-500/10 text-green-500 rounded font-bold text-xs">Sorteado</span>
+                                            {:else}
+                                                <span class="px-2 py-1 bg-amber-500/10 text-amber-500 rounded font-bold text-xs">Remanescente #{item.substitute_position}</span>
+                                            {/if}
+                                        </td>
+                                        <td class="p-3 font-medium text-text-primary">
+                                            {item.name}
+                                            {#if item.is_quitter}
+                                                <span class="ml-2 text-[10px] text-red-500 font-bold uppercase">(Desistente)</span>
+                                            {/if}
+                                        </td>
+                                        <td class="p-3 text-text-secondary">{item.preferred_sector}</td>
+                                        <td class="p-3 text-center">
+                                            {#if item.is_confirmed}
+                                                <span class="inline-block px-2 py-1 bg-green-500/10 text-green-500 rounded font-bold text-xs">Pago/Confirmado</span>
+                                            {:else}
+                                                <span class="inline-block px-2 py-1 bg-text-secondary/10 text-text-secondary rounded font-bold text-xs">Pendente</span>
+                                            {/if}
+                                        </td>
+                                    </tr>
+                                {/each}
+                                {#if listData.length === 0}
+                                    <tr>
+                                        <td colspan="4" class="p-6 text-center text-text-secondary">Nenhum inscrito encontrado.</td>
+                                    </tr>
+                                {/if}
+                            </tbody>
+                        </table>
+                    </div>
+                {/if}
+            </div>
+        </div>
+    {:else if loading}
         <div
             class="flex flex-col items-center justify-center py-20 text-text-secondary"
         >
@@ -427,17 +531,6 @@
                                 <p class="text-sm font-black text-text-primary">
                                     {formatDate(camping.raffle_camper_date)}
                                 </p>
-                                {#if isDateReached(camping.raffle_camper_date)}
-                                    <span
-                                        class="inline-block mt-1 text-[9px] font-bold text-green-400 uppercase tracking-widest"
-                                        >Data atingida ✓</span
-                                    >
-                                {:else}
-                                    <span
-                                        class="inline-block mt-1 text-[9px] font-bold text-amber-400 uppercase tracking-widest"
-                                        >Aguardando</span
-                                    >
-                                {/if}
                             </div>
                             <div
                                 class="p-3 bg-bg-primary/40 rounded-xl border border-border-ui"
@@ -450,17 +543,6 @@
                                 <p class="text-sm font-black text-text-primary">
                                     {formatDate(camping.raffle_servant_date)}
                                 </p>
-                                {#if isDateReached(camping.raffle_servant_date)}
-                                    <span
-                                        class="inline-block mt-1 text-[9px] font-bold text-green-400 uppercase tracking-widest"
-                                        >Data atingida ✓</span
-                                    >
-                                {:else}
-                                    <span
-                                        class="inline-block mt-1 text-[9px] font-bold text-amber-400 uppercase tracking-widest"
-                                        >Aguardando</span
-                                    >
-                                {/if}
                             </div>
                         </div>
 
@@ -470,11 +552,12 @@
                         >
                             <!-- Botão Sortear Campistas -->
                             {#if camping.camper_raffle_done}
-                                <div
-                                    class="flex items-center justify-center gap-2 px-4 py-4 bg-green-500/10 border border-green-500/20 text-green-400 rounded-2xl text-xs font-black uppercase tracking-widest"
+                                <button
+                                    onclick={() => viewRaffleList(camping.activity_id, camping.name, 'Campista')}
+                                    class="flex items-center justify-center gap-2 px-4 py-4 bg-brand text-white shadow-lg shadow-brand/20 hover:-translate-y-0.5 hover:brightness-110 active:scale-95 transition-all rounded-2xl text-xs font-black uppercase tracking-widest cursor-pointer"
                                 >
-                                    Sorteado ({camping.selected_campers})
-                                </div>
+                                    Ver Lista
+                                </button>
                             {:else}
                                 <button
                                     onclick={() =>
@@ -502,11 +585,12 @@
 
                             <!-- Botão Sortear Servos -->
                             {#if camping.servant_raffle_done}
-                                <div
-                                    class="flex items-center justify-center gap-2 px-4 py-4 bg-green-500/10 border border-green-500/20 text-green-400 rounded-2xl text-xs font-black uppercase tracking-widest"
+                                <button
+                                    onclick={() => viewRaffleList(camping.activity_id, camping.name, 'Servo')}
+                                    class="flex items-center justify-center gap-2 px-4 py-4 bg-brand text-white shadow-lg shadow-brand/20 hover:-translate-y-0.5 hover:brightness-110 active:scale-95 transition-all rounded-2xl text-xs font-black uppercase tracking-widest cursor-pointer"
                                 >
-                                    Sorteado ({camping.selected_servants})
-                                </div>
+                                    Ver Lista
+                                </button>
                             {:else}
                                 <button
                                     onclick={() =>
