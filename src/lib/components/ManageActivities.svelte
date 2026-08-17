@@ -3,6 +3,8 @@
 
     let { events = [], token, fetchEvents, requestDeleteEvent, currentPage = 1, totalPages = 1 } = $props();
 
+    const API_URL = import.meta.env.VITE_API_URL;
+
     let eventSearchQuery = $state("");
     let isEditingEvent = $state(false);
     let selectedEvent = $state(null);
@@ -24,7 +26,44 @@
         })
     );
 
+    let isViewingSubscribers = $state(false);
+    let subscribersList = $state([]);
+    let loadingSubscribers = $state(false);
+    let subscribersCurrentPage = $state(1);
+    let subscribersTotalPages = $state(1);
 
+    async function openSubscribersList(event, page = 1) {
+        selectedEvent = event;
+        isViewingSubscribers = true;
+        loadingSubscribers = true;
+        try {
+            const response = await fetch(`${API_URL}/v1/subscriptions?activity_id=${event.id}&page=${page}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept: "application/json",
+                },
+            });
+            const data = await response.json();
+            if (response.ok) {
+                subscribersList = data.data || [];
+                subscribersCurrentPage = data.meta?.current_page || 1;
+                subscribersTotalPages = data.meta?.last_page || 1;
+            } else {
+                console.error("Erro ao buscar inscritos", data);
+                subscribersList = [];
+            }
+        } catch (err) {
+            console.error("Erro de conexão", err);
+        } finally {
+            loadingSubscribers = false;
+        }
+    }
+
+    function closeSubscribersList() {
+        isViewingSubscribers = false;
+        selectedEvent = null;
+        subscribersList = [];
+    }
 
     function openEditModal(event) {
         selectedEvent = event;
@@ -70,6 +109,83 @@
             fetchEvents();
         }}
     />
+{:else if isViewingSubscribers}
+    <div class="mb-6">
+        <button
+            onclick={closeSubscribersList}
+            class="mb-4 flex items-center gap-2 text-text-secondary hover:text-brand font-bold transition-colors"
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"><path d="m15 18-6-6 6-6" /></svg
+            >
+            Voltar para a Lista
+        </button>
+    </div>
+    
+    <div class="bg-bg-secondary border border-border-ui rounded-[2.5rem] p-8 shadow-xl">
+        <h3 class="text-2xl font-black mb-6">Inscritos na Atividade: {selectedEvent?.name}</h3>
+        
+        {#if loadingSubscribers}
+            <div class="flex justify-center items-center py-12">
+                <div class="w-10 h-10 border-4 border-brand border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        {:else if subscribersList.length === 0}
+            <div class="text-center py-12 bg-bg-secondary/30 rounded-[2rem] border-2 border-dashed border-border-ui uppercase tracking-widest">
+                <p class="text-text-secondary text-xs font-bold">Nenhum usuário inscrito nesta atividade.</p>
+            </div>
+        {:else}
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-text-primary">
+                    <thead class="text-xs uppercase bg-bg-primary border-b border-border-ui">
+                        <tr>
+                            <th class="px-6 py-4 font-bold text-text-secondary">Nome</th>
+                            <th class="px-6 py-4 font-bold text-text-secondary">Email</th>
+                            <th class="px-6 py-4 font-bold text-text-secondary">CPF</th>
+                            <th class="px-6 py-4 font-bold text-text-secondary">Tipo de Inscrição</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {#each subscribersList as sub}
+                            <tr class="border-b border-border-ui hover:bg-bg-primary/50 transition-colors">
+                                <td class="px-6 py-4 font-medium">{sub.user?.name || '-'}</td>
+                                <td class="px-6 py-4 text-text-secondary">{sub.user?.email || '-'}</td>
+                                <td class="px-6 py-4">{sub.user?.masked_cpf || sub.user?.cpf || '-'}</td>
+                                <td class="px-6 py-4">
+                                    <span class="px-3 py-1 bg-brand/10 text-brand rounded-full text-xs font-bold">{sub.subscription_type}</span>
+                                </td>
+                            </tr>
+                        {/each}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="flex justify-between items-center mt-6">
+                <button
+                    disabled={subscribersCurrentPage === 1}
+                    onclick={() => openSubscribersList(selectedEvent, subscribersCurrentPage - 1)}
+                    class="px-6 py-2 bg-bg-secondary border border-border-ui text-text-primary rounded-xl font-bold disabled:opacity-50 hover:bg-border-ui transition-all cursor-pointer disabled:cursor-not-allowed"
+                >
+                    Página Anterior
+                </button>
+                <span class="text-sm font-bold text-text-secondary">Página {subscribersCurrentPage} de {subscribersTotalPages}</span>
+                <button
+                    disabled={subscribersCurrentPage === subscribersTotalPages}
+                    onclick={() => openSubscribersList(selectedEvent, subscribersCurrentPage + 1)}
+                    class="px-6 py-2 bg-brand text-white rounded-xl font-bold disabled:opacity-50 hover:brightness-110 transition-all cursor-pointer disabled:cursor-not-allowed shadow-lg shadow-brand/20"
+                >
+                    Próxima Página
+                </button>
+            </div>
+        {/if}
+    </div>
 {:else}
     <h2 class="text-3xl font-black mb-6">Gerenciar Atividades</h2>
     <div class="mb-6 flex gap-4 items-center">
@@ -155,10 +271,10 @@
                                 >Nome</th
                             >
                             <th class="px-6 py-4 font-bold text-text-secondary"
-                                >Categoria</th
-                            >
-                            <th class="px-6 py-4 font-bold text-text-secondary"
                                 >Data Início</th
+                            >
+                            <th class="px-6 py-4 font-bold text-text-secondary text-center"
+                                >Inscritos</th
                             >
                             <th
                                 class="px-6 py-4 font-bold text-text-secondary text-right"
@@ -175,21 +291,33 @@
                                     >{event.name}</td
                                 >
                                 <td class="px-6 py-4">
-                                    {#if event.category}
-                                        <span
-                                            class="px-3 py-1 bg-brand/10 text-brand rounded-full text-xs font-bold"
-                                            >{event.category.name}</span
-                                        >
-                                    {/if}
-                                </td>
-                                <td class="px-6 py-4">
                                     {event.start_date
                                         ? new Date(
                                               event.start_date,
                                           ).toLocaleDateString("pt-BR")
                                         : "N/A"}
                                 </td>
+                                <td class="px-6 py-4 text-center font-medium">
+                                    {event.pre_registrations_count || 0}
+                                </td>
                                 <td class="px-6 py-4 flex justify-end gap-2">
+                                    <button
+                                        onclick={() => openSubscribersList(event)}
+                                        class="p-2 bg-text-primary/5 text-blue-500 rounded-lg hover:bg-blue-500/10 transition-colors"
+                                        title="Ver Inscritos"
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2.5"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            ><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                    </button>
                                     <button
                                         onclick={() => openEditModal(event)}
                                         class="p-2 bg-text-primary/5 text-brand rounded-lg hover:bg-brand/10 transition-colors"
