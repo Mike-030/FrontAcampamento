@@ -23,6 +23,9 @@
     // Estado principal do Dashboard
     /** @type {any[]} */
     let events = $state([]); // Lista de eventos disponíveis
+    let eventsCurrentPage = $state(1);
+    let eventsTotalPages = $state(1);
+
     /** @type {any[]} */
     let subscriptions = $state([]); // Lista de inscrições do usuário
     let loading = $state(true); // Controle de carregamento global
@@ -86,12 +89,15 @@
     });
 
     // Função para buscar lista de atividades da API
-    async function fetchEvents() {
+    async function fetchEvents(page = 1, searchQuery = "") {
         try {
             loading = true;
-            const endpoint = isAdmin
-                ? `${API_URL}/v1/activities`
-                : `${API_URL}/v1/activities?available=true`;
+            let endpoint = isAdmin
+                ? `${API_URL}/v1/activities?page=${page}`
+                : `${API_URL}/v1/activities?available=true&page=${page}`;
+            if (searchQuery.trim()) {
+                endpoint += `&search=${encodeURIComponent(searchQuery.trim())}`;
+            }
             const response = await fetch(endpoint, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -101,6 +107,8 @@
             const data = await response.json();
             if (response.ok) {
                 events = data.data || [];
+                eventsCurrentPage = data.meta?.current_page || 1;
+                eventsTotalPages = data.meta?.last_page || 1;
             }
         } catch (err) {
             console.error("Erro ao buscar atividades:", err);
@@ -422,7 +430,9 @@
                 {events}
                 {isAdmin}
                 {fetchEvents}
-                {openEventForm}
+                currentPage={eventsCurrentPage}
+                totalPages={eventsTotalPages}
+                openEventForm={openEventForm}
                 {openEventDetails}
             />
         {:else if activeTab === "inbox"}
@@ -473,10 +483,12 @@
         {:else if activeTab === "manage_activities" && isAdmin}
             <!-- Componente: Gerenciamento de Atividades (Admin) -->
             <ManageActivities
-                {events}
                 {token}
+                {events}
                 {fetchEvents}
-                {requestDeleteEvent}
+                currentPage={eventsCurrentPage}
+                totalPages={eventsTotalPages}
+                requestDeleteEvent={requestDeleteEvent}
                 onEditEvent={(evt) => {
                     selectedEvent = evt;
                     activeTab = "event_form";
@@ -491,7 +503,7 @@
         {:else if activeTab === "questions_admin" && isAdmin}
             <QuestionManager {token} />
         {:else if activeTab === "counselor_review" && isAdmin}
-            <ReviewPanel />
+            <ReviewPanel {token} {events} {showModal} {closeModal} />
         {:else if activeTab === "questionnaire" && selectedSubscriptionId}
             <QuestionnaireForm
                 {token}

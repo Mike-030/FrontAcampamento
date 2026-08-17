@@ -263,11 +263,13 @@
                         <line x1="12" x2="12.01" y1="17" y2="17" />
                     </svg>
                     {#if isExpanded}
-                        <span class="font-medium whitespace-nowrap">Perguntas</span>
+                        <span class="font-medium whitespace-nowrap"
+                            >Perguntas</span
+                        >
                     {/if}
                 </li>
 
-                <!-- Link: Avaliar Inscrições -->
+                <!-- Link: Aprovar Inscrições -->
                 <!-- svelte-ignore a11y_click_events_have_key_events -->
                 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
                 <li
@@ -278,7 +280,7 @@
                         : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer {isExpanded
                         ? 'p-3 gap-3 justify-start'
                         : 'w-12 h-12 justify-center mx-auto'}"
-                    title="Avaliar Inscrições"
+                    title="Aprovar Inscrições"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -292,15 +294,17 @@
                         stroke-linejoin="round"
                         class="flex-shrink-0"
                     >
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                        <polyline points="14 2 14 8 20 8" />
+                        <path
+                            d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                        />
                         <path d="m9 15 2 2 4-4" />
                     </svg>
                     {#if isExpanded}
-                        <span class="font-medium whitespace-nowrap">Avaliar Inscrições</span>
+                        <span class="font-medium whitespace-nowrap"
+                            >Aprovar Inscrições</span
+                        >
                     {/if}
                 </li>
-
                 <!-- Link: Setores -->
                 <!-- svelte-ignore a11y_click_events_have_key_events -->
                 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->

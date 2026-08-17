@@ -43,6 +43,11 @@
     <div class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8 text-text-primary">
         {#each filteredMySubscriptions as sub}
             <div class="bg-bg-secondary border border-border-ui p-8 rounded-[2.5rem] hover:shadow-2xl hover:-translate-y-1 transition-all group overflow-hidden relative">
+                {#if sub.is_approved}
+                    <div class="absolute top-0 right-0 bg-green-500 text-white text-[10px] font-black px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm z-10">
+                        Inscrição Aprovada
+                    </div>
+                {/if}
                 <div class="flex justify-between items-start mb-6">
                     <h3 class="text-2xl font-black group-hover:text-brand transition-colors line-clamp-1">
                         {sub.event?.name || "Inscrição"}
@@ -76,6 +81,13 @@
                     <div class="flex justify-end items-center pt-6 border-t border-border-ui mt-4">
                         <span class="text-xs font-bold text-text-secondary uppercase tracking-widest">
                             Aguardando Avaliação dos Conselheiros
+                        </span>
+                    </div>
+                {:else if sub.is_approved}
+                    <div class="flex justify-end items-center pt-6 border-t border-border-ui mt-4">
+                        <span class="text-xs font-bold text-green-500 uppercase tracking-widest flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                            Inscrição Aprovada pelos Conselheiros
                         </span>
                     </div>
                 {/if}

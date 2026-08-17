@@ -61,7 +61,7 @@
             
             // Initialize formData
             questions.forEach(q => {
-                formData[q.id] = q.type === 'checkbox' ? [] : "";
+                formData[q.id] = q.type === 'Fechada (Múltipla Escolha)' ? [] : "";
             });
 
         } catch (err) {
@@ -180,12 +180,44 @@
                             <span class="text-brand">*</span>
                         </label>
 
-                        <textarea 
-                            required 
-                            bind:value={formData[q.id]}
-                            rows="4"
-                            class="w-full bg-bg-primary border-2 border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand focus:outline-none transition-colors"
-                        ></textarea>
+                        {#if q.type === 'Fechada (Única Escolha)' && q.options}
+                            <div class="space-y-3 mt-4">
+                                {#each q.options as opt}
+                                    <label class="flex items-center gap-3 p-4 border border-border-ui rounded-xl cursor-pointer hover:bg-bg-primary transition-colors">
+                                        <input
+                                            type="radio"
+                                            name="question_{q.id}"
+                                            value={opt.text}
+                                            bind:group={formData[q.id]}
+                                            class="w-5 h-5 text-brand focus:ring-brand accent-brand"
+                                        />
+                                        <span class="text-text-primary font-medium">{opt.text}</span>
+                                    </label>
+                                {/each}
+                            </div>
+                        {:else if q.type === 'Fechada (Múltipla Escolha)' && q.options}
+                            <div class="space-y-3 mt-4">
+                                {#each q.options as opt}
+                                    <label class="flex items-center gap-3 p-4 border border-border-ui rounded-xl cursor-pointer hover:bg-bg-primary transition-colors">
+                                        <input
+                                            type="checkbox"
+                                            value={opt.text}
+                                            checked={formData[q.id].includes(opt.text)}
+                                            onchange={(e) => handleCheckbox(q.id, opt.text, e.target.checked)}
+                                            class="w-5 h-5 text-brand rounded focus:ring-brand accent-brand"
+                                        />
+                                        <span class="text-text-primary font-medium">{opt.text}</span>
+                                    </label>
+                                {/each}
+                            </div>
+                        {:else}
+                            <textarea 
+                                required 
+                                bind:value={formData[q.id]}
+                                rows="4"
+                                class="w-full bg-bg-primary border-2 border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand focus:outline-none transition-colors mt-4"
+                            ></textarea>
+                        {/if}
                     </div>
                 {/each}
 

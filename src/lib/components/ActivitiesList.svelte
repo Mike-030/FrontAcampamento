@@ -5,6 +5,8 @@
         fetchEvents,
         openEventForm,
         openEventDetails,
+        currentPage = 1,
+        totalPages = 1,
     } = $props();
 
     let eventSearchQuery = $state("");
@@ -335,5 +337,23 @@
                 </div>
             </div>
         {/each}
+    </div>
+    
+    <div class="flex justify-between items-center mt-8">
+        <button
+            disabled={currentPage === 1}
+            onclick={() => fetchEvents(currentPage - 1)}
+            class="px-6 py-2 bg-bg-secondary border border-border-ui text-text-primary rounded-xl font-bold disabled:opacity-50 hover:bg-border-ui transition-all cursor-pointer disabled:cursor-not-allowed"
+        >
+            Página Anterior
+        </button>
+        <span class="text-sm font-bold text-text-secondary">Página {currentPage} de {totalPages}</span>
+        <button
+            disabled={currentPage === totalPages}
+            onclick={() => fetchEvents(currentPage + 1)}
+            class="px-6 py-2 bg-brand text-white rounded-xl font-bold disabled:opacity-50 hover:brightness-110 transition-all cursor-pointer disabled:cursor-not-allowed shadow-lg shadow-brand/20"
+        >
+            Próxima Página
+        </button>
     </div>
 {/if}

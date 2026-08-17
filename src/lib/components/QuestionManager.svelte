@@ -14,6 +14,8 @@
     let currentQuestionId = $state(null);
     let formText = $state("");
     let formOrder = $state(0);
+    let formType = $state("Aberta");
+    let formOptions = $state([]);
 
     // Linking state
     let selectedCategoryId = $state("");
@@ -75,6 +77,8 @@
         currentQuestionId = q.id;
         formText = q.text;
         formOrder = q.order;
+        formType = q.type || "Aberta";
+        formOptions = q.options ? q.options.map(o => ({text: o.text})) : [];
     }
 
     function resetForm() {
@@ -82,6 +86,16 @@
         currentQuestionId = null;
         formText = "";
         formOrder = 0;
+        formType = "Aberta";
+        formOptions = [];
+    }
+
+    function addOption() {
+        formOptions = [...formOptions, { text: "" }];
+    }
+
+    function removeOption(idx) {
+        formOptions = formOptions.filter((_, i) => i !== idx);
     }
 
     async function saveQuestion(e) {
@@ -95,7 +109,9 @@
             const payload = {
                 text: formText,
                 order: formOrder || 0,
+                type: formType,
                 section_id: 1, // default section
+                options: formType.startsWith('Fechada') ? formOptions : []
             };
 
             const res = await fetch(url, {
@@ -282,6 +298,61 @@
                                 class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:outline-none focus:border-brand transition-colors"
                             />
                         </div>
+                        <div>
+                            <label
+                                class="block text-sm font-bold text-text-secondary mb-1 uppercase tracking-wider"
+                            >
+                                Tipo
+                            </label>
+                            <select
+                                bind:value={formType}
+                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:outline-none focus:border-brand transition-colors"
+                            >
+                                <option value="Aberta">Aberta</option>
+                                <option value="Fechada (Única Escolha)">Fechada (Única Escolha)</option>
+                                <option value="Fechada (Múltipla Escolha)">Fechada (Múltipla Escolha)</option>
+                            </select>
+                        </div>
+                        {#if formType.startsWith('Fechada')}
+                            <div class="space-y-3 border border-border-ui p-4 rounded-xl bg-bg-primary/50">
+                                <div class="flex items-center justify-between">
+                                    <label class="block text-sm font-bold text-text-secondary uppercase tracking-wider">
+                                        Opções de Resposta
+                                    </label>
+                                    <button
+                                        type="button"
+                                        onclick={addOption}
+                                        class="text-brand text-sm font-bold bg-brand/10 px-3 py-1.5 rounded-lg hover:bg-brand/20 transition-colors"
+                                    >
+                                        + Adicionar Opção
+                                    </button>
+                                </div>
+                                
+                                {#if formOptions.length === 0}
+                                    <p class="text-xs text-text-secondary text-center py-2">Nenhuma opção cadastrada. Adicione opções para esta pergunta fechada.</p>
+                                {/if}
+                                
+                                {#each formOptions as option, idx}
+                                    <div class="flex items-center gap-2">
+                                        <input
+                                            type="text"
+                                            required
+                                            bind:value={formOptions[idx].text}
+                                            placeholder="Texto da opção..."
+                                            class="flex-1 bg-bg-primary border border-border-ui rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-brand transition-colors"
+                                        />
+                                        <button
+                                            type="button"
+                                            onclick={() => removeOption(idx)}
+                                            class="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors flex-shrink-0"
+                                            title="Remover opção"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                        </button>
+                                    </div>
+                                {/each}
+                            </div>
+                        {/if}
                         <div class="pt-4 flex gap-3">
                             <button
                                 type="submit"
@@ -331,7 +402,7 @@
                                             <p
                                                 class="text-[10px] text-text-secondary uppercase tracking-widest mt-1"
                                             >
-                                                Ordem: {q.order}
+                                                Ordem: {q.order} | Tipo: {q.type || "Aberta"}
                                             </p>
                                         </div>
                                         <div
@@ -484,7 +555,7 @@
                                                 <p
                                                     class="text-[10px] text-text-secondary uppercase tracking-widest mt-1"
                                                 >
-                                                    Ordem: {lq.order}
+                                                    Ordem: {lq.order} | Tipo: {lq.type || "Aberta"}
                                                 </p>
                                             </div>
                                             <button

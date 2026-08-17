@@ -9,6 +9,8 @@
     let users = $state([]);
     let loadingUsers = $state(true);
     let searchQuery = $state("");
+    let currentPage = $state(1);
+    let totalPages = $state(1);
 
     let selectedUser = $state(null);
     let userSubscriptions = $state([]);
@@ -32,18 +34,7 @@
         modalState.isOpen = false;
     }
 
-    let filteredUsers = $derived(
-        users.filter(
-            (u) =>
-                (u.name &&
-                    u.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-                (u.email &&
-                    u.email
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase())) ||
-                (u.cpf && u.cpf.includes(searchQuery)),
-        ),
-    );
+
 
     let filteredSubscriptions = $derived(
         userSubscriptions.filter(
@@ -63,10 +54,14 @@
         fetchUsers();
     });
 
-    async function fetchUsers() {
+    async function fetchUsers(page = 1) {
         try {
             loadingUsers = true;
-            const response = await fetch(`${API_URL}/v1/users`, {
+            let url = `${API_URL}/v1/users?page=${page}`;
+            if (searchQuery.trim()) {
+                url += `&search=${encodeURIComponent(searchQuery.trim())}`;
+            }
+            const response = await fetch(url, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     Accept: "application/json",
@@ -75,6 +70,8 @@
             const data = await response.json();
             if (response.ok) {
                 users = data.data || [];
+                currentPage = data.meta?.current_page || 1;
+                totalPages = data.meta?.last_page || 1;
             } else {
                 console.error("Erro ao buscar usuários:", data);
             }
@@ -223,9 +220,16 @@
                 <input
                     type="text"
                     bind:value={searchQuery}
+                    onkeydown={(e) => { if (e.key === 'Enter') fetchUsers(1); }}
                     placeholder="Pesquisar por nome, email ou CPF..."
                     class="w-full bg-bg-secondary border-2 border-border-ui text-text-primary p-4 rounded-2xl focus:border-brand focus:ring-4 focus:ring-brand/20 transition-all outline-none"
                 />
+                <button
+                    onclick={() => fetchUsers(1)}
+                    class="px-8 py-4 bg-brand text-white rounded-2xl font-bold hover:brightness-110 transition-all shrink-0 shadow-lg shadow-brand/20"
+                >
+                    Buscar
+                </button>
             </div>
 
             {#if loadingUsers}
@@ -237,7 +241,7 @@
                     ></div>
                     <p class="animate-pulse">Carregando usuários...</p>
                 </div>
-            {:else if filteredUsers.length === 0}
+            {:else if users.length === 0}
                 <div
                     class="text-center py-24 bg-bg-secondary/30 rounded-[3rem] border-2 border-dashed border-border-ui uppercase tracking-widest"
                 >
@@ -276,16 +280,16 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {#each filteredUsers as user}
-                                    <tr
-                                        class="border-b border-border-ui hover:bg-text-primary/5 transition-colors"
-                                    >
+                            {#each users as user}
+                                <tr
+                                    class="border-b border-border-ui hover:bg-bg-primary/50 transition-colors"
+                                >
                                         <td class="px-6 py-4 font-medium"
                                             >{user.name}</td
                                         >
                                         <td class="px-6 py-4">{user.email}</td>
                                         <td class="px-6 py-4"
-                                            >{formatCPF(user.cpf)}</td
+                                            >{user.masked_cpf || formatCPF(user.cpf)}</td
                                         >
                                         <td
                                             class="px-6 py-4 flex justify-end gap-2"
@@ -304,6 +308,24 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+
+                <div class="flex justify-between items-center mt-6">
+                    <button
+                        disabled={currentPage === 1}
+                        onclick={() => fetchUsers(currentPage - 1)}
+                        class="px-6 py-2 bg-bg-secondary border border-border-ui text-text-primary rounded-xl font-bold disabled:opacity-50 hover:bg-border-ui transition-all cursor-pointer disabled:cursor-not-allowed"
+                    >
+                        Página Anterior
+                    </button>
+                    <span class="text-sm font-bold text-text-secondary">Página {currentPage} de {totalPages}</span>
+                    <button
+                        disabled={currentPage === totalPages}
+                        onclick={() => fetchUsers(currentPage + 1)}
+                        class="px-6 py-2 bg-brand text-white rounded-xl font-bold disabled:opacity-50 hover:brightness-110 transition-all cursor-pointer disabled:cursor-not-allowed shadow-lg shadow-brand/20"
+                    >
+                        Próxima Página
+                    </button>
                 </div>
             {/if}
         </div>
@@ -358,7 +380,7 @@
                         >
                             CPF
                         </p>
-                        <p class="font-medium">{formatCPF(selectedUser.cpf)}</p>
+                        <p class="font-medium">{selectedUser.masked_cpf || formatCPF(selectedUser.cpf)}</p>
                     </div>
                     <div>
                         <p

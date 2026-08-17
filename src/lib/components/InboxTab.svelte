@@ -1,10 +1,10 @@
 <script>
     import { onMount } from "svelte";
+    import { token as auth_token } from "$lib/stores/auth.js";
 
     let { selectedMessage = $bindable(null) } = $props();
 
     const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
-    let token = "";
 
     let messages = $state([]);
     let loading = $state(false);
@@ -18,16 +18,15 @@
     });
 
     onMount(() => {
-        token = localStorage.getItem("auth_token") || "";
         fetchMessages();
     });
 
     async function fetchMessages() {
-        if (!token) return;
+        if (!$auth_token) return;
         loading = true;
         try {
             const res = await fetch(`${API_URL}/v1/inbox-messages`, {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: { Authorization: `Bearer ${$auth_token}` },
             });
             if (res.ok) {
                 const data = await res.json();
@@ -44,7 +43,7 @@
         try {
             const res = await fetch(`${API_URL}/v1/inbox-messages/${id}/read`, {
                 method: "PUT",
-                headers: { Authorization: `Bearer ${token}` },
+                headers: { Authorization: `Bearer ${$auth_token}` },
             });
             if (res.ok) {
                 messages = messages.map((m) =>
@@ -59,7 +58,7 @@
         try {
             const res = await fetch(`${API_URL}/v1/inbox-messages/${id}`, {
                 method: "DELETE",
-                headers: { Authorization: `Bearer ${token}` },
+                headers: { Authorization: `Bearer ${$auth_token}` },
             });
             if (res.ok) {
                 messages = messages.filter((m) => m.id !== id);

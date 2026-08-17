@@ -1,20 +1,30 @@
 <script>
     import ActivityForm from "./ActivityForm.svelte";
 
-    let { events = [], token, fetchEvents, requestDeleteEvent } = $props();
+    let { events = [], token, fetchEvents, requestDeleteEvent, currentPage = 1, totalPages = 1 } = $props();
 
     let eventSearchQuery = $state("");
     let isEditingEvent = $state(false);
     let selectedEvent = $state(null);
+    let typeFilter = $state("all"); // "all", "camping", "event"
 
     let filteredEvents = $derived(
         events.filter((e) => {
-            const matchesSearch =
-                e.name &&
-                e.name.toLowerCase().includes(eventSearchQuery.toLowerCase());
-            return matchesSearch;
-        }),
+            if (
+                typeFilter === "camping" &&
+                e.activitable_type !== "App\\Models\\Camping"
+            )
+                return false;
+            if (
+                typeFilter === "event" &&
+                e.activitable_type !== "App\\Models\\Event"
+            )
+                return false;
+            return true;
+        })
     );
+
+
 
     function openEditModal(event) {
         selectedEvent = event;
@@ -61,14 +71,52 @@
         }}
     />
 {:else}
-    <div class="mb-6">
-        <h2 class="text-3xl font-black mb-6">Gerenciar Atividades</h2>
+    <h2 class="text-3xl font-black mb-6">Gerenciar Atividades</h2>
+    <div class="mb-6 flex gap-4 items-center">
         <input
             type="text"
             bind:value={eventSearchQuery}
+            onkeydown={(e) => { if (e.key === 'Enter') fetchEvents(1, eventSearchQuery); }}
             placeholder="Pesquisar por nome da atividade..."
             class="w-full bg-bg-secondary border-2 border-border-ui text-text-primary p-4 rounded-2xl focus:border-brand focus:ring-4 focus:ring-brand/20 transition-all outline-none"
         />
+        <button
+            onclick={() => fetchEvents(1, eventSearchQuery)}
+            class="px-8 py-4 bg-brand text-white rounded-2xl font-bold hover:brightness-110 transition-all shrink-0 shadow-lg shadow-brand/20"
+        >
+            Buscar
+        </button>
+    </div>
+
+    <!-- Filtro por tipo -->
+    <div class="mb-6 flex flex-wrap gap-2">
+        <button
+            onclick={() => (typeFilter = "all")}
+            class="px-4 py-2 rounded-xl text-xs font-bold transition-all {typeFilter ===
+            'all'
+                ? 'bg-brand text-white shadow-lg shadow-brand/20'
+                : 'bg-bg-secondary border border-border-ui text-text-secondary hover:text-text-primary'}"
+        >
+            Todos
+        </button>
+        <button
+            onclick={() => (typeFilter = "camping")}
+            class="px-4 py-2 rounded-xl text-xs font-bold transition-all {typeFilter ===
+            'camping'
+                ? 'bg-brand text-white shadow-lg shadow-brand/20'
+                : 'bg-bg-secondary border border-border-ui text-text-secondary hover:text-text-primary'}"
+        >
+            Acampamentos
+        </button>
+        <button
+            onclick={() => (typeFilter = "event")}
+            class="px-4 py-2 rounded-xl text-xs font-bold transition-all {typeFilter ===
+            'event'
+                ? 'bg-brand text-white shadow-lg shadow-brand/20'
+                : 'bg-bg-secondary border border-border-ui text-text-secondary hover:text-text-primary'}"
+        >
+            Eventos
+        </button>
     </div>
 
     {#if events.length === 0}
@@ -84,6 +132,14 @@
             >
                 Recarregar
             </button>
+        </div>
+    {:else if filteredEvents.length === 0}
+        <div
+            class="text-center py-24 bg-bg-secondary/30 rounded-[3rem] border-2 border-dashed border-border-ui uppercase tracking-widest"
+        >
+            <p class="text-text-secondary text-xs font-bold mb-6">
+                Nenhuma atividade corresponde ao filtro.
+            </p>
         </div>
     {:else}
         <div
@@ -113,7 +169,7 @@
                     <tbody>
                         {#each filteredEvents as event}
                             <tr
-                                class="border-b border-border-ui hover:bg-text-primary/5 transition-colors"
+                                class="border-b border-border-ui hover:bg-bg-primary/50 transition-colors"
                             >
                                 <td class="px-6 py-4 font-medium"
                                     >{event.name}</td
@@ -183,6 +239,24 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+
+        <div class="flex justify-between items-center mt-6">
+            <button
+                disabled={currentPage === 1}
+                onclick={() => fetchEvents(currentPage - 1)}
+                class="px-6 py-2 bg-bg-secondary border border-border-ui text-text-primary rounded-xl font-bold disabled:opacity-50 hover:bg-border-ui transition-all cursor-pointer disabled:cursor-not-allowed"
+            >
+                Página Anterior
+            </button>
+            <span class="text-sm font-bold text-text-secondary">Página {currentPage} de {totalPages}</span>
+            <button
+                disabled={currentPage === totalPages}
+                onclick={() => fetchEvents(currentPage + 1)}
+                class="px-6 py-2 bg-brand text-white rounded-xl font-bold disabled:opacity-50 hover:brightness-110 transition-all cursor-pointer disabled:cursor-not-allowed shadow-lg shadow-brand/20"
+            >
+                Próxima Página
+            </button>
         </div>
     {/if}
 {/if}

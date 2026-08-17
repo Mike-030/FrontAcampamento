@@ -14,9 +14,7 @@
         event.activitable?.camper_fee || event.activitable?.ticket_price || 0,
     );
 
-    let isCamping = $derived(
-        event.activitable_type === "App\\Models\\Camping",
-    );
+    let isCamping = $derived(event.activitable_type === "App\\Models\\Camping");
 
     let subscriptionTypeText = $derived.by(() => {
         let text = "Inscrições Abertas";
@@ -29,7 +27,8 @@
                 ? new Date(event.activitable.camper_registration_end_date)
                 : null;
 
-            const servantStart = event.activitable.servant_registration_start_date
+            const servantStart = event.activitable
+                .servant_registration_start_date
                 ? new Date(event.activitable.servant_registration_start_date)
                 : null;
             const servantEnd = event.activitable.servant_registration_end_date
@@ -71,15 +70,16 @@
 
     function finalizeSubscription() {
         showPaymentModal = false;
-        onSubscribe(event.id, isServo ? "Servo" : "Campista", sector1 === 'none' ? null : sector1, null);
+        onSubscribe(
+            event.id,
+            isServo ? "Servo" : "Campista",
+            sector1 === "none" ? null : sector1,
+            null,
+        );
     }
 
     function simulatePayment() {
-        isProcessingPayment = true;
-        setTimeout(() => {
-            isProcessingPayment = false;
-            finalizeSubscription();
-        }, 2000);
+        finalizeSubscription();
     }
 </script>
 
@@ -121,7 +121,9 @@
                         {event.name}
                     </h2>
                     {#if event.category}
-                        <span class="text-xs font-bold text-text-secondary">{event.category.name}</span>
+                        <span class="text-xs font-bold text-text-secondary"
+                            >{event.category.name}</span
+                        >
                     {/if}
                 </div>
                 <div class="flex flex-col items-end gap-2">
@@ -184,18 +186,18 @@
                         >
                     </li>
                     {#if !isCamping}
-                    <li
-                        class="flex justify-between items-center p-5 bg-bg-primary/50 rounded-2xl border border-border-ui"
-                    >
-                        <span
-                            class="text-[10px] text-text-secondary uppercase tracking-widest font-bold"
-                            >Vagas</span
+                        <li
+                            class="flex justify-between items-center p-5 bg-bg-primary/50 rounded-2xl border border-border-ui"
                         >
-                        <span
-                            class="text-text-primary font-black text-sm md:text-base"
-                            >{event.total_vacancies || "Ilimitadas"}</span
-                        >
-                    </li>
+                            <span
+                                class="text-[10px] text-text-secondary uppercase tracking-widest font-bold"
+                                >Vagas</span
+                            >
+                            <span
+                                class="text-text-primary font-black text-sm md:text-base"
+                                >{event.total_vacancies || "Ilimitadas"}</span
+                            >
+                        </li>
                     {/if}
                     <li
                         class="flex justify-between items-center p-5 bg-bg-primary/50 rounded-2xl border border-border-ui"
@@ -220,7 +222,8 @@
                             >
                             <span
                                 class="text-text-primary font-black text-sm md:text-base"
-                                >{event.activitable.minimal_age} - {event.activitable.maximal_age} anos</span
+                                >{event.activitable.minimal_age} - {event
+                                    .activitable.maximal_age} anos</span
                             >
                         </li>
                     {/if}
@@ -270,15 +273,33 @@
             <!-- Setores (apenas para servos) -->
             {#if isServo && event.category?.sectors && event.category.sectors.length > 0}
                 <div class="pt-8 border-t border-border-ui space-y-4">
-                    <h3 class="text-sm font-bold uppercase tracking-wider text-text-secondary">Preferência de Setor</h3>
+                    <h3
+                        class="text-sm font-bold uppercase tracking-wider text-text-secondary"
+                    >
+                        Preferência de Setor
+                    </h3>
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex-1">
-                            <label for="sector1" class="block text-xs font-bold text-text-secondary mb-1 uppercase tracking-wider">Opção de Setor <span class="text-brand">*</span></label>
-                            <select id="sector1" bind:value={sector1} required class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-brand transition-colors">
+                            <label
+                                for="sector1"
+                                class="block text-xs font-bold text-text-secondary mb-1 uppercase tracking-wider"
+                                >Opção de Setor <span class="text-brand">*</span
+                                ></label
+                            >
+                            <select
+                                id="sector1"
+                                bind:value={sector1}
+                                required
+                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-brand transition-colors"
+                            >
                                 <option value="">Selecione...</option>
-                                <option value="none">Sem setor de preferência</option>
+                                <option value="none"
+                                    >Sem setor de preferência</option
+                                >
                                 {#each event.category.sectors as sector}
-                                    <option value={sector.id}>{sector.name}</option>
+                                    <option value={sector.id}
+                                        >{sector.name}</option
+                                    >
                                 {/each}
                             </select>
                         </div>
@@ -326,27 +347,54 @@
 </div>
 
 {#if showPaymentModal}
-    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div class="bg-bg-primary border border-border-ui w-full max-w-md rounded-[3rem] p-8 shadow-2xl relative overflow-hidden">
-            <h3 class="text-2xl font-black mb-6 text-center">Pagamento da Inscrição</h3>
-            <p class="text-text-secondary text-center text-sm font-bold uppercase tracking-wider mb-8">
-                Valor: <span class="text-brand">R$ {parseFloat(eventFee).toFixed(2).replace(".", ",")}</span>
+    <div
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+    >
+        <div
+            class="bg-bg-primary border border-border-ui w-full max-w-md rounded-[3rem] p-8 shadow-2xl relative overflow-hidden"
+        >
+            <h3 class="text-2xl font-black mb-6 text-center">
+                Pagamento da Inscrição
+            </h3>
+            <p
+                class="text-text-secondary text-center text-sm font-bold uppercase tracking-wider mb-8"
+            >
+                Valor: <span class="text-brand"
+                    >R$ {parseFloat(eventFee)
+                        .toFixed(2)
+                        .replace(".", ",")}</span
+                >
             </p>
-            
+
             <div class="flex flex-col gap-4">
                 {#if isProcessingPayment}
                     <div class="flex flex-col items-center justify-center py-8">
-                        <div class="w-12 h-12 border-4 border-brand border-t-transparent rounded-full animate-spin mb-4"></div>
-                        <p class="text-sm font-bold text-text-secondary uppercase tracking-widest animate-pulse">Processando Pagamento...</p>
+                        <div
+                            class="w-12 h-12 border-4 border-brand border-t-transparent rounded-full animate-spin mb-4"
+                        ></div>
+                        <p
+                            class="text-sm font-bold text-text-secondary uppercase tracking-widest animate-pulse"
+                        >
+                            Processando Pagamento...
+                        </p>
                     </div>
                 {:else}
-                    <div class="bg-bg-secondary p-6 rounded-3xl border border-border-ui text-center mb-4">
-                        <p class="text-xs text-text-secondary mb-2">Simulação de Pagamento via PIX</p>
-                        <div class="w-48 h-48 bg-white mx-auto border-4 border-border-ui rounded-xl mb-4 flex items-center justify-center">
-                            <span class="text-border-ui font-black uppercase tracking-widest text-xs">QR CODE</span>
+                    <div
+                        class="bg-bg-secondary p-6 rounded-3xl border border-border-ui text-center mb-4"
+                    >
+                        <p class="text-xs text-text-secondary mb-2">
+                            Simulação de Pagamento via PIX
+                        </p>
+                        <div
+                            class="w-48 h-48 bg-white mx-auto border-4 border-border-ui rounded-xl mb-4 flex items-center justify-center"
+                        >
+                            <span
+                                class="text-border-ui font-black uppercase tracking-widest text-xs"
+                                >QR CODE</span
+                            >
                         </div>
                     </div>
-                    
+
                     <button
                         onclick={simulatePayment}
                         class="w-full px-6 py-4 bg-brand text-white font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-brand/20 hover:brightness-110 active:scale-95 transition-all"
@@ -354,7 +402,7 @@
                         Simular Pagamento
                     </button>
                     <button
-                        onclick={() => showPaymentModal = false}
+                        onclick={() => (showPaymentModal = false)}
                         class="w-full px-6 py-4 bg-bg-secondary text-text-primary font-black uppercase tracking-widest rounded-2xl hover:bg-border-ui transition-all"
                     >
                         Cancelar
