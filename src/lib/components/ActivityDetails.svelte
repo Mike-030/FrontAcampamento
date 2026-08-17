@@ -1,66 +1,44 @@
 <script>
     let { event, onSubscribe, onBack, showModal = null } = $props();
 
-    let endDate = $derived.by(() => {
-        let date = event.start_date ? new Date(event.start_date) : null;
-        if (date && event.duration_days) {
-            date.setDate(date.getDate() + event.duration_days);
-        }
-        return date;
-    });
-
-    // Calcula o valor com base no tipo de atividade (Acampamento ou Evento)
     let eventFee = $derived(
         event.activitable?.camper_fee || event.activitable?.ticket_price || 0,
     );
 
     let isCamping = $derived(event.activitable_type === "App\\Models\\Camping");
 
-    let subscriptionTypeText = $derived.by(() => {
-        let text = "Inscrições Abertas";
-        if (isCamping && event.activitable) {
-            const now = new Date();
-            const camperStart = event.activitable.camper_registration_start_date
-                ? new Date(event.activitable.camper_registration_start_date)
-                : null;
-            const camperEnd = event.activitable.camper_registration_end_date
-                ? new Date(event.activitable.camper_registration_end_date)
-                : null;
-
-            const servantStart = event.activitable
-                .servant_registration_start_date
-                ? new Date(event.activitable.servant_registration_start_date)
-                : null;
-            const servantEnd = event.activitable.servant_registration_end_date
-                ? new Date(event.activitable.servant_registration_end_date)
-                : null;
-
-            if (
-                camperStart &&
-                camperEnd &&
-                now >= camperStart &&
-                now <= camperEnd
-            ) {
-                text = "Inscrições Abertas - Campista";
-            } else if (
-                servantStart &&
-                servantEnd &&
-                now >= servantStart &&
-                now <= servantEnd
-            ) {
-                text = "Inscrições Abertas - Servo";
-            }
-        }
-        return text;
+    let isCamperOpen = $derived.by(() => {
+        if (!isCamping || !event.activitable) return true;
+        const now = new Date();
+        const camperStart = event.activitable.camper_registration_start_date ? new Date(event.activitable.camper_registration_start_date) : null;
+        const camperEnd = event.activitable.camper_registration_end_date ? new Date(event.activitable.camper_registration_end_date) : null;
+        return camperStart && camperEnd && now >= camperStart && now <= camperEnd;
     });
 
-    let isServo = $derived(subscriptionTypeText.includes("Servo"));
+    let isServoOpen = $derived.by(() => {
+        if (!isCamping || !event.activitable) return false;
+        const now = new Date();
+        const servantStart = event.activitable.servant_registration_start_date ? new Date(event.activitable.servant_registration_start_date) : null;
+        const servantEnd = event.activitable.servant_registration_end_date ? new Date(event.activitable.servant_registration_end_date) : null;
+        return servantStart && servantEnd && now >= servantStart && now <= servantEnd;
+    });
+
+    let activeTab = $state("Campista");
+
+    $effect(() => {
+        if (!isCamping) {
+            activeTab = "Participante";
+        } else if (!isCamperOpen && isServoOpen) {
+            activeTab = "Servo";
+        }
+    });
+
     let sector1 = $state("");
+    let sector2 = $state("");
 
     let isCoupleSubscription = $state(false);
     let spouseCpf = $state("");
 
-    // Formatar CPF enquanto digita
     function handleCpfInput(e) {
         let value = e.target.value.replace(/\D/g, "");
         if (value.length <= 11) {
@@ -77,20 +55,30 @@
     );
 
     function handleSubscribeClick() {
-        if (showCoupleCpf && spouseCpf.replace(/\D/g, "").length !== 11) {
-            if (showModal) {
-                showModal("error", "Por favor, preencha o CPF do cônjuge corretamente.");
-            } else {
-                alert("Por favor, preencha o CPF do cônjuge corretamente.");
+        if (activeTab === "Servo") {
+            if (!sector1 || !sector2) {
+                if (showModal) showModal("error", "Selecione dois setores distintos.");
+                else alert("Selecione dois setores distintos.");
+                return;
             }
+            if (sector1 === sector2) {
+                if (showModal) showModal("error", "Os setores escolhidos devem ser diferentes.");
+                else alert("Os setores escolhidos devem ser diferentes.");
+                return;
+            }
+        }
+
+        if (activeTab === "Campista" && showCoupleCpf && spouseCpf.replace(/\D/g, "").length !== 11) {
+            if (showModal) showModal("error", "Por favor, preencha o CPF do cônjuge corretamente.");
+            else alert("Por favor, preencha o CPF do cônjuge corretamente.");
             return;
         }
 
         onSubscribe(
             event.id,
-            isServo ? "Servo" : "Campista",
-            sector1 === "none" ? null : sector1,
-            null,
+            activeTab,
+            activeTab === "Servo" ? sector1 : null,
+            activeTab === "Servo" ? sector2 : null,
             eventFee,
             showCoupleCpf ? spouseCpf : null
         );
@@ -140,16 +128,6 @@
                         >
                     {/if}
                 </div>
-                <div class="flex flex-col items-end gap-2">
-                    <div
-                        class="px-6 py-3 bg-brand/10 border border-brand/20 text-brand rounded-2xl"
-                    >
-                        <span
-                            class="text-[10px] md:text-xs font-black uppercase tracking-widest text-center block"
-                            >{subscriptionTypeText}</span
-                        >
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -176,28 +154,21 @@
                             class="text-[10px] text-text-secondary uppercase tracking-widest font-bold"
                             >Início</span
                         >
-                        <span
-                            class="text-text-primary font-black text-sm md:text-base"
-                            >{event.start_date
-                                ? new Date(event.start_date).toLocaleDateString(
-                                      "pt-BR",
-                                  )
-                                : "Não definida"}</span
-                        >
-                    </li>
-                    <li
-                        class="flex justify-between items-center p-5 bg-bg-primary/50 rounded-2xl border border-border-ui"
-                    >
-                        <span
-                            class="text-[10px] text-text-secondary uppercase tracking-widest font-bold"
-                            >Término</span
-                        >
-                        <span
-                            class="text-text-primary font-black text-sm md:text-base"
-                            >{endDate
-                                ? endDate.toLocaleDateString("pt-BR")
-                                : "Não definida"}</span
-                        >
+                        <div class="flex items-center gap-3">
+                            <span
+                                class="text-text-primary font-black text-sm md:text-base"
+                                >{event.start_date
+                                    ? new Date(event.start_date).toLocaleDateString(
+                                          "pt-BR",
+                                      )
+                                    : "Não definida"}</span
+                            >
+                            {#if event.duration_days}
+                                <span class="px-2 py-1 bg-brand/10 text-brand text-[10px] font-black uppercase tracking-widest rounded-lg">
+                                    {event.duration_days} {event.duration_days > 1 ? 'dias' : 'dia'}
+                                </span>
+                            {/if}
+                        </div>
                     </li>
                     {#if !isCamping}
                         <li
@@ -284,45 +255,77 @@
                 {/if}
             </div>
 
-            <!-- Setores (apenas para servos) -->
-            {#if isServo && event.category?.sectors && event.category.sectors.length > 0}
-                <div class="pt-8 border-t border-border-ui space-y-4">
-                    <h3
-                        class="text-sm font-bold uppercase tracking-wider text-text-secondary"
-                    >
-                        Preferência de Setor
-                    </h3>
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <div class="flex-1">
-                            <label
-                                for="sector1"
-                                class="block text-xs font-bold text-text-secondary mb-1 uppercase tracking-wider"
-                                >Opção de Setor <span class="text-brand">*</span
-                                ></label
-                            >
-                            <select
-                                id="sector1"
-                                bind:value={sector1}
-                                required
-                                class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-brand transition-colors"
-                            >
-                                <option value="">Selecione...</option>
-                                <option value="none"
-                                    >Sem setor de preferência</option
-                                >
-                                {#each event.category.sectors as sector}
-                                    <option value={sector.id}
-                                        >{sector.name}</option
-                                    >
-                                {/each}
-                            </select>
-                        </div>
+            <!-- Tabs de Inscrição -->
+            {#if isCamping}
+                <div class="pt-8 border-t border-border-ui space-y-6">
+                    <div class="flex gap-4 border-b border-border-ui">
+                        <button
+                            class="pb-3 text-sm font-bold uppercase tracking-wider transition-colors border-b-2 {activeTab === 'Campista' ? 'border-brand text-brand' : 'border-transparent text-text-secondary hover:text-text-primary'}"
+                            onclick={() => activeTab = 'Campista'}
+                        >
+                            Campista
+                        </button>
+                        <button
+                            class="pb-3 text-sm font-bold uppercase tracking-wider transition-colors border-b-2 {activeTab === 'Servo' ? 'border-brand text-brand' : 'border-transparent text-text-secondary hover:text-text-primary'}"
+                            onclick={() => activeTab = 'Servo'}
+                        >
+                            Servo
+                        </button>
                     </div>
+
+                    {#if activeTab === "Campista"}
+                        {#if !isCamperOpen}
+                            <div class="p-4 bg-error/10 border border-error/20 text-error rounded-xl text-sm font-bold">
+                                As inscrições para Campista estão fechadas no momento.
+                            </div>
+                        {:else}
+                            <div class="p-4 bg-brand/10 border border-brand/20 text-brand rounded-xl text-sm font-bold">
+                                Inscrições abertas para Campista!
+                            </div>
+                        {/if}
+                    {/if}
+
+                    {#if activeTab === "Servo"}
+                        {#if !isServoOpen}
+                            <div class="p-4 bg-error/10 border border-error/20 text-error rounded-xl text-sm font-bold">
+                                As inscrições para Servo estão fechadas no momento.
+                            </div>
+                        {:else}
+                            <!-- Setores (apenas para servos) -->
+                            {#if event.category?.sectors && event.category.sectors.length > 0}
+                                <div class="space-y-4">
+                                    <h3 class="text-sm font-bold uppercase tracking-wider text-text-secondary">
+                                        Preferência de Setor
+                                    </h3>
+                                    <div class="flex flex-col md:flex-row gap-4">
+                                        <div class="flex-1">
+                                            <label for="sector1" class="block text-xs font-bold text-text-secondary mb-1 uppercase tracking-wider">Opção 1 de Setor <span class="text-brand">*</span></label>
+                                            <select id="sector1" bind:value={sector1} required class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-brand transition-colors">
+                                                <option value="">Selecione...</option>
+                                                {#each event.category.sectors as sector}
+                                                    <option value={sector.id}>{sector.name}</option>
+                                                {/each}
+                                            </select>
+                                        </div>
+                                        <div class="flex-1">
+                                            <label for="sector2" class="block text-xs font-bold text-text-secondary mb-1 uppercase tracking-wider">Opção 2 de Setor <span class="text-brand">*</span></label>
+                                            <select id="sector2" bind:value={sector2} required class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-brand transition-colors">
+                                                <option value="">Selecione...</option>
+                                                {#each event.category.sectors as sector}
+                                                    <option value={sector.id}>{sector.name}</option>
+                                                {/each}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            {/if}
+                        {/if}
+                    {/if}
                 </div>
             {/if}
 
             <!-- Inscrição como Casal -->
-            {#if event.category?.name === "Acampamento Sênior" || event.category?.name === "Acampamento Casais"}
+            {#if activeTab === "Campista" && (event.category?.name === "Acampamento Sênior" || event.category?.name === "Acampamento Casais")}
                 <div class="pt-8 border-t border-border-ui space-y-4">
                     {#if event.category?.name === "Acampamento Sênior"}
                         <label class="flex items-center gap-3 cursor-pointer">
@@ -395,7 +398,7 @@
 
                 <button
                     onclick={handleSubscribeClick}
-                    disabled={isServo && !sector1}
+                    disabled={(activeTab === 'Servo' && !isServoOpen) || (activeTab === 'Campista' && !isCamperOpen)}
                     class="w-full md:w-auto px-10 py-5 bg-brand text-white rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-brand/20 hover:-translate-y-1 hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:brightness-100"
                 >
                     Se Inscrever
