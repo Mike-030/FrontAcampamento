@@ -2,7 +2,7 @@
     import { onMount } from "svelte";
     import { token as auth_token } from "$lib/stores/auth.js";
 
-    let { selectedMessage = $bindable(null) } = $props();
+    let { selectedMessage = $bindable(null), onCoupleInviteAccepted = null, showModal = null, closeModal = null, onPaySubscription = null } = $props();
 
     const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
@@ -66,6 +66,73 @@
         } catch (err) {}
     }
 
+    async function handleCoupleAction(action) {
+        if (!viewingMessage?.action_id) return;
+        const id = viewingMessage.action_id;
+        
+        try {
+            loading = true;
+            const res = await fetch(`${API_URL}/v1/couple-invitations/${id}/${action}`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${$auth_token}` },
+            });
+            if (res.ok) {
+                const data = await res.json();
+                
+                viewingMessage.action_type = null;
+                messages = messages.map(m => m.id === viewingMessage.id ? { ...m, action_type: null } : m);
+
+                if (action === 'accept' && onCoupleInviteAccepted) {
+                    onCoupleInviteAccepted(data.data);
+                } else {
+                    alert(data.message);
+                }
+            } else {
+                const errorData = await res.json();
+                alert(errorData.message || "Erro ao processar convite.");
+            }
+        } catch (err) {
+            alert("Erro de comunicação com o servidor.");
+        } finally {
+            loading = false;
+        }
+    }
+
+    function requestCoupleAction(action) {
+        const actionText = action === 'accept' ? 'aceitar' : 'recusar';
+        
+        if (showModal && closeModal) {
+            if (action === 'accept') {
+                showModal(
+                    "confirm",
+                    "Ao aceitar o convite, você será redirecionado para a tela de pagamento. Deseja continuar?",
+                    () => {
+                        closeModal();
+                        handleCoupleAction(action);
+                    }
+                );
+            } else {
+                showModal(
+                    "confirm",
+                    `Tem certeza que deseja ${actionText} este convite?`,
+                    () => {
+                        closeModal();
+                        handleCoupleAction(action);
+                    }
+                );
+            }
+        } else {
+            if (!confirm(`Tem certeza que deseja ${actionText} este convite?`)) return;
+            handleCoupleAction(action);
+        }
+    }
+
+    function handlePaySubscription(actionId) {
+        if (onPaySubscription) {
+            onPaySubscription(actionId);
+        }
+    }
+
     function openMessage(msg) {
         if (!msg.is_read) {
             markAsRead(msg.id);
@@ -103,9 +170,39 @@
             <span>Recebida em: {new Date(viewingMessage.created_at).toLocaleDateString("pt-BR")} às {new Date(viewingMessage.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
         </div>
         
-        <div class="prose prose-sm max-w-none text-text-primary whitespace-pre-wrap leading-relaxed">
+        <div class="prose prose-sm max-w-none text-text-primary whitespace-pre-wrap leading-relaxed mb-8">
             {viewingMessage.content}
         </div>
+
+        {#if viewingMessage.action_type === 'couple_invitation'}
+            <div class="flex items-center gap-4 border-t border-border-ui/50 pt-6 mt-4">
+                <button
+                    onclick={() => requestCoupleAction('accept')}
+                    disabled={loading}
+                    class="px-6 py-3 bg-brand text-white font-bold uppercase tracking-wider rounded-xl shadow hover:brightness-110 active:scale-95 transition-all disabled:opacity-50"
+                >
+                    Aceitar Convite
+                </button>
+                <button
+                    onclick={() => requestCoupleAction('reject')}
+                    disabled={loading}
+                    class="px-6 py-3 bg-red-500/10 text-red-500 font-bold uppercase tracking-wider rounded-xl hover:bg-red-500 hover:text-white transition-all disabled:opacity-50"
+                >
+                    Recusar
+                </button>
+            </div>
+        {/if}
+
+        {#if viewingMessage.action_type === 'pay_subscription'}
+            <div class="flex items-center gap-4 border-t border-border-ui/50 pt-6 mt-4">
+                <button
+                    onclick={() => handlePaySubscription(viewingMessage.action_id)}
+                    class="px-6 py-3 bg-brand text-white font-bold uppercase tracking-wider rounded-xl shadow hover:brightness-110 active:scale-95 transition-all"
+                >
+                    Realizar Pagamento
+                </button>
+            </div>
+        {/if}
     </div>
 </div>
 {:else}

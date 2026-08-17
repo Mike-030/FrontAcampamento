@@ -1,5 +1,5 @@
 <script>
-    let { event, onSubscribe, onBack } = $props();
+    let { event, onSubscribe, onBack, showModal = null } = $props();
 
     let endDate = $derived.by(() => {
         let date = event.start_date ? new Date(event.start_date) : null;
@@ -57,13 +57,42 @@
     let isServo = $derived(subscriptionTypeText.includes("Servo"));
     let sector1 = $state("");
 
+    let isCoupleSubscription = $state(false);
+    let spouseCpf = $state("");
+
+    // Formatar CPF enquanto digita
+    function handleCpfInput(e) {
+        let value = e.target.value.replace(/\D/g, "");
+        if (value.length <= 11) {
+            value = value.replace(/(\d{3})(\d)/, "$1.$2");
+            value = value.replace(/(\d{3})(\d)/, "$1.$2");
+            value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+            spouseCpf = value;
+        }
+    }
+
+    let showCoupleCpf = $derived(
+        event.category?.name === "Acampamento Casais" || 
+        (event.category?.name === "Acampamento Sênior" && isCoupleSubscription)
+    );
+
     function handleSubscribeClick() {
+        if (showCoupleCpf && spouseCpf.replace(/\D/g, "").length !== 11) {
+            if (showModal) {
+                showModal("error", "Por favor, preencha o CPF do cônjuge corretamente.");
+            } else {
+                alert("Por favor, preencha o CPF do cônjuge corretamente.");
+            }
+            return;
+        }
+
         onSubscribe(
             event.id,
             isServo ? "Servo" : "Campista",
             sector1 === "none" ? null : sector1,
             null,
-            eventFee
+            eventFee,
+            showCoupleCpf ? spouseCpf : null
         );
     }
 </script>
@@ -289,6 +318,51 @@
                             </select>
                         </div>
                     </div>
+                </div>
+            {/if}
+
+            <!-- Inscrição como Casal -->
+            {#if event.category?.name === "Acampamento Sênior" || event.category?.name === "Acampamento Casais"}
+                <div class="pt-8 border-t border-border-ui space-y-4">
+                    {#if event.category?.name === "Acampamento Sênior"}
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                bind:checked={isCoupleSubscription}
+                                class="w-5 h-5 rounded border-border-ui text-brand focus:ring-brand"
+                            />
+                            <span class="text-sm font-bold text-text-primary uppercase tracking-wider">
+                                Inscrição como casal
+                            </span>
+                        </label>
+                    {/if}
+
+                    {#if showCoupleCpf}
+                        <div class="mt-4">
+                            <h3 class="text-sm font-bold uppercase tracking-wider text-text-secondary mb-4">
+                                Dados do Cônjuge
+                            </h3>
+                            <div class="flex flex-col md:flex-row gap-4">
+                                <div class="flex-1">
+                                    <label
+                                        for="spouseCpf"
+                                        class="block text-xs font-bold text-text-secondary mb-1 uppercase tracking-wider"
+                                        >CPF do Cônjuge <span class="text-brand">*</span></label
+                                    >
+                                    <input
+                                        id="spouseCpf"
+                                        type="text"
+                                        placeholder="000.000.000-00"
+                                        bind:value={spouseCpf}
+                                        oninput={handleCpfInput}
+                                        maxlength="14"
+                                        required
+                                        class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-sm text-text-primary focus:outline-none focus:border-brand transition-colors"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    {/if}
                 </div>
             {/if}
 

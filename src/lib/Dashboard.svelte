@@ -151,9 +151,36 @@
      * @param {string|number|null} sector1
      * @param {string|number|null} sector2
      * @param {number} eventFee
+     * @param {string|null} spouseCpf
      */
-    async function subscribe(eventId, type = "Campista", sector1 = null, sector2 = null, eventFee = 0) {
+    async function subscribe(eventId, type = "Campista", sector1 = null, sector2 = null, eventFee = 0, spouseCpf = null) {
         try {
+            if (spouseCpf) {
+                const response = await fetch(`${API_URL}/v1/couple-invitations`, {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                    },
+                    body: JSON.stringify({ activity_id: eventId, spouse_cpf: spouseCpf }),
+                });
+
+                if (response.ok) {
+                    showModal("success", "Convite enviado com sucesso! O seu cônjuge precisa aceitar o convite na caixa de entrada para prosseguir com a inscrição.");
+                    activeTab = "events";
+                    fetchEvents();
+                    return;
+                } else {
+                    const errorData = await response.json();
+                    const errorMessage = errorData.errors
+                        ? Object.values(errorData.errors)[0][0]
+                        : errorData.message;
+                    showModal("error", errorMessage || "Erro ao enviar convite.");
+                    return;
+                }
+            }
+
             const payload = {
                 subscription_date: new Date().toISOString().split("T")[0],
                 subscription_type: type,
@@ -260,14 +287,15 @@
      * @param {string|number|null} sector1
      * @param {string|number|null} sector2
      * @param {number} eventFee
+     * @param {string|null} spouseCpf
      */
-    function requestSubscription(eventId, type = "Campista", sector1 = null, sector2 = null, eventFee = 0) {
+    function requestSubscription(eventId, type = "Campista", sector1 = null, sector2 = null, eventFee = 0, spouseCpf = null) {
         showModal(
             "confirm",
             "Ao confirmar, prosseguiremos com sua inscrição. Deseja continuar?",
             () => {
                 closeModal();
-                subscribe(eventId, type, sector1, sector2, eventFee);
+                subscribe(eventId, type, sector1, sector2, eventFee, spouseCpf);
             },
         );
     }
@@ -478,7 +506,50 @@
             />
         {:else if activeTab === "inbox"}
             <!-- Componente: Caixa de Entrada -->
-            <InboxTab bind:selectedMessage={selectedInboxMessage} />
+            <InboxTab 
+                bind:selectedMessage={selectedInboxMessage}
+                {showModal}
+                {closeModal}
+                onCoupleInviteAccepted={(preReg) => {
+                    const fee = preReg.activity?.activitable?.camper_fee || preReg.activity?.activitable?.ticket_price || 0;
+                    if (fee > 0) {
+                        paymentFee = fee;
+                        createdSubscriptionId = preReg.id;
+                        showPaymentModal = true;
+                    } else {
+                        showModal("success", "Inscrição realizada com sucesso!");
+                        activeTab = "subscriptions";
+                        fetchSubscriptions();
+                    }
+                }}
+                onPaySubscription={async (subscriptionId) => {
+                    const sub = subscriptions.find(s => s.id === subscriptionId);
+                    if (sub) {
+                        const fee = sub.activity?.activitable?.camper_fee || sub.activity?.activitable?.ticket_price || 0;
+                        if (fee > 0 && !sub.is_fee_paid) {
+                            paymentFee = fee;
+                            createdSubscriptionId = sub.id;
+                            showPaymentModal = true;
+                        } else {
+                            showModal("info", "Esta inscrição já está paga ou é gratuita.");
+                        }
+                    } else {
+                        // Fetch again if not loaded
+                        await fetchSubscriptions();
+                        const refetchedSub = subscriptions.find(s => s.id === subscriptionId);
+                        if (refetchedSub) {
+                            const fee = refetchedSub.activity?.activitable?.camper_fee || refetchedSub.activity?.activitable?.ticket_price || 0;
+                            if (fee > 0 && !refetchedSub.is_fee_paid) {
+                                paymentFee = fee;
+                                createdSubscriptionId = refetchedSub.id;
+                                showPaymentModal = true;
+                            } else {
+                                showModal("info", "Esta inscrição já está paga ou é gratuita.");
+                            }
+                        }
+                    }
+                }}
+            />
         {:else if activeTab === "subscriptions"}
             <!-- Componente: Minhas Inscrições -->
             <MySubscriptions
@@ -506,6 +577,7 @@
                 event={selectedEvent}
                 onSubscribe={requestSubscription}
                 onBack={() => (activeTab = "events")}
+                {showModal}
             />
         {:else if activeTab === "event_form"}
             <!-- Componente: Formulário de Criação/Edição de Evento (Admin) -->
