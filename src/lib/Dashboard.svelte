@@ -44,6 +44,11 @@
 
     let isSidebarExpanded = $state(false);
 
+    let showPaymentModal = $state(false);
+    let isProcessingPayment = $state(false);
+    let paymentFee = $state(0);
+    let createdSubscriptionId = $state(null);
+
     // Estado do Modal global para confirmações e alertas
     /** @type {{ isOpen: boolean, type: string, message: string, onConfirm: (() => void) | null }} */
     let modalState = $state({
@@ -145,8 +150,9 @@
      * @param {string} type
      * @param {string|number|null} sector1
      * @param {string|number|null} sector2
+     * @param {number} eventFee
      */
-    async function subscribe(eventId, type = "Campista", sector1 = null, sector2 = null) {
+    async function subscribe(eventId, type = "Campista", sector1 = null, sector2 = null, eventFee = 0) {
         try {
             const payload = {
                 subscription_date: new Date().toISOString().split("T")[0],
@@ -176,9 +182,16 @@
             });
 
             if (response.ok) {
-                showModal("success", "Inscrição realizada com sucesso!");
-                activeTab = "subscriptions";
-                fetchSubscriptions();
+                const responseData = await response.json();
+                if (eventFee > 0) {
+                    paymentFee = eventFee;
+                    createdSubscriptionId = responseData.data?.id;
+                    showPaymentModal = true;
+                } else {
+                    showModal("success", "Inscrição realizada com sucesso!");
+                    activeTab = "subscriptions";
+                    fetchSubscriptions();
+                }
             } else {
                 const errorData = await response.json();
                 const errorMessage = errorData.errors
@@ -246,16 +259,44 @@
      * @param {string} type
      * @param {string|number|null} sector1
      * @param {string|number|null} sector2
+     * @param {number} eventFee
      */
-    function requestSubscription(eventId, type = "Campista", sector1 = null, sector2 = null) {
+    function requestSubscription(eventId, type = "Campista", sector1 = null, sector2 = null, eventFee = 0) {
         showModal(
             "confirm",
-            "Ao confirmar, você será redirecionado para suas inscrições. Deseja continuar?",
+            "Ao confirmar, prosseguiremos com sua inscrição. Deseja continuar?",
             () => {
                 closeModal();
-                subscribe(eventId, type, sector1, sector2);
+                subscribe(eventId, type, sector1, sector2, eventFee);
             },
         );
+    }
+
+    async function simulatePayment() {
+        isProcessingPayment = true;
+        try {
+            if (createdSubscriptionId) {
+                await fetch(`${API_URL}/v1/subscriptions/${createdSubscriptionId}`, {
+                    method: "PUT",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                    },
+                    body: JSON.stringify({ paid_the_fee: true })
+                });
+            }
+        } catch (err) {
+            console.error("Erro ao simular pagamento:", err);
+        }
+        
+        setTimeout(() => {
+            isProcessingPayment = false;
+            showPaymentModal = false;
+            showModal("success", "Pagamento confirmado e inscrição realizada com sucesso!");
+            activeTab = "subscriptions";
+            fetchSubscriptions();
+        }, 1500);
     }
 
     function requestUpdateProfile() {
@@ -520,4 +561,49 @@
     </main>
 
     <Modal {modalState} {closeModal} />
+
+    {#if showPaymentModal}
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div class="bg-bg-primary border border-border-ui w-full max-w-md rounded-[3rem] p-8 shadow-2xl relative overflow-hidden">
+                <h3 class="text-2xl font-black mb-6 text-center">Pagamento da Inscrição</h3>
+                <p class="text-text-secondary text-center text-sm font-bold uppercase tracking-wider mb-8">
+                    Valor: <span class="text-brand">R$ {parseFloat(paymentFee).toFixed(2).replace(".", ",")}</span>
+                </p>
+
+                <div class="flex flex-col gap-4">
+                    {#if isProcessingPayment}
+                        <div class="flex flex-col items-center justify-center py-8">
+                            <div class="w-12 h-12 border-4 border-brand border-t-transparent rounded-full animate-spin mb-4"></div>
+                            <p class="text-sm font-bold text-text-secondary uppercase tracking-widest animate-pulse">Processando Pagamento...</p>
+                        </div>
+                    {:else}
+                        <div class="bg-bg-secondary p-6 rounded-3xl border border-border-ui text-center mb-4">
+                            <p class="text-xs text-text-secondary mb-2">Simulação de Pagamento via PIX</p>
+                            <div class="w-48 h-48 bg-white mx-auto border-4 border-border-ui rounded-xl mb-4 flex items-center justify-center">
+                                <span class="text-border-ui font-black uppercase tracking-widest text-xs">QR CODE</span>
+                            </div>
+                        </div>
+
+                        <button
+                            onclick={simulatePayment}
+                            class="w-full px-6 py-4 bg-brand text-white font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-brand/20 hover:brightness-110 active:scale-95 transition-all"
+                        >
+                            Simular Pagamento
+                        </button>
+                        <button
+                            onclick={() => {
+                                showPaymentModal = false;
+                                showModal("success", "Sua inscrição foi reservada! Você pode realizar o pagamento depois pela aba de inscrições.");
+                                activeTab = "subscriptions";
+                                fetchSubscriptions();
+                            }}
+                            class="w-full px-6 py-4 bg-bg-secondary text-text-primary font-black uppercase tracking-widest rounded-2xl hover:bg-border-ui transition-all"
+                        >
+                            Pagar Depois
+                        </button>
+                    {/if}
+                </div>
+            </div>
+        </div>
+    {/if}
 </div>
