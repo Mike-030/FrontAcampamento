@@ -122,6 +122,40 @@
                 {/if}
             </li>
 
+            <!-- Link: Caixa de Entrada -->
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+            <li
+                onclick={() => (activeTab = "inbox")}
+                class="flex items-center rounded-xl {activeTab === 'inbox'
+                    ? 'bg-brand text-white shadow-lg shadow-brand/20'
+                    : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer {isExpanded
+                    ? 'p-3 gap-3 justify-start'
+                    : 'w-12 h-12 justify-center mx-auto'}"
+                title="Caixa de Entrada"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="flex-shrink-0"
+                >
+                    <rect width="20" height="16" x="2" y="4" rx="2" />
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                </svg>
+                {#if isExpanded}
+                    <span class="font-medium whitespace-nowrap"
+                        >Caixa de Entrada</span
+                    >
+                {/if}
+            </li>
+
             <!-- Funcionalidades Restritas a Administradores -->
             {#if isAdmin}
                 <!-- Link: Gerenciamento de Usuários -->
@@ -269,42 +303,7 @@
                     {/if}
                 </li>
 
-                <!-- Link: Aprovar Inscrições -->
-                <!-- svelte-ignore a11y_click_events_have_key_events -->
-                <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-                <li
-                    onclick={() => (activeTab = "counselor_review")}
-                    class="flex items-center rounded-xl {activeTab ===
-                    'counselor_review'
-                        ? 'bg-brand text-white shadow-lg shadow-brand/20'
-                        : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer {isExpanded
-                        ? 'p-3 gap-3 justify-start'
-                        : 'w-12 h-12 justify-center mx-auto'}"
-                    title="Aprovar Inscrições"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="flex-shrink-0"
-                    >
-                        <path
-                            d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-                        />
-                        <path d="m9 15 2 2 4-4" />
-                    </svg>
-                    {#if isExpanded}
-                        <span class="font-medium whitespace-nowrap"
-                            >Aprovar Inscrições</span
-                        >
-                    {/if}
-                </li>
+
                 <!-- Link: Setores -->
                 <!-- svelte-ignore a11y_click_events_have_key_events -->
                 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->

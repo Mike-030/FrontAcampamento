@@ -25,6 +25,7 @@
     <div class="flex items-center gap-4 relative">
         <Inbox bind:activeTab {onOpenMessage} />
         <!-- Área Clicável: Avatar do Usuário -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div class="relative" onmouseleave={() => (isProfileMenuOpen = false)}>
             <button
                 onclick={() => (isProfileMenuOpen = !isProfileMenuOpen)}
@@ -68,7 +69,24 @@
                                     }}
                                     class="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold hover:bg-brand hover:text-white rounded-xl transition-all text-left text-text-secondary"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h8"></path><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path><path d="M19 16v6"></path><path d="M16 19h6"></path></svg>
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="18"
+                                        height="18"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        ><path
+                                            d="M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h8"
+                                        ></path><path
+                                            d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"
+                                        ></path><path d="M19 16v6"></path><path
+                                            d="M16 19h6"
+                                        ></path></svg
+                                    >
                                     Caixa de Entrada
                                 </button>
                             </li>

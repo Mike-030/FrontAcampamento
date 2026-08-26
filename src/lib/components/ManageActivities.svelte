@@ -32,6 +32,49 @@
     let subscribersCurrentPage = $state(1);
     let subscribersTotalPages = $state(1);
 
+    let showFormModal = $state(false);
+    let viewingSubscriber = $state(null);
+    let viewingAnswers = $state([]);
+    let loadingAnswers = $state(false);
+
+    async function viewForm(sub) {
+        viewingSubscriber = sub;
+        showFormModal = true;
+        
+        if (!sub.has_answered_form) {
+            loadingAnswers = false;
+            viewingAnswers = [];
+            return;
+        }
+        
+        loadingAnswers = true;
+        viewingAnswers = [];
+        try {
+            const res = await fetch(`${API_URL}/v1/answers?pre_registration_id=${sub.id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept: "application/json",
+                },
+            });
+            if (res.ok) {
+                const data = await res.json();
+                viewingAnswers = data.data || [];
+            } else {
+                console.error("Erro ao buscar respostas");
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            loadingAnswers = false;
+        }
+    }
+
+    function closeFormModal() {
+        showFormModal = false;
+        viewingSubscriber = null;
+        viewingAnswers = [];
+    }
+
     async function openSubscribersList(event, page = 1) {
         selectedEvent = event;
         isViewingSubscribers = true;
@@ -150,6 +193,7 @@
                             <th class="px-6 py-4 font-bold text-text-secondary">Email</th>
                             <th class="px-6 py-4 font-bold text-text-secondary">CPF</th>
                             <th class="px-6 py-4 font-bold text-text-secondary">Tipo de Inscrição</th>
+                            <th class="px-6 py-4 font-bold text-text-secondary text-right">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -160,6 +204,16 @@
                                 <td class="px-6 py-4">{sub.user?.masked_cpf || sub.user?.cpf || '-'}</td>
                                 <td class="px-6 py-4">
                                     <span class="px-3 py-1 bg-brand/10 text-brand rounded-full text-xs font-bold">{sub.subscription_type}</span>
+                                </td>
+                                <td class="px-6 py-4 flex justify-end gap-2">
+                                        <button
+                                            onclick={() => viewForm(sub)}
+                                            class="p-2 bg-text-primary/5 text-brand rounded-lg hover:bg-brand/10 transition-colors text-sm font-bold flex items-center gap-2"
+                                            title="Ver Formulário"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                                            Ver Formulário
+                                        </button>
                                 </td>
                             </tr>
                         {/each}
@@ -186,6 +240,61 @@
             </div>
         {/if}
     </div>
+
+    <!-- Modal Visualizar Formulário -->
+    {#if showFormModal && viewingSubscriber}
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div class="bg-bg-secondary w-full max-w-3xl max-h-[90vh] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col border border-border-ui">
+                <div class="p-6 border-b border-border-ui flex items-center justify-between bg-bg-primary/50">
+                    <div>
+                        <h3 class="text-2xl font-black text-text-primary">
+                            Formulário de {viewingSubscriber.user?.name}
+                        </h3>
+                    </div>
+                    <button
+                        onclick={closeFormModal}
+                        class="p-2 text-text-secondary hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-colors"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
+                </div>
+    
+                <div class="p-6 overflow-y-auto flex-1 bg-bg-primary">
+                    {#if loadingAnswers}
+                        <div class="flex justify-center items-center py-12">
+                            <div class="w-10 h-10 border-4 border-brand border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                    {:else if viewingAnswers && viewingAnswers.length > 0}
+                        <div class="space-y-6">
+                            {#each viewingAnswers as answer}
+                                <div class="bg-bg-secondary p-5 rounded-2xl border border-border-ui">
+                                    <p class="text-sm font-black text-brand mb-2">{answer.question?.text || "Pergunta não encontrada"}</p>
+                                    <p class="text-text-primary whitespace-pre-wrap">{answer.answer}</p>
+                                </div>
+                            {/each}
+                        </div>
+                    {:else if !viewingSubscriber.has_answered_form}
+                        <div class="text-center p-12">
+                            <p class="text-text-secondary font-bold">O usuário ainda não enviou o formulário.</p>
+                        </div>
+                    {:else}
+                        <div class="text-center p-12">
+                            <p class="text-text-secondary font-bold">Nenhuma resposta encontrada.</p>
+                        </div>
+                    {/if}
+                </div>
+    
+                <div class="p-6 border-t border-border-ui bg-bg-secondary flex justify-end gap-3">
+                    <button
+                        onclick={closeFormModal}
+                        class="px-6 py-3 bg-bg-primary text-text-secondary font-bold rounded-xl border border-border-ui hover:bg-text-primary/5 transition-colors"
+                    >
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    {/if}
 {:else}
     <h2 class="text-3xl font-black mb-6">Gerenciar Atividades</h2>
     <div class="mb-6 flex gap-4 items-center">
