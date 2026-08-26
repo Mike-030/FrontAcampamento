@@ -18,6 +18,7 @@
     let subSearchQuery = $state("");
 
     let editingSubscription = $state(null);
+    let selectionMethods = $state([]);
 
     let modalState = $state({
         isOpen: false,
@@ -33,8 +34,6 @@
     function closeModal() {
         modalState.isOpen = false;
     }
-
-
 
     let filteredSubscriptions = $derived(
         userSubscriptions.filter(
@@ -52,7 +51,25 @@
 
     onMount(() => {
         fetchUsers();
+        fetchSelectionMethods();
     });
+
+    async function fetchSelectionMethods() {
+        try {
+            const res = await fetch(`${API_URL}/v1/selection-methods`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept: "application/json",
+                },
+            });
+            if (res.ok) {
+                const data = await res.json();
+                selectionMethods = data.data || [];
+            }
+        } catch (err) {
+            console.error("Erro ao buscar métodos de seleção:", err);
+        }
+    }
 
     async function fetchUsers(page = 1) {
         try {
@@ -220,7 +237,9 @@
                 <input
                     type="text"
                     bind:value={searchQuery}
-                    onkeydown={(e) => { if (e.key === 'Enter') fetchUsers(1); }}
+                    onkeydown={(e) => {
+                        if (e.key === "Enter") fetchUsers(1);
+                    }}
                     placeholder="Pesquisar por nome, email ou CPF..."
                     class="w-full bg-bg-secondary border-2 border-border-ui text-text-primary p-4 rounded-2xl focus:border-brand focus:ring-4 focus:ring-brand/20 transition-all outline-none"
                 />
@@ -280,16 +299,17 @@
                                 </tr>
                             </thead>
                             <tbody>
-                            {#each users as user}
-                                <tr
-                                    class="border-b border-border-ui hover:bg-bg-primary/50 transition-colors"
-                                >
+                                {#each users as user}
+                                    <tr
+                                        class="border-b border-border-ui hover:bg-bg-primary/50 transition-colors"
+                                    >
                                         <td class="px-6 py-4 font-medium"
                                             >{user.name}</td
                                         >
                                         <td class="px-6 py-4">{user.email}</td>
                                         <td class="px-6 py-4"
-                                            >{user.masked_cpf || formatCPF(user.cpf)}</td
+                                            >{user.masked_cpf ||
+                                                formatCPF(user.cpf)}</td
                                         >
                                         <td
                                             class="px-6 py-4 flex justify-end gap-2"
@@ -318,7 +338,9 @@
                     >
                         Página Anterior
                     </button>
-                    <span class="text-sm font-bold text-text-secondary">Página {currentPage} de {totalPages}</span>
+                    <span class="text-sm font-bold text-text-secondary"
+                        >Página {currentPage} de {totalPages}</span
+                    >
                     <button
                         disabled={currentPage === totalPages}
                         onclick={() => fetchUsers(currentPage + 1)}
@@ -380,7 +402,10 @@
                         >
                             CPF
                         </p>
-                        <p class="font-medium">{selectedUser.masked_cpf || formatCPF(selectedUser.cpf)}</p>
+                        <p class="font-medium">
+                            {selectedUser.masked_cpf ||
+                                formatCPF(selectedUser.cpf)}
+                        </p>
                     </div>
                     <div>
                         <p
@@ -614,28 +639,6 @@
 
                 <div class="space-y-6">
                     {#if editingSubscription.event?.activitable_type === "App\\Models\\Event"}
-                        <div>
-                            <label
-                                class="block text-xs font-bold uppercase tracking-widest text-text-secondary mb-2"
-                                for="subscription_type"
-                            >
-                                Tipo de Inscrição (Festival)
-                            </label>
-                            <select
-                                id="subscription_type"
-                                bind:value={
-                                    editingSubscription.subscription_type
-                                }
-                                class="w-full bg-bg-primary border-2 border-border-ui text-text-primary p-4 rounded-2xl focus:border-brand focus:ring-4 focus:ring-brand/20 transition-all outline-none"
-                            >
-                                <option value="Campista">Campista</option>
-                                <option value="Servo">Servo</option>
-                                <option value="Participante"
-                                    >Participante</option
-                                >
-                            </select>
-                        </div>
-
                         <div
                             class="flex items-center gap-4 p-4 bg-bg-primary border-2 border-border-ui rounded-2xl"
                         >
@@ -653,25 +656,6 @@
                             </label>
                         </div>
                     {:else}
-                        <div>
-                            <label
-                                class="block text-xs font-bold uppercase tracking-widest text-text-secondary mb-2"
-                                for="subscription_type"
-                            >
-                                Tipo de Inscrição (Acampamento)
-                            </label>
-                            <select
-                                id="subscription_type"
-                                bind:value={
-                                    editingSubscription.subscription_type
-                                }
-                                class="w-full bg-bg-primary border-2 border-border-ui text-text-primary p-4 rounded-2xl focus:border-brand focus:ring-4 focus:ring-brand/20 transition-all outline-none"
-                            >
-                                <option value="Campista">Campista</option>
-                                <option value="Servo">Servo</option>
-                            </select>
-                        </div>
-
                         <div
                             class="flex items-center gap-4 p-4 bg-bg-primary border-2 border-border-ui rounded-2xl"
                         >
@@ -679,14 +663,55 @@
                                 id="was_selected"
                                 type="checkbox"
                                 bind:checked={editingSubscription.was_selected}
+                                onchange={() => {
+                                    if (!editingSubscription.was_selected) {
+                                        editingSubscription.selection_method_id =
+                                            null;
+                                    }
+                                }}
                                 class="w-5 h-5 accent-brand rounded"
                             />
                             <label
                                 class="text-sm font-bold cursor-pointer select-none flex-grow"
                                 for="was_selected"
                             >
-                                Sorteado (Foi selecionado?)
+                                Escolhido
                             </label>
+                        </div>
+
+                        <div
+                            class="p-4 bg-bg-primary border-2 border-border-ui rounded-2xl {editingSubscription.was_selected
+                                ? ''
+                                : 'opacity-50'}"
+                        >
+                            <p class="text-sm font-bold mb-3">
+                                Método de Escolha:
+                            </p>
+                            <div class="space-y-2">
+                                {#each selectionMethods as method}
+                                    <div class="flex items-center gap-3">
+                                        <input
+                                            type="radio"
+                                            id={`method_${method.id}`}
+                                            name="selection_method"
+                                            value={method.id}
+                                            bind:group={
+                                                editingSubscription.selection_method_id
+                                            }
+                                            disabled={!editingSubscription.was_selected}
+                                            class="w-4 h-4 accent-brand disabled:cursor-not-allowed"
+                                        />
+                                        <label
+                                            class="text-sm select-none {editingSubscription.was_selected
+                                                ? 'cursor-pointer'
+                                                : 'cursor-not-allowed'}"
+                                            for={`method_${method.id}`}
+                                        >
+                                            {method.method}
+                                        </label>
+                                    </div>
+                                {/each}
+                            </div>
                         </div>
 
                         <div

@@ -1,7 +1,16 @@
 <script>
+    import { onMount } from "svelte";
     import ActivityForm from "./ActivityForm.svelte";
+    import Modal from "./Modal.svelte";
 
-    let { events = [], token, fetchEvents, requestDeleteEvent, currentPage = 1, totalPages = 1 } = $props();
+    let {
+        events = [],
+        token,
+        fetchEvents,
+        requestDeleteEvent,
+        currentPage = 1,
+        totalPages = 1,
+    } = $props();
 
     const API_URL = import.meta.env.VITE_API_URL;
 
@@ -23,7 +32,7 @@
             )
                 return false;
             return true;
-        })
+        }),
     );
 
     let isViewingSubscribers = $state(false);
@@ -40,22 +49,25 @@
     async function viewForm(sub) {
         viewingSubscriber = sub;
         showFormModal = true;
-        
+
         if (!sub.has_answered_form) {
             loadingAnswers = false;
             viewingAnswers = [];
             return;
         }
-        
+
         loadingAnswers = true;
         viewingAnswers = [];
         try {
-            const res = await fetch(`${API_URL}/v1/answers?pre_registration_id=${sub.id}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    Accept: "application/json",
+            const res = await fetch(
+                `${API_URL}/v1/answers?pre_registration_id=${sub.id}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        Accept: "application/json",
+                    },
                 },
-            });
+            );
             if (res.ok) {
                 const data = await res.json();
                 viewingAnswers = data.data || [];
@@ -75,12 +87,117 @@
         viewingAnswers = [];
     }
 
-    async function openSubscribersList(event, page = 1) {
+    let selectionMethods = $state([]);
+
+    onMount(() => {
+        fetchSelectionMethods();
+    });
+
+    async function fetchSelectionMethods() {
+        try {
+            const res = await fetch(`${API_URL}/v1/selection-methods`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept: "application/json",
+                },
+            });
+            if (res.ok) {
+                const data = await res.json();
+                selectionMethods = data.data || [];
+            }
+        } catch (err) {
+            console.error("Erro ao buscar métodos de seleção:", err);
+        }
+    }
+
+    let editingSubscription = $state(null);
+    let modalState = $state({
+        isOpen: false,
+        type: "error",
+        message: "",
+        onConfirm: null,
+    });
+
+    function showModal(type, message, onConfirm = null) {
+        modalState = { isOpen: true, type, message, onConfirm };
+    }
+
+    function closeModal() {
+        modalState.isOpen = false;
+    }
+
+    function editSubscription(sub) {
+        editingSubscription = { ...sub };
+    }
+
+    function cancelEditSubscription() {
+        editingSubscription = null;
+    }
+
+    function saveSubscription() {
+        showModal(
+            "confirm",
+            "Tem certeza que deseja salvar as alterações nesta inscrição?",
+            async () => {
+                closeModal();
+                await executeSaveSubscription();
+            },
+        );
+    }
+
+    async function executeSaveSubscription() {
+        try {
+            const response = await fetch(
+                `${API_URL}/v1/subscriptions/${editingSubscription.id}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                    },
+                    body: JSON.stringify(editingSubscription),
+                },
+            );
+
+            if (response.ok) {
+                showModal("success", "Inscrição atualizada com sucesso!");
+                // Refresh subscribers list
+                openSubscribersList(
+                    selectedEvent,
+                    subscribersCurrentPage,
+                    isViewingOnlySelected,
+                );
+                editingSubscription = null;
+            } else {
+                const errorData = await response.json();
+                const errorMessage = errorData.errors
+                    ? Object.values(errorData.errors)[0][0]
+                    : errorData.message;
+                showModal(
+                    "error",
+                    errorMessage || "Erro ao atualizar inscrição.",
+                );
+            }
+        } catch (err) {
+            console.error("Erro de conexão ao salvar:", err);
+            showModal("error", "Não foi possível conectar com o servidor.");
+        }
+    }
+
+    let isViewingOnlySelected = $state(false);
+
+    async function openSubscribersList(event, page = 1, onlySelected = false) {
         selectedEvent = event;
         isViewingSubscribers = true;
+        isViewingOnlySelected = onlySelected;
         loadingSubscribers = true;
         try {
-            const response = await fetch(`${API_URL}/v1/subscriptions?activity_id=${event.id}&page=${page}`, {
+            let url = `${API_URL}/v1/subscriptions?activity_id=${event.id}&page=${page}`;
+            if (onlySelected) {
+                url += `&was_selected=true`;
+            }
+            const response = await fetch(url, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     Accept: "application/json",
@@ -172,48 +289,158 @@
             Voltar para a Lista
         </button>
     </div>
-    
-    <div class="bg-bg-secondary border border-border-ui rounded-[2.5rem] p-8 shadow-xl">
-        <h3 class="text-2xl font-black mb-6">Inscritos na Atividade: {selectedEvent?.name}</h3>
-        
+
+    <div
+        class="bg-bg-secondary border border-border-ui rounded-[2.5rem] p-8 shadow-xl"
+    >
+        <div>
+            <h3 class="text-2xl font-black mb-6">
+                {isViewingOnlySelected ? "Sorteados" : "Inscritos"} na Atividade:
+                {selectedEvent?.name}
+            </h3>
+        </div>
+
         {#if loadingSubscribers}
             <div class="flex justify-center items-center py-12">
-                <div class="w-10 h-10 border-4 border-brand border-t-transparent rounded-full animate-spin"></div>
+                <div
+                    class="w-10 h-10 border-4 border-brand border-t-transparent rounded-full animate-spin"
+                ></div>
             </div>
         {:else if subscribersList.length === 0}
-            <div class="text-center py-12 bg-bg-secondary/30 rounded-[2rem] border-2 border-dashed border-border-ui uppercase tracking-widest">
-                <p class="text-text-secondary text-xs font-bold">Nenhum usuário inscrito nesta atividade.</p>
+            <div
+                class="text-center py-12 bg-bg-secondary/30 rounded-[2rem] border-2 border-dashed border-border-ui uppercase tracking-widest"
+            >
+                <p class="text-text-secondary text-xs font-bold">
+                    Nenhum usuário inscrito nesta atividade.
+                </p>
             </div>
         {:else}
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm text-text-primary">
-                    <thead class="text-xs uppercase bg-bg-primary border-b border-border-ui">
+                    <thead
+                        class="text-xs uppercase bg-bg-primary border-b border-border-ui"
+                    >
                         <tr>
-                            <th class="px-6 py-4 font-bold text-text-secondary">Nome</th>
-                            <th class="px-6 py-4 font-bold text-text-secondary">Email</th>
-                            <th class="px-6 py-4 font-bold text-text-secondary">CPF</th>
-                            <th class="px-6 py-4 font-bold text-text-secondary">Tipo de Inscrição</th>
-                            <th class="px-6 py-4 font-bold text-text-secondary text-right">Ações</th>
+                            <th class="px-6 py-4 font-bold text-text-secondary"
+                                >Nome</th
+                            >
+                            <th class="px-6 py-4 font-bold text-text-secondary"
+                                >Email</th
+                            >
+                            <th class="px-6 py-4 font-bold text-text-secondary"
+                                >CPF</th
+                            >
+                            <th class="px-6 py-4 font-bold text-text-secondary"
+                                >Tipo de Inscrição</th
+                            >
+                            {#if isViewingOnlySelected}
+                                <th
+                                    class="px-6 py-4 font-bold text-text-secondary"
+                                    >Status</th
+                                >
+                            {/if}
+                            <th
+                                class="px-6 py-4 font-bold text-text-secondary text-right"
+                                >Ações</th
+                            >
                         </tr>
                     </thead>
                     <tbody>
                         {#each subscribersList as sub}
-                            <tr class="border-b border-border-ui hover:bg-bg-primary/50 transition-colors">
-                                <td class="px-6 py-4 font-medium">{sub.user?.name || '-'}</td>
-                                <td class="px-6 py-4 text-text-secondary">{sub.user?.email || '-'}</td>
-                                <td class="px-6 py-4">{sub.user?.masked_cpf || sub.user?.cpf || '-'}</td>
+                            <tr
+                                class="border-b border-border-ui hover:bg-bg-primary/50 transition-colors"
+                            >
+                                <td class="px-6 py-4 font-medium"
+                                    >{sub.user?.name || "-"}</td
+                                >
+                                <td class="px-6 py-4 text-text-secondary"
+                                    >{sub.user?.email || "-"}</td
+                                >
+                                <td class="px-6 py-4"
+                                    >{sub.user?.masked_cpf ||
+                                        sub.user?.cpf ||
+                                        "-"}</td
+                                >
                                 <td class="px-6 py-4">
-                                    <span class="px-3 py-1 bg-brand/10 text-brand rounded-full text-xs font-bold">{sub.subscription_type}</span>
+                                    <span
+                                        class="px-3 py-1 bg-brand/10 text-brand rounded-full text-xs font-bold"
+                                        >{sub.subscription_type}</span
+                                    >
                                 </td>
+                                {#if isViewingOnlySelected}
+                                    <td class="px-6 py-4">
+                                        {#if sub.was_selected && sub.has_answered_form && sub.paid_the_fee}
+                                            <span
+                                                class="px-3 py-1 bg-green-500/10 text-green-500 rounded-full text-xs font-bold uppercase tracking-widest"
+                                                >Apto</span
+                                            >
+                                        {:else}
+                                            <span
+                                                class="px-3 py-1 bg-red-500/10 text-red-500 rounded-full text-xs font-bold uppercase tracking-widest"
+                                                >Inapto</span
+                                            >
+                                        {/if}
+                                    </td>
+                                {/if}
                                 <td class="px-6 py-4 flex justify-end gap-2">
+                                    {#if isViewingOnlySelected}
                                         <button
                                             onclick={() => viewForm(sub)}
                                             class="p-2 bg-text-primary/5 text-brand rounded-lg hover:bg-brand/10 transition-colors text-sm font-bold flex items-center gap-2"
                                             title="Ver Formulário"
                                         >
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="16"
+                                                height="16"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="2.5"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                ><path
+                                                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                                                /><polyline
+                                                    points="14 2 14 8 20 8"
+                                                /><line
+                                                    x1="16"
+                                                    y1="13"
+                                                    x2="8"
+                                                    y2="13"
+                                                /><line
+                                                    x1="16"
+                                                    y1="17"
+                                                    x2="8"
+                                                    y2="17"
+                                                /><polyline
+                                                    points="10 9 9 9 8 9"
+                                                /></svg
+                                            >
                                             Ver Formulário
                                         </button>
+                                    {/if}
+                                    <button
+                                        onclick={() => editSubscription(sub)}
+                                        class="p-2 bg-text-primary/5 text-brand rounded-lg hover:bg-brand/10 transition-colors text-sm font-bold flex items-center gap-2"
+                                        title="Editar Inscrição"
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2.5"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            ><path
+                                                d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"
+                                            /></svg
+                                        >
+                                        Editar Inscrição
+                                    </button>
                                 </td>
                             </tr>
                         {/each}
@@ -221,31 +448,59 @@
                 </table>
             </div>
 
-            <div class="flex justify-between items-center mt-6">
+            <div
+                class="p-6 border-t border-border-ui bg-bg-secondary flex justify-between items-center gap-3"
+            >
                 <button
                     disabled={subscribersCurrentPage === 1}
-                    onclick={() => openSubscribersList(selectedEvent, subscribersCurrentPage - 1)}
+                    onclick={() =>
+                        openSubscribersList(
+                            selectedEvent,
+                            subscribersCurrentPage - 1,
+                            isViewingOnlySelected,
+                        )}
                     class="px-6 py-2 bg-bg-secondary border border-border-ui text-text-primary rounded-xl font-bold disabled:opacity-50 hover:bg-border-ui transition-all cursor-pointer disabled:cursor-not-allowed"
                 >
                     Página Anterior
                 </button>
-                <span class="text-sm font-bold text-text-secondary">Página {subscribersCurrentPage} de {subscribersTotalPages}</span>
+                <span class="text-sm font-bold text-text-secondary"
+                    >Página {subscribersCurrentPage} de {subscribersTotalPages}</span
+                >
                 <button
                     disabled={subscribersCurrentPage === subscribersTotalPages}
-                    onclick={() => openSubscribersList(selectedEvent, subscribersCurrentPage + 1)}
+                    onclick={() =>
+                        openSubscribersList(
+                            selectedEvent,
+                            subscribersCurrentPage + 1,
+                            isViewingOnlySelected,
+                        )}
                     class="px-6 py-2 bg-brand text-white rounded-xl font-bold disabled:opacity-50 hover:brightness-110 transition-all cursor-pointer disabled:cursor-not-allowed shadow-lg shadow-brand/20"
                 >
                     Próxima Página
                 </button>
+                <div class="flex-grow flex justify-end">
+                    <button
+                        onclick={() => (isViewingSubscribers = false)}
+                        class="px-6 py-2 border border-border-ui text-text-primary rounded-xl font-bold hover:bg-text-primary/5 transition-all"
+                    >
+                        Fechar
+                    </button>
+                </div>
             </div>
         {/if}
     </div>
 
     <!-- Modal Visualizar Formulário -->
     {#if showFormModal && viewingSubscriber}
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <div class="bg-bg-secondary w-full max-w-3xl max-h-[90vh] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col border border-border-ui">
-                <div class="p-6 border-b border-border-ui flex items-center justify-between bg-bg-primary/50">
+        <div
+            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+        >
+            <div
+                class="bg-bg-secondary w-full max-w-3xl max-h-[90vh] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col border border-border-ui"
+            >
+                <div
+                    class="p-6 border-b border-border-ui flex items-center justify-between bg-bg-primary/50"
+                >
                     <div>
                         <h3 class="text-2xl font-black text-text-primary">
                             Formulário de {viewingSubscriber.user?.name}
@@ -255,36 +510,66 @@
                         onclick={closeFormModal}
                         class="p-2 text-text-secondary hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-colors"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            ><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg
+                        >
                     </button>
                 </div>
-    
+
                 <div class="p-6 overflow-y-auto flex-1 bg-bg-primary">
                     {#if loadingAnswers}
                         <div class="flex justify-center items-center py-12">
-                            <div class="w-10 h-10 border-4 border-brand border-t-transparent rounded-full animate-spin"></div>
+                            <div
+                                class="w-10 h-10 border-4 border-brand border-t-transparent rounded-full animate-spin"
+                            ></div>
                         </div>
                     {:else if viewingAnswers && viewingAnswers.length > 0}
                         <div class="space-y-6">
                             {#each viewingAnswers as answer}
-                                <div class="bg-bg-secondary p-5 rounded-2xl border border-border-ui">
-                                    <p class="text-sm font-black text-brand mb-2">{answer.question?.text || "Pergunta não encontrada"}</p>
-                                    <p class="text-text-primary whitespace-pre-wrap">{answer.answer}</p>
+                                <div
+                                    class="bg-bg-secondary p-5 rounded-2xl border border-border-ui"
+                                >
+                                    <p
+                                        class="text-sm font-black text-brand mb-2"
+                                    >
+                                        {answer.question?.text ||
+                                            "Pergunta não encontrada"}
+                                    </p>
+                                    <p
+                                        class="text-text-primary whitespace-pre-wrap"
+                                    >
+                                        {answer.answer}
+                                    </p>
                                 </div>
                             {/each}
                         </div>
                     {:else if !viewingSubscriber.has_answered_form}
                         <div class="text-center p-12">
-                            <p class="text-text-secondary font-bold">O usuário ainda não enviou o formulário.</p>
+                            <p class="text-text-secondary font-bold">
+                                O usuário ainda não enviou o formulário.
+                            </p>
                         </div>
                     {:else}
                         <div class="text-center p-12">
-                            <p class="text-text-secondary font-bold">Nenhuma resposta encontrada.</p>
+                            <p class="text-text-secondary font-bold">
+                                Nenhuma resposta encontrada.
+                            </p>
                         </div>
                     {/if}
                 </div>
-    
-                <div class="p-6 border-t border-border-ui bg-bg-secondary flex justify-end gap-3">
+
+                <div
+                    class="p-6 border-t border-border-ui bg-bg-secondary flex justify-end gap-3"
+                >
                     <button
                         onclick={closeFormModal}
                         class="px-6 py-3 bg-bg-primary text-text-secondary font-bold rounded-xl border border-border-ui hover:bg-text-primary/5 transition-colors"
@@ -301,7 +586,9 @@
         <input
             type="text"
             bind:value={eventSearchQuery}
-            onkeydown={(e) => { if (e.key === 'Enter') fetchEvents(1, eventSearchQuery); }}
+            onkeydown={(e) => {
+                if (e.key === "Enter") fetchEvents(1, eventSearchQuery);
+            }}
             placeholder="Pesquisar por nome da atividade..."
             class="w-full bg-bg-secondary border-2 border-border-ui text-text-primary p-4 rounded-2xl focus:border-brand focus:ring-4 focus:ring-brand/20 transition-all outline-none"
         />
@@ -382,7 +669,8 @@
                             <th class="px-6 py-4 font-bold text-text-secondary"
                                 >Data Início</th
                             >
-                            <th class="px-6 py-4 font-bold text-text-secondary text-center"
+                            <th
+                                class="px-6 py-4 font-bold text-text-secondary text-center"
                                 >Inscritos</th
                             >
                             <th
@@ -411,7 +699,8 @@
                                 </td>
                                 <td class="px-6 py-4 flex justify-end gap-2">
                                     <button
-                                        onclick={() => openSubscribersList(event)}
+                                        onclick={() =>
+                                            openSubscribersList(event)}
                                         class="p-2 bg-text-primary/5 text-blue-500 rounded-lg hover:bg-blue-500/10 transition-colors"
                                         title="Ver Inscritos"
                                     >
@@ -425,8 +714,43 @@
                                             stroke-width="2.5"
                                             stroke-linecap="round"
                                             stroke-linejoin="round"
-                                            ><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                            ><path
+                                                d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
+                                            ></path><circle cx="9" cy="7" r="4"
+                                            ></circle><path
+                                                d="M23 21v-2a4 4 0 0 0-3-3.87"
+                                            ></path><path
+                                                d="M16 3.13a4 4 0 0 1 0 7.75"
+                                            ></path></svg
+                                        >
                                     </button>
+                                    {#if event.activitable_type === "App\\Models\\Camping"}
+                                        <button
+                                            onclick={() =>
+                                                openSubscribersList(
+                                                    event,
+                                                    1,
+                                                    true,
+                                                )}
+                                            class="p-2 bg-green-500/10 text-green-500 rounded-lg hover:bg-green-500/20 transition-colors"
+                                            title="Ver Sorteados"
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="16"
+                                                height="16"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="2.5"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                ><path
+                                                    d="M5 12l5 5l10 -10"
+                                                /></svg
+                                            >
+                                        </button>
+                                    {/if}
                                     <button
                                         onclick={() => openEditModal(event)}
                                         class="p-2 bg-text-primary/5 text-brand rounded-lg hover:bg-brand/10 transition-colors"
@@ -486,7 +810,9 @@
             >
                 Página Anterior
             </button>
-            <span class="text-sm font-bold text-text-secondary">Página {currentPage} de {totalPages}</span>
+            <span class="text-sm font-bold text-text-secondary"
+                >Página {currentPage} de {totalPages}</span
+            >
             <button
                 disabled={currentPage === totalPages}
                 onclick={() => fetchEvents(currentPage + 1)}
@@ -497,3 +823,130 @@
         </div>
     {/if}
 {/if}
+
+{#if editingSubscription}
+    <div
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in"
+    >
+        <div
+            class="bg-bg-secondary w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden border border-border-ui transform transition-all"
+        >
+            <div class="p-8">
+                <h3 class="text-2xl font-black mb-6">Editar Inscrição</h3>
+
+                <div class="space-y-6">
+                    {#if selectedEvent?.activitable_type === "App\\Models\\Event"}
+                        <div
+                            class="flex items-center gap-4 p-4 bg-bg-primary border-2 border-border-ui rounded-2xl"
+                        >
+                            <input
+                                id="paid_the_fee"
+                                type="checkbox"
+                                bind:checked={editingSubscription.paid_the_fee}
+                                class="w-5 h-5 accent-brand rounded"
+                            />
+                            <label
+                                class="text-sm font-bold cursor-pointer select-none flex-grow"
+                                for="paid_the_fee"
+                            >
+                                Taxa Paga?
+                            </label>
+                        </div>
+                    {:else}
+                        <div
+                            class="flex items-center gap-4 p-4 bg-bg-primary border-2 border-border-ui rounded-2xl"
+                        >
+                            <input
+                                id="was_selected"
+                                type="checkbox"
+                                bind:checked={editingSubscription.was_selected}
+                                onchange={() => {
+                                    if (!editingSubscription.was_selected) {
+                                        editingSubscription.selection_method_id =
+                                            null;
+                                    }
+                                }}
+                                class="w-5 h-5 accent-brand rounded"
+                            />
+                            <label
+                                class="text-sm font-bold cursor-pointer select-none flex-grow"
+                                for="was_selected"
+                            >
+                                Escolhido
+                            </label>
+                        </div>
+
+                        <div
+                            class="p-4 bg-bg-primary border-2 border-border-ui rounded-2xl {editingSubscription.was_selected
+                                ? ''
+                                : 'opacity-50'}"
+                        >
+                            <p class="text-sm font-bold mb-3">
+                                Método de Escolha:
+                            </p>
+                            <div class="space-y-2">
+                                {#each selectionMethods as method}
+                                    <div class="flex items-center gap-3">
+                                        <input
+                                            type="radio"
+                                            id={`method_${method.id}`}
+                                            name="selection_method"
+                                            value={method.id}
+                                            bind:group={
+                                                editingSubscription.selection_method_id
+                                            }
+                                            disabled={!editingSubscription.was_selected}
+                                            class="w-4 h-4 accent-brand disabled:cursor-not-allowed"
+                                        />
+                                        <label
+                                            class="text-sm select-none {editingSubscription.was_selected
+                                                ? 'cursor-pointer'
+                                                : 'cursor-not-allowed'}"
+                                            for={`method_${method.id}`}
+                                        >
+                                            {method.method}
+                                        </label>
+                                    </div>
+                                {/each}
+                            </div>
+                        </div>
+
+                        <div
+                            class="flex items-center gap-4 p-4 bg-bg-primary border-2 border-border-ui rounded-2xl"
+                        >
+                            <input
+                                id="paid_the_fee"
+                                type="checkbox"
+                                bind:checked={editingSubscription.paid_the_fee}
+                                class="w-5 h-5 accent-brand rounded"
+                            />
+                            <label
+                                class="text-sm font-bold cursor-pointer select-none flex-grow"
+                                for="paid_the_fee"
+                            >
+                                Inscrição Paga
+                            </label>
+                        </div>
+                    {/if}
+                </div>
+
+                <div class="flex gap-4 mt-8">
+                    <button
+                        onclick={cancelEditSubscription}
+                        class="flex-1 py-4 border-2 border-border-ui text-text-primary rounded-2xl font-bold hover:bg-text-primary/5 transition-all"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        onclick={saveSubscription}
+                        class="flex-1 py-4 bg-brand text-white rounded-2xl font-bold shadow-lg shadow-brand/30 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                    >
+                        Salvar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{/if}
+
+<Modal {modalState} {closeModal} />
