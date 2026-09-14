@@ -3,7 +3,7 @@
         subscriptions = [],
         onGoToEvents,
         requestCancelSubscription,
-        onOpenQuestionnaire
+        onOpenQuestionnaire,
     } = $props();
 
     let mySubSearchQuery = $state("");
@@ -11,7 +11,9 @@
         subscriptions.filter(
             (sub) =>
                 sub.event?.name &&
-                sub.event.name.toLowerCase().includes(mySubSearchQuery.toLowerCase()),
+                sub.event.name
+                    .toLowerCase()
+                    .includes(mySubSearchQuery.toLowerCase()),
         ),
     );
 </script>
@@ -26,37 +28,47 @@
     />
 </div>
 {#if subscriptions.length === 0}
-    <div class="text-center py-24 bg-bg-secondary/30 rounded-[3rem] border-2 border-dashed border-border-ui uppercase tracking-widest">
+    <div
+        class="text-center py-24 bg-bg-secondary/30 rounded-[3rem] border-2 border-dashed border-border-ui uppercase tracking-widest"
+    >
         <p class="text-text-secondary text-xs font-bold mb-6">
             Nenhuma inscrição encontrada
         </p>
         <button
             onclick={onGoToEvents}
             class="px-5 py-2 bg-text-primary text-bg-primary rounded-full text-[10px] font-bold hover:bg-brand hover:text-white transition-all"
-        >Ver Eventos</button>
+            >Ver Eventos</button
+        >
     </div>
 {:else if filteredMySubscriptions.length === 0}
-    <div class="text-center py-24 bg-bg-secondary/30 rounded-[3rem] border-2 border-dashed border-border-ui uppercase tracking-widest">
-        <p class="text-text-secondary text-xs font-bold mb-6">Nenhuma inscrição corresponde à pesquisa.</p>
+    <div
+        class="text-center py-24 bg-bg-secondary/30 rounded-[3rem] border-2 border-dashed border-border-ui uppercase tracking-widest"
+    >
+        <p class="text-text-secondary text-xs font-bold mb-6">
+            Nenhuma inscrição corresponde à pesquisa.
+        </p>
     </div>
 {:else}
-    <div class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8 text-text-primary">
+    <div
+        class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8 text-text-primary"
+    >
         {#each filteredMySubscriptions as sub}
-            <div class="bg-bg-secondary border border-border-ui p-8 rounded-[2.5rem] hover:shadow-2xl hover:-translate-y-1 transition-all group overflow-hidden relative">
-                {#if sub.has_answered_form && sub.was_selected}
-                    <div class="absolute top-0 right-0 bg-green-500 text-white text-[10px] font-black px-4 py-1.5 rounded-bl-xl uppercase tracking-widest shadow-sm z-10">
-                        Inscrição Confirmada
-                    </div>
-                {/if}
+            <div
+                class="bg-bg-secondary border border-border-ui p-8 rounded-[2.5rem] hover:shadow-2xl hover:-translate-y-1 transition-all group overflow-hidden relative"
+            >
                 <div class="flex justify-between items-start mb-6">
-                    <h3 class="text-2xl font-black group-hover:text-brand transition-colors line-clamp-1">
+                    <h3
+                        class="text-2xl font-black group-hover:text-brand transition-colors line-clamp-1"
+                    >
                         {sub.event?.name || "Inscrição"}
                     </h3>
                 </div>
                 <p class="text-text-secondary text-sm leading-relaxed mb-4">
                     <strong>Status:</strong>
                     {#if sub.has_answered_form && sub.was_selected}
-                        <span class="text-green-500 font-bold">Inscrição Confirmada</span>
+                        <span class="text-green-500 font-bold"
+                            >Inscrição Confirmada</span
+                        >
                     {:else if sub.paid_the_fee}
                         <span>Aguardando Sorteio</span>
                     {:else}
@@ -68,8 +80,10 @@
                     <strong>Sorteado:</strong>
                     {sub.was_selected ? "Sim" : "Não"}
                 </p>
-                {#if sub.subscription_type === 'Campista' && sub.was_selected && !sub.has_answered_form}
-                    <div class="flex justify-end items-center pt-6 border-t border-border-ui mt-4">
+                {#if sub.subscription_type === "Campista" && sub.was_selected && !sub.has_answered_form}
+                    <div
+                        class="flex justify-end items-center pt-6 border-t border-border-ui mt-4"
+                    >
                         <button
                             onclick={() => onOpenQuestionnaire(sub.id)}
                             class="px-6 py-3 bg-brand text-white hover:brightness-110 rounded-xl text-xs font-black transition-all uppercase tracking-wider shadow-lg"
@@ -77,10 +91,48 @@
                             Prosseguir com a inscrição
                         </button>
                     </div>
+                {:else if sub.has_answered_form && sub.is_form_returned}
+                    <div class="pt-6 border-t border-border-ui mt-4">
+                        <div
+                            class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-4"
+                        >
+                            <p class="text-xs font-bold text-red-500 mb-1">
+                                Atenção: Formulário Devolvido
+                            </p>
+                            <p class="text-xs text-red-500/80">
+                                O administrador solicitou correções no seu
+                                formulário.
+                            </p>
+                        </div>
+                        <div class="flex justify-end">
+                            <button
+                                onclick={() => onOpenQuestionnaire(sub.id)}
+                                class="px-6 py-3 bg-red-500 text-white hover:brightness-110 rounded-xl text-xs font-black transition-all uppercase tracking-wider shadow-lg shadow-red-500/20"
+                            >
+                                Corrigir Formulário
+                            </button>
+                        </div>
+                    </div>
                 {:else if sub.has_answered_form}
-                    <div class="flex justify-end items-center pt-6 border-t border-border-ui mt-4">
-                        <span class="text-xs font-bold text-green-500 uppercase tracking-widest flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                    <div
+                        class="flex justify-end items-center pt-6 border-t border-border-ui mt-4"
+                    >
+                        <span
+                            class="text-xs font-bold text-green-500 uppercase tracking-widest flex items-center gap-2"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                ><path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M5 13l4 4L19 7"
+                                /></svg
+                            >
                             Formulário Preenchido
                         </span>
                     </div>

@@ -64,6 +64,33 @@
                 formData[q.id] = q.type === 'Fechada (Múltipla Escolha)' ? [] : "";
             });
 
+            // If form is returned, fetch existing answers
+            if (preRegistration.is_form_returned) {
+                const ansRes = await fetch(`${API_URL}/v1/answers?pre_registration_id=${preRegistrationId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        Accept: "application/json",
+                    },
+                });
+                
+                if (ansRes.ok) {
+                    const ansData = await ansRes.json();
+                    if (ansData.data) {
+                        ansData.data.forEach(ans => {
+                            const q = questions.find(question => question.id === ans.question_id);
+                            if (q) {
+                                if (q.type === 'Fechada (Múltipla Escolha)') {
+                                    // Assumes multiple choice answers are comma-separated string
+                                    formData[q.id] = ans.answer ? ans.answer.split(',').map(s => s.trim()) : [];
+                                } else {
+                                    formData[q.id] = ans.answer || "";
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+
         } catch (err) {
             error = err.message;
         } finally {
@@ -149,11 +176,25 @@
             Voltar
         </button>
 
-        <h1 class="text-4xl font-black mb-2">Formulário de Inscrição</h1>
+        <h1 class="text-4xl font-black mb-2">
+            {preRegistration?.is_form_returned ? 'Corrigir Formulário' : 'Formulário de Inscrição'}
+        </h1>
         {#if preRegistration && preRegistration.event}
             <h2 class="text-xl font-bold text-brand mb-2">{preRegistration.event.category?.name} - {preRegistration.event.name}</h2>
         {/if}
-        <p class="text-text-secondary font-bold mb-10">Responda o questionário abaixo para prosseguir com a confirmação da sua inscrição.</p>
+        <p class="text-text-secondary font-bold mb-10">
+            {preRegistration?.is_form_returned ? 'Corrija as respostas indicadas abaixo e envie novamente.' : 'Responda o questionário abaixo para prosseguir com a confirmação da sua inscrição.'}
+        </p>
+
+        {#if preRegistration?.is_form_returned && preRegistration?.return_instructions}
+            <div class="mb-10 bg-red-500/10 border border-red-500/20 p-6 rounded-3xl">
+                <h3 class="text-red-500 font-black text-lg mb-2 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    Instruções do Administrador
+                </h3>
+                <p class="text-text-primary font-medium whitespace-pre-wrap">{preRegistration.return_instructions}</p>
+            </div>
+        {/if}
 
         {#if loading}
             <div class="flex justify-center items-center py-24">
@@ -174,21 +215,30 @@
         {:else}
             <form onsubmit={requestSubmit} class="space-y-8 bg-bg-secondary p-8 md:p-12 rounded-[3rem] shadow-xl border border-border-ui">
                 {#each questions as q}
-                    <div class="space-y-3">
-                        <label class="block text-lg font-black text-text-primary">
-                            {q.text}
-                            <span class="text-brand">*</span>
+                    {@const isEditable = !preRegistration.is_form_returned || (preRegistration.returned_fields && preRegistration.returned_fields.includes(q.id))}
+                    <div class="space-y-3 {isEditable ? '' : 'opacity-60 pointer-events-none grayscale'}">
+                        <label class="block text-lg font-black text-text-primary flex justify-between items-center">
+                            <span>
+                                {q.text}
+                                <span class="text-brand">*</span>
+                            </span>
+                            {#if preRegistration.is_form_returned && !isEditable}
+                                <span class="text-xs bg-bg-primary px-3 py-1 rounded-full text-text-secondary border border-border-ui uppercase tracking-widest">
+                                    Bloqueado
+                                </span>
+                            {/if}
                         </label>
 
                         {#if q.type === 'Fechada (Única Escolha)' && q.options}
                             <div class="space-y-3 mt-4">
                                 {#each q.options as opt}
-                                    <label class="flex items-center gap-3 p-4 border border-border-ui rounded-xl cursor-pointer hover:bg-bg-primary transition-colors">
+                                    <label class="flex items-center gap-3 p-4 border border-border-ui rounded-xl {isEditable ? 'cursor-pointer hover:bg-bg-primary' : 'cursor-not-allowed'} transition-colors">
                                         <input
                                             type="radio"
                                             name="question_{q.id}"
                                             value={opt.text}
                                             bind:group={formData[q.id]}
+                                            disabled={!isEditable}
                                             class="w-5 h-5 text-brand focus:ring-brand accent-brand"
                                         />
                                         <span class="text-text-primary font-medium">{opt.text}</span>
@@ -198,12 +248,13 @@
                         {:else if q.type === 'Fechada (Múltipla Escolha)' && q.options}
                             <div class="space-y-3 mt-4">
                                 {#each q.options as opt}
-                                    <label class="flex items-center gap-3 p-4 border border-border-ui rounded-xl cursor-pointer hover:bg-bg-primary transition-colors">
+                                    <label class="flex items-center gap-3 p-4 border border-border-ui rounded-xl {isEditable ? 'cursor-pointer hover:bg-bg-primary' : 'cursor-not-allowed'} transition-colors">
                                         <input
                                             type="checkbox"
                                             value={opt.text}
                                             checked={formData[q.id].includes(opt.text)}
                                             onchange={(e) => handleCheckbox(q.id, opt.text, e.target.checked)}
+                                            disabled={!isEditable}
                                             class="w-5 h-5 text-brand rounded focus:ring-brand accent-brand"
                                         />
                                         <span class="text-text-primary font-medium">{opt.text}</span>
@@ -214,8 +265,9 @@
                             <textarea 
                                 required 
                                 bind:value={formData[q.id]}
+                                disabled={!isEditable}
                                 rows="4"
-                                class="w-full bg-bg-primary border-2 border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand focus:outline-none transition-colors mt-4"
+                                class="w-full bg-bg-primary border-2 border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand focus:outline-none transition-colors mt-4 {isEditable ? '' : 'cursor-not-allowed'}"
                             ></textarea>
                         {/if}
                     </div>

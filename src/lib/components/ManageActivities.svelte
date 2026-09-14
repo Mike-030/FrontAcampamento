@@ -85,6 +85,72 @@
         showFormModal = false;
         viewingSubscriber = null;
         viewingAnswers = [];
+        isReturningForm = false;
+        returnInstructions = "";
+        returnedFields = [];
+    }
+
+    let isReturningForm = $state(false);
+    let returnInstructions = $state("");
+    let returnedFields = $state([]);
+    let submittingReturn = $state(false);
+
+    function startReturnForm() {
+        isReturningForm = true;
+        returnInstructions = "";
+        returnedFields = [];
+    }
+
+    function cancelReturnForm() {
+        isReturningForm = false;
+        returnInstructions = "";
+        returnedFields = [];
+    }
+
+    function handleFieldToggle(questionId, checked) {
+        if (checked) {
+            returnedFields = [...returnedFields, questionId];
+        } else {
+            returnedFields = returnedFields.filter(id => id !== questionId);
+        }
+    }
+
+    async function executeReturnForm() {
+        if (!returnInstructions) {
+            showModal("error", "Por favor, preencha as instruções para o usuário.");
+            return;
+        }
+        if (returnedFields.length === 0) {
+            showModal("error", "Por favor, selecione ao menos uma resposta para o usuário corrigir.");
+            return;
+        }
+
+        try {
+            submittingReturn = true;
+            const res = await fetch(`${API_URL}/v1/subscriptions/${viewingSubscriber.id}/return-form`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                body: JSON.stringify({
+                    return_instructions: returnInstructions,
+                    returned_fields: returnedFields
+                })
+            });
+
+            if (res.ok) {
+                showModal("success", "Formulário devolvido com sucesso!");
+                closeFormModal();
+            } else {
+                showModal("error", "Erro ao devolver o formulário.");
+            }
+        } catch (e) {
+            showModal("error", "Erro de conexão ao devolver formulário.");
+        } finally {
+            submittingReturn = false;
+        }
     }
 
     let selectionMethods = $state([]);
@@ -533,22 +599,49 @@
                             ></div>
                         </div>
                     {:else if viewingAnswers && viewingAnswers.length > 0}
+                        {#if isReturningForm}
+                            <div class="mb-6 p-6 bg-red-500/10 border border-red-500/20 rounded-2xl">
+                                <h4 class="text-xl font-black text-red-500 mb-4">Devolver Formulário</h4>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-bold text-text-primary mb-2">Instruções para o usuário</label>
+                                    <textarea
+                                        bind:value={returnInstructions}
+                                        rows="3"
+                                        placeholder="Ex: Por favor, melhore a resposta da pergunta X..."
+                                        class="w-full bg-bg-secondary border-2 border-border-ui text-text-primary p-4 rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-500/20 transition-all outline-none"
+                                    ></textarea>
+                                </div>
+                                <p class="text-sm font-bold text-text-secondary mb-4">Selecione abaixo quais campos o usuário poderá editar:</p>
+                            </div>
+                        {/if}
                         <div class="space-y-6">
                             {#each viewingAnswers as answer}
                                 <div
-                                    class="bg-bg-secondary p-5 rounded-2xl border border-border-ui"
+                                    class="bg-bg-secondary p-5 rounded-2xl border {isReturningForm && returnedFields.includes(answer.question_id) ? 'border-red-500' : 'border-border-ui'} flex gap-4 transition-all"
                                 >
-                                    <p
-                                        class="text-sm font-black text-brand mb-2"
-                                    >
-                                        {answer.question?.text ||
-                                            "Pergunta não encontrada"}
-                                    </p>
-                                    <p
-                                        class="text-text-primary whitespace-pre-wrap"
-                                    >
-                                        {answer.answer}
-                                    </p>
+                                    {#if isReturningForm}
+                                        <div class="pt-1">
+                                            <input 
+                                                type="checkbox" 
+                                                class="w-6 h-6 text-red-500 rounded focus:ring-red-500 accent-red-500 cursor-pointer"
+                                                checked={returnedFields.includes(answer.question_id)}
+                                                onchange={(e) => handleFieldToggle(answer.question_id, e.target.checked)}
+                                            />
+                                        </div>
+                                    {/if}
+                                    <div class="flex-1">
+                                        <p
+                                            class="text-sm font-black text-brand mb-2"
+                                        >
+                                            {answer.question?.text ||
+                                                "Pergunta não encontrada"}
+                                        </p>
+                                        <p
+                                            class="text-text-primary whitespace-pre-wrap"
+                                        >
+                                            {answer.answer}
+                                        </p>
+                                    </div>
                                 </div>
                             {/each}
                         </div>
@@ -570,12 +663,36 @@
                 <div
                     class="p-6 border-t border-border-ui bg-bg-secondary flex justify-end gap-3"
                 >
-                    <button
-                        onclick={closeFormModal}
-                        class="px-6 py-3 bg-bg-primary text-text-secondary font-bold rounded-xl border border-border-ui hover:bg-text-primary/5 transition-colors"
-                    >
-                        Fechar
-                    </button>
+                    {#if isReturningForm}
+                        <button
+                            onclick={cancelReturnForm}
+                            class="px-6 py-3 bg-bg-primary text-text-secondary font-bold rounded-xl border border-border-ui hover:bg-text-primary/5 transition-colors"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            onclick={executeReturnForm}
+                            disabled={submittingReturn}
+                            class="px-6 py-3 bg-red-500 text-white font-bold rounded-xl hover:brightness-110 transition-all shadow-lg shadow-red-500/20 disabled:opacity-50"
+                        >
+                            {submittingReturn ? 'Enviando...' : 'Confirmar Devolução'}
+                        </button>
+                    {:else}
+                        {#if viewingAnswers && viewingAnswers.length > 0 && !viewingSubscriber.is_form_returned}
+                            <button
+                                onclick={startReturnForm}
+                                class="px-6 py-3 bg-red-500/10 text-red-500 font-bold rounded-xl border border-red-500/20 hover:bg-red-500/20 transition-colors"
+                            >
+                                Devolver Formulário
+                            </button>
+                        {/if}
+                        <button
+                            onclick={closeFormModal}
+                            class="px-6 py-3 bg-bg-primary text-text-secondary font-bold rounded-xl border border-border-ui hover:bg-text-primary/5 transition-colors"
+                        >
+                            Fechar
+                        </button>
+                    {/if}
                 </div>
             </div>
         </div>
