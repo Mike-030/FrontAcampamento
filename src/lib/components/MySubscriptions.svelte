@@ -4,6 +4,7 @@
         onGoToEvents,
         requestCancelSubscription,
         onOpenQuestionnaire,
+        onPaySubscription,
     } = $props();
 
     let mySubSearchQuery = $state("");
@@ -80,7 +81,18 @@
                     <strong>Sorteado:</strong>
                     {sub.was_selected ? "Sim" : "Não"}
                 </p>
-                {#if sub.subscription_type === "Campista" && sub.was_selected && !sub.has_answered_form}
+                {#if !sub.paid_the_fee && !sub.is_fee_paid}
+                    <div
+                        class="flex justify-end items-center pt-6 border-t border-border-ui mt-4"
+                    >
+                        <button
+                            onclick={() => onPaySubscription(sub.id)}
+                            class="px-6 py-3 bg-brand text-white hover:brightness-110 rounded-xl text-xs font-black transition-all uppercase tracking-wider shadow-lg"
+                        >
+                            Prosseguir com o pagamento da inscrição
+                        </button>
+                    </div>
+                {:else if sub.subscription_type === "Campista" && sub.was_selected && !sub.has_answered_form}
                     <div
                         class="flex justify-end items-center pt-6 border-t border-border-ui mt-4"
                     >

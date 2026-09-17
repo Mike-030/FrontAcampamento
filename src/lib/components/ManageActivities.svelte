@@ -252,16 +252,21 @@
     }
 
     let isViewingOnlySelected = $state(false);
+    let subscriberVacancyTypeFilter = $state("todos");
 
-    async function openSubscribersList(event, page = 1, onlySelected = false) {
+    async function openSubscribersList(event, page = 1, onlySelected = false, vacancyType = subscriberVacancyTypeFilter) {
         selectedEvent = event;
         isViewingSubscribers = true;
         isViewingOnlySelected = onlySelected;
+        subscriberVacancyTypeFilter = vacancyType;
         loadingSubscribers = true;
         try {
             let url = `${API_URL}/v1/subscriptions?activity_id=${event.id}&page=${page}`;
             if (onlySelected) {
                 url += `&was_selected=true`;
+            }
+            if (vacancyType !== "todos") {
+                url += `&vacancy_type=${vacancyType}`;
             }
             const response = await fetch(url, {
                 headers: {
@@ -364,6 +369,46 @@
                 {isViewingOnlySelected ? "Sorteados" : "Inscritos"} na Atividade:
                 {selectedEvent?.name}
             </h3>
+        </div>
+
+        <!-- Filtro de Vaga -->
+        <div class="mb-6 flex flex-wrap gap-2">
+            <button
+                onclick={() => openSubscribersList(selectedEvent, 1, isViewingOnlySelected, "todos")}
+                class="px-4 py-2 rounded-xl text-xs font-bold transition-all {subscriberVacancyTypeFilter ===
+                'todos'
+                    ? 'bg-brand text-white shadow-lg shadow-brand/20'
+                    : 'bg-bg-secondary border border-border-ui text-text-secondary hover:text-text-primary'}"
+            >
+                Todos
+            </button>
+            <button
+                onclick={() => openSubscribersList(selectedEvent, 1, isViewingOnlySelected, "masculina")}
+                class="px-4 py-2 rounded-xl text-xs font-bold transition-all {subscriberVacancyTypeFilter ===
+                'masculina'
+                    ? 'bg-brand text-white shadow-lg shadow-brand/20'
+                    : 'bg-bg-secondary border border-border-ui text-text-secondary hover:text-text-primary'}"
+            >
+                Masculina
+            </button>
+            <button
+                onclick={() => openSubscribersList(selectedEvent, 1, isViewingOnlySelected, "feminina")}
+                class="px-4 py-2 rounded-xl text-xs font-bold transition-all {subscriberVacancyTypeFilter ===
+                'feminina'
+                    ? 'bg-brand text-white shadow-lg shadow-brand/20'
+                    : 'bg-bg-secondary border border-border-ui text-text-secondary hover:text-text-primary'}"
+            >
+                Feminina
+            </button>
+            <button
+                onclick={() => openSubscribersList(selectedEvent, 1, isViewingOnlySelected, "casal")}
+                class="px-4 py-2 rounded-xl text-xs font-bold transition-all {subscriberVacancyTypeFilter ===
+                'casal'
+                    ? 'bg-brand text-white shadow-lg shadow-brand/20'
+                    : 'bg-bg-secondary border border-border-ui text-text-secondary hover:text-text-primary'}"
+            >
+                Casal
+            </button>
         </div>
 
         {#if loadingSubscribers}
@@ -524,6 +569,7 @@
                             selectedEvent,
                             subscribersCurrentPage - 1,
                             isViewingOnlySelected,
+                            subscriberVacancyTypeFilter,
                         )}
                     class="px-6 py-2 bg-bg-secondary border border-border-ui text-text-primary rounded-xl font-bold disabled:opacity-50 hover:bg-border-ui transition-all cursor-pointer disabled:cursor-not-allowed"
                 >
@@ -539,6 +585,7 @@
                             selectedEvent,
                             subscribersCurrentPage + 1,
                             isViewingOnlySelected,
+                            subscriberVacancyTypeFilter,
                         )}
                     class="px-6 py-2 bg-brand text-white rounded-xl font-bold disabled:opacity-50 hover:brightness-110 transition-all cursor-pointer disabled:cursor-not-allowed shadow-lg shadow-brand/20"
                 >

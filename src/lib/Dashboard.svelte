@@ -327,6 +327,36 @@
         }, 1500);
     }
 
+    async function handlePaySubscription(subscriptionId) {
+        const sub = subscriptions.find(s => s.id === subscriptionId);
+        if (sub) {
+            const activity = sub.event || sub.activity;
+            const fee = activity?.activitable?.camper_fee || activity?.activitable?.ticket_price || 0;
+            if (fee > 0 && !sub.is_fee_paid && !sub.paid_the_fee) {
+                paymentFee = fee;
+                createdSubscriptionId = sub.id;
+                showPaymentModal = true;
+            } else {
+                showModal("info", "Esta inscrição já está paga ou é gratuita.");
+            }
+        } else {
+            // Fetch again if not loaded
+            await fetchSubscriptions();
+            const refetchedSub = subscriptions.find(s => s.id === subscriptionId);
+            if (refetchedSub) {
+                const activity = refetchedSub.event || refetchedSub.activity;
+                const fee = activity?.activitable?.camper_fee || activity?.activitable?.ticket_price || 0;
+                if (fee > 0 && !refetchedSub.is_fee_paid && !refetchedSub.paid_the_fee) {
+                    paymentFee = fee;
+                    createdSubscriptionId = refetchedSub.id;
+                    showPaymentModal = true;
+                } else {
+                    showModal("info", "Esta inscrição já está paga ou é gratuita.");
+                }
+            }
+        }
+    }
+
     function requestUpdateProfile() {
         showModal(
             "confirm",
@@ -522,33 +552,7 @@
                         fetchSubscriptions();
                     }
                 }}
-                onPaySubscription={async (subscriptionId) => {
-                    const sub = subscriptions.find(s => s.id === subscriptionId);
-                    if (sub) {
-                        const fee = sub.activity?.activitable?.camper_fee || sub.activity?.activitable?.ticket_price || 0;
-                        if (fee > 0 && !sub.is_fee_paid) {
-                            paymentFee = fee;
-                            createdSubscriptionId = sub.id;
-                            showPaymentModal = true;
-                        } else {
-                            showModal("info", "Esta inscrição já está paga ou é gratuita.");
-                        }
-                    } else {
-                        // Fetch again if not loaded
-                        await fetchSubscriptions();
-                        const refetchedSub = subscriptions.find(s => s.id === subscriptionId);
-                        if (refetchedSub) {
-                            const fee = refetchedSub.activity?.activitable?.camper_fee || refetchedSub.activity?.activitable?.ticket_price || 0;
-                            if (fee > 0 && !refetchedSub.is_fee_paid) {
-                                paymentFee = fee;
-                                createdSubscriptionId = refetchedSub.id;
-                                showPaymentModal = true;
-                            } else {
-                                showModal("info", "Esta inscrição já está paga ou é gratuita.");
-                            }
-                        }
-                    }
-                }}
+                onPaySubscription={handlePaySubscription}
             />
         {:else if activeTab === "subscriptions"}
             <!-- Componente: Minhas Inscrições -->
@@ -560,6 +564,7 @@
                     selectedSubscriptionId = id;
                     activeTab = "questionnaire";
                 }}
+                onPaySubscription={handlePaySubscription}
             />
         {:else if activeTab === "users"}
             <!-- Componente: Lista de Usuários (Admin) -->
