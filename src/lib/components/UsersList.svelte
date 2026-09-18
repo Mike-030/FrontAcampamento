@@ -49,6 +49,19 @@
         ),
     );
 
+    let showDocumentModal = $state(false);
+    let viewingDocumentUser = $state(null);
+
+    function viewDocument(user) {
+        viewingDocumentUser = user;
+        showDocumentModal = true;
+    }
+
+    function closeDocumentModal() {
+        showDocumentModal = false;
+        viewingDocumentUser = null;
+    }
+
     onMount(() => {
         fetchUsers();
         fetchSelectionMethods();
@@ -472,6 +485,16 @@
                         </div>
                     {/if}
                 </div>
+                
+                <div class="mt-6 pt-6 border-t border-border-ui">
+                    <button
+                        onclick={() => viewDocument(selectedUser)}
+                        class="px-6 py-3 bg-brand text-white font-bold rounded-xl hover:brightness-110 transition-all shadow-lg shadow-brand/20 flex items-center gap-2"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                        Ver Documento
+                    </button>
+                </div>
             </div>
 
             <div class="flex justify-between items-center mb-6">
@@ -752,4 +775,46 @@
     </div>
 {/if}
 
+{#if showDocumentModal && viewingDocumentUser}
+    <div
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+    >
+        <div class="bg-bg-secondary w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col border border-border-ui transform transition-all">
+            <div class="p-6 border-b border-border-ui flex items-center justify-between bg-bg-primary/50">
+                <h3 class="text-2xl font-black text-text-primary">
+                    Documento de {viewingDocumentUser.name}
+                </h3>
+                <button
+                    onclick={closeDocumentModal}
+                    class="p-2 text-text-secondary hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-colors"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 bg-bg-primary flex justify-center items-center">
+                {#if viewingDocumentUser.photo}
+                    <img 
+                        src={viewingDocumentUser.photo.startsWith('http') || viewingDocumentUser.photo.startsWith('data:') ? viewingDocumentUser.photo : `${API_URL}/storage/${viewingDocumentUser.photo}`} 
+                        alt="Documento" 
+                        class="max-w-full max-h-[60vh] rounded-xl object-contain border border-border-ui shadow-md" 
+                    />
+                {:else}
+                    <div class="text-center py-12 text-text-secondary font-bold">
+                        <p>Este usuário não possui documento cadastrado.</p>
+                    </div>
+                {/if}
+            </div>
+            <div class="p-6 border-t border-border-ui bg-bg-secondary flex justify-end">
+                <button
+                    onclick={closeDocumentModal}
+                    class="px-6 py-3 bg-bg-primary text-text-secondary font-bold rounded-xl border border-border-ui hover:bg-text-primary/5 transition-colors"
+                >
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+{/if}
+
 <Modal {modalState} {closeModal} />
+
