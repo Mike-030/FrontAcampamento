@@ -78,15 +78,14 @@
     function requestApproveRegistration(camperId) {
         if (showModal) {
             showModal(
-                "confirm",
-                "Tem certeza que deseja aprovar esta inscrição?",
+               "confirm", "Tem certeza que deseja aprovar esta inscrição? ",
                 () => {
                     closeModal();
                     performApproveRegistration(camperId);
                 }
             );
         } else {
-            if (confirm("Tem certeza que deseja aprovar esta inscrição?")) {
+            if (confirm("Tem certeza que deseja aprovar esta inscrição? ")) {
                 performApproveRegistration(camperId);
             }
         }
@@ -116,8 +115,7 @@
     function requestRejectRegistration(camperId) {
         if (showModal) {
             showModal(
-                "confirm",
-                "Tem certeza que deseja REJEITAR esta inscrição? Esta ação é irreversível.",
+               "confirm", "Tem certeza que deseja REJEITAR esta inscrição? Esta ação é irreversível.",
                 () => {
                     closeModal();
                     performRejectRegistration(camperId);
@@ -245,11 +243,11 @@
                     bind:value={camperSearchTerm}
                     onkeydown={(e) => { if (e.key === 'Enter') fetchCampers(1, camperSearchTerm); }}
                     placeholder="Pesquisar campista por nome, email ou CPF..."
-                    class="w-full bg-bg-secondary border-2 border-border-ui text-text-primary p-4 rounded-2xl focus:border-brand focus:ring-4 focus:ring-brand/20 transition-all outline-none"
+                    class="w-full bg-bg-secondary border-2 border-border-ui text-text-primary p-4 rounded-2xl focus:border-brand transition-all outline-none"
                 />
                 <button
                     onclick={() => fetchCampers(1, camperSearchTerm)}
-                    class="px-8 py-4 bg-brand text-white rounded-2xl font-bold hover:brightness-110 transition-all shrink-0 shadow-lg shadow-brand/20"
+                    class="px-8 py-4 bg-brand text-white rounded-2xl font-bold hover:brightness-110 transition-all shrink-0"
                 >
                     Buscar
                 </button>
@@ -328,7 +326,7 @@
                     <button
                         disabled={currentPage === totalPages}
                         onclick={() => fetchCampers(currentPage + 1, camperSearchTerm)}
-                        class="px-6 py-2 bg-brand text-white rounded-xl font-bold disabled:opacity-50 hover:brightness-110 transition-all cursor-pointer disabled:cursor-not-allowed shadow-lg shadow-brand/20"
+                        class="px-6 py-2 bg-brand text-white rounded-xl font-bold disabled:opacity-50 hover:brightness-110 transition-all cursor-pointer disabled:cursor-not-allowed"
                     >
                         Próxima Página
                     </button>

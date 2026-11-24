@@ -12,11 +12,11 @@
      * Navbar unificada do sistema (presente na landing page e demais telas)
      *
      * @type {{
-     *   activeTab?: string,
-     *   onOpenLogin?: (() => void) | null,
-     *   onOpenMessage?: ((message: any) => void) | null,
-     *   handleLogout?: (() => void) | null,
-     *   onAddEvent?: (() => void) | null
+     * activeTab?: string,
+     * onOpenLogin?: (() => void) | null,
+     * onOpenMessage?: ((message: any) => void) | null,
+     * handleLogout?: (() => void) | null,
+     * onAddEvent?: (() => void) | null
      * }}
      */
     let {
@@ -39,7 +39,7 @@
         exibicao: false,
     });
 
-    /** @param {'navegacao' | 'minhaConta' | 'administracao' | 'sobreNos' | 'exibicao'} group */
+    /** @param {'navegacao'|'minhaConta'|'administracao'|'sobreNos'|'exibicao'} group */
     function toggleGroup(group) {
         openGroups[group] = !openGroups[group];
     }
@@ -63,9 +63,9 @@
     let isDashboardPage = $derived(currentPath.startsWith("/dashboard"));
 
     let defaultAvatar = $derived(
-        "https://ui-avatars.com/api/?name=" +
+       "https://ui-avatars.com/api/?name=" +
             encodeURIComponent(userData.name || "User") +
-            "&background=C4982A&color=fff",
+           "&background=C4982A&color=fff",
     );
 
     let avatarSrc = $derived(
@@ -148,7 +148,7 @@
         logoutModal = {
             isOpen: true,
             type: "confirm",
-            message: "Tem certeza que deseja sair da sua conta?",
+            message: "Tem certeza que deseja sair da sua conta? ",
             onConfirm: () => {
                 logoutModal.isOpen = false;
                 setLogout();
@@ -246,7 +246,7 @@
                         onclick={navigateHome}
                         class="flex items-center gap-3.5 transition-all p-2.5 rounded-xl group cursor-pointer text-left
                                {isLandingPage
-                            ? 'bg-brand text-white shadow-md shadow-brand/20'
+                            ? 'bg-brand text-white'
                             : 'text-text-secondary hover:text-brand hover:bg-brand/5'}"
                     >
                         <div
@@ -362,7 +362,7 @@
                             onclick={() => navigateToDashboardTab("events")}
                             class="flex items-center gap-3.5 transition-all p-2.5 rounded-xl group cursor-pointer text-left
                                    {isDashboardPage && activeTab === 'events'
-                                ? 'bg-brand text-white shadow-md shadow-brand/20'
+                                ? 'bg-brand text-white'
                                 : 'text-text-secondary hover:text-brand hover:bg-brand/5'}"
                         >
                             <div
@@ -430,7 +430,7 @@
                             onclick={() => navigateToDashboardTab("subscriptions")}
                             class="flex items-center gap-3.5 transition-all p-2.5 rounded-xl group cursor-pointer text-left
                                    {isDashboardPage && activeTab === 'subscriptions'
-                                ? 'bg-brand text-white shadow-md shadow-brand/20'
+                                ? 'bg-brand text-white'
                                 : 'text-text-secondary hover:text-brand hover:bg-brand/5'}"
                         >
                             <div
@@ -468,7 +468,7 @@
                             onclick={() => navigateToDashboardTab("inbox")}
                             class="flex items-center gap-3.5 transition-all p-2.5 rounded-xl group cursor-pointer text-left
                                    {isDashboardPage && activeTab === 'inbox'
-                                ? 'bg-brand text-white shadow-md shadow-brand/20'
+                                ? 'bg-brand text-white'
                                 : 'text-text-secondary hover:text-brand hover:bg-brand/5'}"
                         >
                             <div
@@ -534,7 +534,7 @@
                             onclick={() => navigateToDashboardTab("users")}
                             class="flex items-center gap-3.5 transition-all p-2.5 rounded-xl group cursor-pointer text-left
                                    {isDashboardPage && activeTab === 'users'
-                                ? 'bg-brand text-white shadow-md shadow-brand/20'
+                                ? 'bg-brand text-white'
                                 : 'text-text-secondary hover:text-brand hover:bg-brand/5'}"
                         >
                             <div
@@ -566,7 +566,7 @@
                             onclick={() => navigateToDashboardTab("event_form")}
                             class="flex items-center gap-3.5 transition-all p-2.5 rounded-xl group cursor-pointer text-left
                                    {isDashboardPage && activeTab === 'event_form'
-                                ? 'bg-brand text-white shadow-md shadow-brand/20'
+                                ? 'bg-brand text-white'
                                 : 'text-text-secondary hover:text-brand hover:bg-brand/5'}"
                         >
                             <div
@@ -598,7 +598,7 @@
                             onclick={() => navigateToDashboardTab("manage_activities")}
                             class="flex items-center gap-3.5 transition-all p-2.5 rounded-xl group cursor-pointer text-left
                                    {isDashboardPage && activeTab === 'manage_activities'
-                                ? 'bg-brand text-white shadow-md shadow-brand/20'
+                                ? 'bg-brand text-white'
                                 : 'text-text-secondary hover:text-brand hover:bg-brand/5'}"
                         >
                             <div
@@ -635,7 +635,7 @@
                             onclick={() => navigateToDashboardTab("questions_admin")}
                             class="flex items-center gap-3.5 transition-all p-2.5 rounded-xl group cursor-pointer text-left
                                    {isDashboardPage && activeTab === 'questions_admin'
-                                ? 'bg-brand text-white shadow-md shadow-brand/20'
+                                ? 'bg-brand text-white'
                                 : 'text-text-secondary hover:text-brand hover:bg-brand/5'}"
                         >
                             <div
@@ -668,7 +668,7 @@
                             onclick={() => navigateToDashboardTab("sectors")}
                             class="flex items-center gap-3.5 transition-all p-2.5 rounded-xl group cursor-pointer text-left
                                    {isDashboardPage && activeTab === 'sectors'
-                                ? 'bg-brand text-white shadow-md shadow-brand/20'
+                                ? 'bg-brand text-white'
                                 : 'text-text-secondary hover:text-brand hover:bg-brand/5'}"
                         >
                             <div
@@ -701,7 +701,7 @@
                             onclick={() => navigateToDashboardTab("raffle")}
                             class="flex items-center gap-3.5 transition-all p-2.5 rounded-xl group cursor-pointer text-left
                                    {isDashboardPage && activeTab === 'raffle'
-                                ? 'bg-brand text-white shadow-md shadow-brand/20'
+                                ? 'bg-brand text-white'
                                 : 'text-text-secondary hover:text-brand hover:bg-brand/5'}"
                         >
                             <div
@@ -737,7 +737,7 @@
                             onclick={() => navigateToDashboardTab("products")}
                             class="flex items-center gap-3.5 transition-all p-2.5 rounded-xl group cursor-pointer text-left
                                    {isDashboardPage && activeTab === 'products'
-                                ? 'bg-brand text-white shadow-md shadow-brand/20'
+                                ? 'bg-brand text-white'
                                 : 'text-text-secondary hover:text-brand hover:bg-brand/5'}"
                         >
                             <div
@@ -1270,7 +1270,7 @@
                                             type="button"
                                             onclick={() =>
                                                 navigateToDashboardTab(
-                                                    "profile",
+                                                   "profile",
                                                 )}
                                             class="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold hover:bg-brand hover:text-white rounded-xl transition-all text-left text-text-secondary cursor-pointer"
                                         >
@@ -1335,7 +1335,7 @@
                 <button
                     type="button"
                     onclick={triggerLogin}
-                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-brand text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-brand/25 hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-brand text-white text-xs font-black uppercase tracking-wider hover:brightness-110 active:scale-95 transition-all cursor-pointer"
                 >
                     <span>Entrar</span>
                     <svg

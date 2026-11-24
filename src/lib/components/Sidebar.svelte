@@ -52,7 +52,7 @@
             <li
                 onclick={() => (activeTab = "events")}
                 class="flex items-center rounded-xl {activeTab === 'events'
-                    ? 'bg-brand text-white shadow-lg shadow-brand/20'
+                    ? 'bg-brand text-white'
                     : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer {isExpanded
                     ? 'p-3 gap-3 justify-start'
                     : 'w-12 h-12 justify-center mx-auto'}"
@@ -87,8 +87,8 @@
             <li
                 onclick={() => (activeTab = "subscriptions")}
                 class="flex items-center rounded-xl {activeTab ===
-                'subscriptions'
-                    ? 'bg-brand text-white shadow-lg shadow-brand/20'
+               'subscriptions'
+                    ? 'bg-brand text-white'
                     : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer {isExpanded
                     ? 'p-3 gap-3 justify-start'
                     : 'w-12 h-12 justify-center mx-auto'}"
@@ -128,7 +128,7 @@
             <li
                 onclick={() => (activeTab = "inbox")}
                 class="flex items-center rounded-xl {activeTab === 'inbox'
-                    ? 'bg-brand text-white shadow-lg shadow-brand/20'
+                    ? 'bg-brand text-white'
                     : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer {isExpanded
                     ? 'p-3 gap-3 justify-start'
                     : 'w-12 h-12 justify-center mx-auto'}"
@@ -164,7 +164,7 @@
                 <li
                     onclick={() => (activeTab = "users")}
                     class="flex items-center rounded-xl {activeTab === 'users'
-                        ? 'bg-brand text-white shadow-lg shadow-brand/20'
+                        ? 'bg-brand text-white'
                         : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer {isExpanded
                         ? 'p-3 gap-3 justify-start'
                         : 'w-12 h-12 justify-center mx-auto'}"
@@ -198,8 +198,8 @@
                 <li
                     onclick={onAddEvent}
                     class="flex items-center rounded-xl {activeTab ===
-                    'event_form'
-                        ? 'bg-brand text-white shadow-lg shadow-brand/20'
+                   'event_form'
+                        ? 'bg-brand text-white'
                         : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer {isExpanded
                         ? 'p-3 gap-3 justify-start'
                         : 'w-12 h-12 justify-center mx-auto'}"
@@ -233,8 +233,8 @@
                 <li
                     onclick={() => (activeTab = "manage_activities")}
                     class="flex items-center rounded-xl {activeTab ===
-                    'manage_activities'
-                        ? 'bg-brand text-white shadow-lg shadow-brand/20'
+                   'manage_activities'
+                        ? 'bg-brand text-white'
                         : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer {isExpanded
                         ? 'p-3 gap-3 justify-start'
                         : 'w-12 h-12 justify-center mx-auto'}"
@@ -273,8 +273,8 @@
                 <li
                     onclick={() => (activeTab = "questions_admin")}
                     class="flex items-center rounded-xl {activeTab ===
-                    'questions_admin'
-                        ? 'bg-brand text-white shadow-lg shadow-brand/20'
+                   'questions_admin'
+                        ? 'bg-brand text-white'
                         : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer {isExpanded
                         ? 'p-3 gap-3 justify-start'
                         : 'w-12 h-12 justify-center mx-auto'}"
@@ -310,7 +310,7 @@
                 <li
                     onclick={() => (activeTab = "sectors")}
                     class="flex items-center rounded-xl {activeTab === 'sectors'
-                        ? 'bg-brand text-white shadow-lg shadow-brand/20'
+                        ? 'bg-brand text-white'
                         : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer {isExpanded
                         ? 'p-3 gap-3 justify-start'
                         : 'w-12 h-12 justify-center mx-auto'}"
@@ -343,7 +343,7 @@
                 <li
                     onclick={() => (activeTab = "raffle")}
                     class="flex items-center rounded-xl {activeTab === 'raffle'
-                        ? 'bg-brand text-white shadow-lg shadow-brand/20'
+                        ? 'bg-brand text-white'
                         : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer {isExpanded
                         ? 'p-3 gap-3 justify-start'
                         : 'w-12 h-12 justify-center mx-auto'}"
@@ -379,7 +379,7 @@
                 <li
                     onclick={() => (activeTab = "products")}
                     class="flex items-center rounded-xl {activeTab === 'products'
-                        ? 'bg-brand text-white shadow-lg shadow-brand/20'
+                        ? 'bg-brand text-white'
                         : 'hover:bg-text-primary/5 text-text-secondary hover:text-text-primary'} transition-all cursor-pointer {isExpanded
                         ? 'p-3 gap-3 justify-start'
                         : 'w-12 h-12 justify-center mx-auto'}"

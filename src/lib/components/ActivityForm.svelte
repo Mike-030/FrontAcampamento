@@ -155,18 +155,7 @@
                     };
                     /** @type {(keyof typeof campingData)[]} */
                     const dateFields = [
-                        "raffle_camper_subscription_start_date",
-                        "raffle_camper_subscription_end_date",
-                        "raffle_camper_date",
-                        "raffle_servant_subscription_start_date",
-                        "raffle_servant_subscription_end_date",
-                        "raffle_servant_date",
-                        "camper_registration_start_date",
-                        "camper_registration_end_date",
-                        "camper_payment_date",
-                        "servant_registration_start_date",
-                        "servant_registration_end_date",
-                        "servant_payment_date",
+                       "raffle_camper_subscription_start_date", "raffle_camper_subscription_end_date", "raffle_camper_date", "raffle_servant_subscription_start_date", "raffle_servant_subscription_end_date", "raffle_servant_date", "camper_registration_start_date", "camper_registration_end_date", "camper_payment_date", "servant_registration_start_date", "servant_registration_end_date", "servant_payment_date",
                     ];
                     for (const field of dateFields) {
                         if (event.activitable[field]) {
@@ -197,7 +186,7 @@
                 categories = data.data || data || [];
             }
         } catch (err) {
-            console.error("Erro ao buscar categorias:", err);
+            console.error("Erro ao buscar categorias: ", err);
         } finally {
             loadingCategories = false;
         }
@@ -259,8 +248,8 @@
                 activitable_type: activityType,
                 activitable_data: activitableData,
                 start_date: formData.start_date.includes("T")
-                    ? formData.start_date.replace("T", " ") + ":00"
-                    : formData.start_date + " 00:00:00",
+                    ? formData.start_date.replace("T", "") +" :00"
+                    : formData.start_date +" 00:00:00",
             };
 
             const method = isEditing ? "PUT" : "POST";
@@ -271,8 +260,7 @@
             const response = await fetch(url, {
                 method,
                 headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`, "Content-Type" : "application/json",
                     Accept: "application/json",
                 },
                 body: JSON.stringify(payload),
@@ -295,8 +283,7 @@
                             {
                                 method: "PUT",
                                 headers: {
-                                    Authorization: `Bearer ${token}`,
-                                    "Content-Type": "application/json",
+                                    Authorization: `Bearer ${token}`, "Content-Type" : "application/json",
                                     Accept: "application/json",
                                 },
                                 body: JSON.stringify({
@@ -341,8 +328,7 @@
                 e.preventDefault();
                 if (event) {
                     showModal(
-                        "confirm",
-                        "Tem certeza que deseja salvar as alterações nesta atividade?",
+                       "confirm", "Tem certeza que deseja salvar as alterações nesta atividade? ",
                         async () => {
                             closeModal();
                             await handleSubmit();
@@ -414,7 +400,7 @@
                             type="text"
                             bind:value={formData.name}
                             required
-                            class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-all"
+                            class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none transition-all"
                         />
                     </div>
                     <div>
@@ -426,7 +412,7 @@
                             type="text"
                             bind:value={formData.place}
                             required
-                            class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-all"
+                            class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none transition-all"
                         />
                     </div>
                     <div>
@@ -438,7 +424,7 @@
                             type="date"
                             bind:value={formData.start_date}
                             required
-                            class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-all"
+                            class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none transition-all"
                         />
                     </div>
                     <div>
@@ -451,7 +437,7 @@
                             bind:value={formData.duration_days}
                             required
                             min="1"
-                            class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-all"
+                            class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none transition-all"
                         />
                     </div>
                     <div>
@@ -462,7 +448,7 @@
                         <input
                             type="text"
                             bind:value={formData.image}
-                            class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-all"
+                            class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none transition-all"
                             placeholder="Link ou path da Imagem"
                         />
                     </div>
@@ -483,7 +469,7 @@
                                 <select
                                     bind:value={formData.category_id}
                                     required
-                                    class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-all"
+                                    class="w-full bg-bg-primary border border-border-ui rounded-xl px-4 py-3 text-text-primary focus:border-brand outline-none transition-all"
                                 >
                                     <option value="" disabled
                                         >Selecione uma categoria</option
@@ -1021,7 +1007,7 @@
                     <button
                         type="submit"
                         disabled={loading}
-                        class="px-8 py-4 bg-brand text-white rounded-xl text-sm font-black uppercase tracking-widest hover:brightness-110 shadow-xl shadow-brand/20 transition-all disabled:opacity-50 flex items-center gap-3"
+                        class="px-8 py-4 bg-brand text-white rounded-xl text-sm font-black uppercase tracking-widest hover:brightness-110 transition-all disabled:opacity-50 flex items-center gap-3"
                     >
                         {loading ? "Salvando..." : "Salvar Atividade"}
                     </button>

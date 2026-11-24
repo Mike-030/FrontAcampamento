@@ -75,7 +75,7 @@
                 showModal("error", "Erro ao carregar a lista de produtos.");
             }
         } catch (err) {
-            console.error("Erro ao buscar produtos:", err);
+            console.error("Erro ao buscar produtos: ", err);
             showModal("error", "Não foi possível conectar com o servidor.");
         } finally {
             loading = false;
@@ -123,12 +123,12 @@
                     ? Object.values(errData.errors)[0]?.[0]
                     : errData.message;
                 showModal(
-                    "error",
+                   "error",
                     firstErr || "Não foi possível enviar a imagem.",
                 );
             }
         } catch (err) {
-            console.error("Erro ao fazer upload de imagem:", err);
+            console.error("Erro ao fazer upload de imagem: ", err);
             showModal("error", "Erro de conexão ao enviar a imagem.");
         } finally {
             uploadingImage = false;
@@ -140,7 +140,7 @@
     async function handleSave(e) {
         e.preventDefault();
 
-        const normalizedPrice = String(form.price).replace(",", ".").trim();
+        const normalizedPrice = String(form.price).replace(", ", ".").trim();
         const numericPrice = Number(normalizedPrice);
 
         if (!form.name.trim()) {
@@ -164,8 +164,7 @@
             const res = await fetch(url, {
                 method,
                 headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`, "Content-Type" : "application/json",
                     Accept: "application/json",
                 },
                 body: JSON.stringify({
@@ -177,7 +176,7 @@
 
             if (res.ok) {
                 showModal(
-                    "success",
+                   "success",
                     isEditing
                         ? "Produto atualizado com sucesso!"
                         : "Produto cadastrado com sucesso!",
@@ -192,7 +191,7 @@
                 showModal("error", firstErr || "Erro ao salvar o produto.");
             }
         } catch (err) {
-            console.error("Erro ao salvar produto:", err);
+            console.error("Erro ao salvar produto: ", err);
             showModal("error", "Não foi possível conectar com o servidor.");
         } finally {
             saving = false;
@@ -225,8 +224,8 @@
     /** @param {any} product */
     function requestDelete(product) {
         showModal(
-            "confirm",
-            `Tem certeza que deseja excluir o produto "${product.name}"? Esta ação não pode ser desfeita.`,
+           "confirm",
+            `Tem certeza que deseja excluir o produto"${product.name}" ? Esta ação não pode ser desfeita.`,
             () => {
                 closeModal();
                 performDelete(product.id);
@@ -256,7 +255,7 @@
                 showModal("error", errData.message || "Erro ao excluir o produto.");
             }
         } catch (err) {
-            console.error("Erro ao excluir produto:", err);
+            console.error("Erro ao excluir produto: ", err);
             showModal("error", "Não foi possível conectar com o servidor.");
         }
     }
@@ -463,7 +462,7 @@
                     <button
                         type="submit"
                         disabled={saving || uploadingImage}
-                        class="flex-1 py-4 rounded-2xl bg-brand text-white text-xs font-black uppercase tracking-widest shadow-xl shadow-brand/25 hover:brightness-110 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                        class="flex-1 py-4 rounded-2xl bg-brand text-white text-xs font-black uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
                     >
                         {#if saving}
                             Salvando...
@@ -483,7 +482,7 @@
                 type="text"
                 bind:value={searchQuery}
                 placeholder="Pesquisar produto por nome..."
-                class="w-full bg-bg-secondary border-2 border-border-ui text-text-primary px-5 py-3.5 rounded-2xl focus:border-brand focus:ring-4 focus:ring-brand/15 outline-none transition-all"
+                class="w-full bg-bg-secondary border-2 border-border-ui text-text-primary px-5 py-3.5 rounded-2xl focus:border-brand outline-none transition-all"
             />
 
             {#if loading}

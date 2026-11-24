@@ -11,7 +11,7 @@
 
     let eventSearchQuery = $state("");
     let showPastEvents = $state(false);
-    let typeFilter = $state("all"); // "all", "camping", "event"
+    let typeFilter = $state("all"); //"all", "camping", "event"
 
     /** @param {any} activity */
     function isRegistrationPassed(activity) {
@@ -90,7 +90,7 @@
         type="text"
         bind:value={eventSearchQuery}
         placeholder="Pesquisar por nome da atividade..."
-        class="w-full bg-bg-secondary border-2 border-border-ui text-text-primary p-4 rounded-2xl focus:border-brand focus:ring-4 focus:ring-brand/20 transition-all outline-none"
+        class="w-full bg-bg-secondary border-2 border-border-ui text-text-primary p-4 rounded-2xl focus:border-brand transition-all outline-none"
     />
     <div class="mt-4 flex flex-wrap items-center gap-4">
         <!-- Filtro por tipo -->
@@ -98,8 +98,8 @@
             <button
                 onclick={() => (typeFilter = "all")}
                 class="px-4 py-2 rounded-xl text-xs font-bold transition-all {typeFilter ===
-                'all'
-                    ? 'bg-brand text-white shadow-lg shadow-brand/20'
+               'all'
+                    ? 'bg-brand text-white'
                     : 'bg-bg-secondary border border-border-ui text-text-secondary hover:text-text-primary'}"
             >
                 Todos
@@ -107,8 +107,8 @@
             <button
                 onclick={() => (typeFilter = "camping")}
                 class="px-4 py-2 rounded-xl text-xs font-bold transition-all {typeFilter ===
-                'camping'
-                    ? 'bg-brand text-white shadow-lg shadow-brand/20'
+               'camping'
+                    ? 'bg-brand text-white'
                     : 'bg-bg-secondary border border-border-ui text-text-secondary hover:text-text-primary'}"
             >
                 Acampamentos
@@ -116,8 +116,8 @@
             <button
                 onclick={() => (typeFilter = "event")}
                 class="px-4 py-2 rounded-xl text-xs font-bold transition-all {typeFilter ===
-                'event'
-                    ? 'bg-brand text-white shadow-lg shadow-brand/20'
+               'event'
+                    ? 'bg-brand text-white'
                     : 'bg-bg-secondary border border-border-ui text-text-secondary hover:text-text-primary'}"
             >
                 Eventos
@@ -217,7 +217,7 @@
                                 class="text-xs text-text-secondary font-medium"
                             >
                                 {new Date(event.start_date).toLocaleDateString(
-                                    "pt-BR",
+                                   "pt-BR",
                                 )}
                             </span>
                         </div>
@@ -293,7 +293,7 @@
                                         event.activitable.ticket_price,
                                 )
                                     .toFixed(2)
-                                    .replace(".", ",")}
+                                    .replace(".", ", ")}
                             </span>
                         </div>
                     {:else}
@@ -351,7 +351,7 @@
         <button
             disabled={currentPage === totalPages}
             onclick={() => fetchEvents(currentPage + 1)}
-            class="px-6 py-2 bg-brand text-white rounded-xl font-bold disabled:opacity-50 hover:brightness-110 transition-all cursor-pointer disabled:cursor-not-allowed shadow-lg shadow-brand/20"
+            class="px-6 py-2 bg-brand text-white rounded-xl font-bold disabled:opacity-50 hover:brightness-110 transition-all cursor-pointer disabled:cursor-not-allowed"
         >
             Próxima Página
         </button>

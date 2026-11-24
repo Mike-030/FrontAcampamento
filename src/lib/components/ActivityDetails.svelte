@@ -159,7 +159,7 @@
                                 class="text-text-primary font-black text-sm md:text-base"
                                 >{event.start_date
                                     ? new Date(event.start_date).toLocaleDateString(
-                                          "pt-BR",
+                                         "pt-BR",
                                       )
                                     : "Não definida"}</span
                             >
@@ -193,7 +193,7 @@
                         >
                         <span class="text-brand font-black text-lg md:text-xl"
                             >{eventFee > 0
-                                ? `R$ ${parseFloat(eventFee).toFixed(2).replace(".", ",")}`
+                                ? `R$ ${parseFloat(eventFee).toFixed(2).replace(".", ", ")}`
                                 : "Gratuito"}</span
                         >
                     </li>
@@ -399,7 +399,7 @@
                 <button
                     onclick={handleSubscribeClick}
                     disabled={(activeTab === 'Servo' && !isServoOpen) || (activeTab === 'Campista' && !isCamperOpen)}
-                    class="w-full md:w-auto px-10 py-5 bg-brand text-white rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-brand/20 hover:-translate-y-1 hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:brightness-100"
+                    class="w-full md:w-auto px-10 py-5 bg-brand text-white rounded-2xl font-black uppercase tracking-widest hover:-translate-y-1 hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:brightness-100"
                 >
                     Se Inscrever
                 </button>

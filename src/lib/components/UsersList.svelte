@@ -80,7 +80,7 @@
                 selectionMethods = data.data || [];
             }
         } catch (err) {
-            console.error("Erro ao buscar métodos de seleção:", err);
+            console.error("Erro ao buscar métodos de seleção: ", err);
         }
     }
 
@@ -103,10 +103,10 @@
                 currentPage = data.meta?.current_page || 1;
                 totalPages = data.meta?.last_page || 1;
             } else {
-                console.error("Erro ao buscar usuários:", data);
+                console.error("Erro ao buscar usuários: ", data);
             }
         } catch (err) {
-            console.error("Erro de conexão:", err);
+            console.error("Erro de conexão: ", err);
         } finally {
             loadingUsers = false;
         }
@@ -128,10 +128,10 @@
             if (response.ok) {
                 userSubscriptions = data.data || [];
             } else {
-                console.error("Erro ao buscar inscrições:", data);
+                console.error("Erro ao buscar inscrições: ", data);
             }
         } catch (err) {
-            console.error("Erro de conexão:", err);
+            console.error("Erro de conexão: ", err);
         } finally {
             loadingSubscriptions = false;
         }
@@ -159,8 +159,7 @@
 
     function saveSubscription() {
         showModal(
-            "confirm",
-            "Tem certeza que deseja salvar as alterações nesta inscrição?",
+           "confirm", "Tem certeza que deseja salvar as alterações nesta inscrição? ",
             async () => {
                 closeModal();
                 await executeSaveSubscription();
@@ -175,8 +174,7 @@
                 {
                     method: "PUT",
                     headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`, "Content-Type" : "application/json",
                         Accept: "application/json",
                     },
                     body: JSON.stringify(editingSubscription),
@@ -193,12 +191,12 @@
                     ? Object.values(errorData.errors)[0][0]
                     : errorData.message;
                 showModal(
-                    "error",
+                   "error",
                     errorMessage || "Erro ao atualizar inscrição.",
                 );
             }
         } catch (err) {
-            console.error("Erro de conexão ao salvar:", err);
+            console.error("Erro de conexão ao salvar: ", err);
             showModal("error", "Não foi possível conectar com o servidor.");
         }
     }
@@ -238,11 +236,11 @@
 
     function formatCurrency(value) {
         if (!value && value !== 0) return "-";
-        return `R$ ${parseFloat(value).toFixed(2).replace(".", ",")}`;
+        return `R$ ${parseFloat(value).toFixed(2).replace(".", ", ")}`;
     }
 </script>
 
-<div class="space-y-8 animate-fade-in">
+<div class="space-y-8 animate-fade-in ">
     {#if !selectedUser}
         <div>
             <h2 class="text-3xl font-black mb-6">Usuários Cadastrados</h2>
@@ -254,11 +252,11 @@
                         if (e.key === "Enter") fetchUsers(1);
                     }}
                     placeholder="Pesquisar por nome, email ou CPF..."
-                    class="w-full bg-bg-secondary border-2 border-border-ui text-text-primary p-4 rounded-2xl focus:border-brand focus:ring-4 focus:ring-brand/20 transition-all outline-none"
+                    class="w-full bg-bg-secondary border-2 border-border-ui text-text-primary p-4 rounded-2xl focus:border-brand transition-all outline-none"
                 />
                 <button
                     onclick={() => fetchUsers(1)}
-                    class="px-8 py-4 bg-brand text-white rounded-2xl font-bold hover:brightness-110 transition-all shrink-0 shadow-lg shadow-brand/20"
+                    class="px-8 py-4 bg-brand text-white rounded-2xl font-bold hover:brightness-110 transition-all shrink-0"
                 >
                     Buscar
                 </button>
@@ -357,7 +355,7 @@
                     <button
                         disabled={currentPage === totalPages}
                         onclick={() => fetchUsers(currentPage + 1)}
-                        class="px-6 py-2 bg-brand text-white rounded-xl font-bold disabled:opacity-50 hover:brightness-110 transition-all cursor-pointer disabled:cursor-not-allowed shadow-lg shadow-brand/20"
+                        class="px-6 py-2 bg-brand text-white rounded-xl font-bold disabled:opacity-50 hover:brightness-110 transition-all cursor-pointer disabled:cursor-not-allowed"
                     >
                         Próxima Página
                     </button>
@@ -489,7 +487,7 @@
                 <div class="mt-6 pt-6 border-t border-border-ui">
                     <button
                         onclick={() => viewDocument(selectedUser)}
-                        class="px-6 py-3 bg-brand text-white font-bold rounded-xl hover:brightness-110 transition-all shadow-lg shadow-brand/20 flex items-center gap-2"
+                        class="px-6 py-3 bg-brand text-white font-bold rounded-xl hover:brightness-110 transition-all flex items-center gap-2"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
                         Ver Documento
@@ -504,7 +502,7 @@
                         type="text"
                         bind:value={subSearchQuery}
                         placeholder="Pesquisar inscrições..."
-                        class="w-full bg-bg-secondary border-2 border-border-ui text-text-primary p-3 rounded-xl focus:border-brand focus:ring-4 focus:ring-brand/20 transition-all outline-none"
+                        class="w-full bg-bg-secondary border-2 border-border-ui text-text-primary p-3 rounded-xl focus:border-brand transition-all outline-none"
                     />
                 </div>
             </div>
@@ -652,7 +650,7 @@
 
 {#if editingSubscription}
     <div
-        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in "
     >
         <div
             class="bg-bg-secondary w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden border border-border-ui transform transition-all"
@@ -765,7 +763,7 @@
                     </button>
                     <button
                         onclick={saveSubscription}
-                        class="flex-1 py-4 bg-brand text-white rounded-2xl font-bold shadow-lg shadow-brand/30 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                        class="flex-1 py-4 bg-brand text-white rounded-2xl font-bold hover:scale-[1.02] active:scale-[0.98] transition-all"
                     >
                         Salvar
                     </button>
@@ -777,7 +775,7 @@
 
 {#if showDocumentModal && viewingDocumentUser}
     <div
-        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in "
     >
         <div class="bg-bg-secondary w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col border border-border-ui transform transition-all">
             <div class="p-6 border-b border-border-ui flex items-center justify-between bg-bg-primary/50">
@@ -794,7 +792,7 @@
             <div class="p-6 overflow-y-auto flex-1 bg-bg-primary flex justify-center items-center">
                 {#if viewingDocumentUser.photo}
                     <img 
-                        src={viewingDocumentUser.photo.startsWith('http') || viewingDocumentUser.photo.startsWith('data:') ? viewingDocumentUser.photo : `${API_URL}/storage/${viewingDocumentUser.photo}`} 
+                        src={viewingDocumentUser.photo.startsWith('http') || viewingDocumentUser.photo.startsWith('data: ') ? viewingDocumentUser.photo : `${API_URL}/storage/${viewingDocumentUser.photo}`} 
                         alt="Documento" 
                         class="max-w-full max-h-[60vh] rounded-xl object-contain border border-border-ui shadow-md" 
                     />

@@ -61,15 +61,13 @@
     /** @param {Event} e */
     function handleCpfInput(e) {
         let value = /** @type {HTMLInputElement} */ (e.target).value.replace(
-            /\D/g,
-            "",
+            /\D/g, "",
         );
         if (value.length > 11) value = value.slice(0, 11);
 
         if (value.length > 9) {
             value = value.replace(
-                /(\d{3})(\d{3})(\d{3})(\d{1,2})/,
-                "$1.$2.$3-$4",
+                /(\d{3})(\d{3})(\d{3})(\d{1,2})/, "$1.$2.$3-$4",
             );
         } else if (value.length > 6) {
             value = value.replace(/(\d{3})(\d{3})(\d{1,3})/, "$1.$2.$3");
@@ -104,7 +102,7 @@
             const response = await fetch(`${API_URL}/v1/login`, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
+                   "Content-Type" : "application/json",
                     Accept: "application/json",
                 },
                 body: JSON.stringify({
@@ -123,7 +121,7 @@
                 onSuccess();
             } else {
                 showModal(
-                    "error",
+                   "error",
                     data.message || "CPF ou senha incorretos.",
                 );
             }
@@ -224,7 +222,7 @@
                         <img
                             src={logo}
                             alt="Logo Comunidade São Miguel"
-                            class="h-24 md:h-28 max-w-full drop-shadow-[0_0_25px_rgba(196,152,42,0.3)] object-contain"
+                            class="h-24 md:h-28 max-w-full drop- object-contain"
                         />
                     </div>
                     <h1
@@ -347,7 +345,7 @@
                         <button
                             type="submit"
                             disabled={loading}
-                            class="w-full bg-brand text-white p-4 rounded-2xl font-black uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all shadow-xl shadow-brand/30 cursor-pointer disabled:opacity-60"
+                            class="w-full bg-brand text-white p-4 rounded-2xl font-black uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all cursor-pointer disabled:opacity-60"
                         >
                             {loading ? "Entrando..." : "Entrar agora"}
                         </button>

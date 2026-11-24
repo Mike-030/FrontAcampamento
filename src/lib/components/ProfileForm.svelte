@@ -15,7 +15,7 @@
 
     function handleEditOrSave() {
         if (!isEditing) {
-            showModal("confirm", "Deseja editar suas informações?", () => {
+            showModal("confirm", "Deseja editar suas informações? ", () => {
                 closeModal();
                 isEditing = true;
             });
@@ -87,7 +87,7 @@
                     ? userData.picture
                     : defaultAvatar}
                 alt="Avatar"
-                class="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-brand object-cover shadow-xl shadow-brand/20 flex-shrink-0"
+                class="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-brand object-cover flex-shrink-0"
             />
             <div class="min-w-0">
                 <h3
@@ -186,7 +186,7 @@
         <div
             class="pt-8 mt-10 border-t border-border-ui flex flex-col sm:flex-row sm:items-end justify-between gap-6"
         >
-            <!-- Canto inferior esquerdo: Título "Tema" + Botão Claro/Escuro -->
+            <!-- Canto inferior esquerdo: Título"Tema" + Botão Claro/Escuro -->
             <div class="flex flex-col items-start gap-2">
                 <span
                     class="text-[10px] font-bold text-text-secondary uppercase tracking-widest ml-1"
@@ -266,7 +266,7 @@
             <button
                 type="button"
                 onclick={handleEditOrSave}
-                class="bg-brand text-white px-10 py-4 rounded-2xl font-black uppercase tracking-wider hover:bg-brand/90 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-brand/30 cursor-pointer"
+                class="bg-brand text-white px-10 py-4 rounded-2xl font-black uppercase tracking-wider hover:bg-brand/90 hover:scale-105 active:scale-95 transition-all cursor-pointer"
             >
                 {isEditing ? "Salvar Alterações" : "Editar Informações"}
             </button>

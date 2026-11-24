@@ -25,7 +25,7 @@
         type="text"
         bind:value={mySubSearchQuery}
         placeholder="Pesquisar inscrições por nome do evento..."
-        class="w-full bg-bg-secondary border-2 border-border-ui text-text-primary p-4 rounded-2xl focus:border-brand focus:ring-4 focus:ring-brand/20 transition-all outline-none"
+        class="w-full bg-bg-secondary border-2 border-border-ui text-text-primary p-4 rounded-2xl focus:border-brand transition-all outline-none"
     />
 </div>
 {#if subscriptions.length === 0}
@@ -119,7 +119,7 @@
                         <div class="flex justify-end">
                             <button
                                 onclick={() => onOpenQuestionnaire(sub.id)}
-                                class="px-6 py-3 bg-red-500 text-white hover:brightness-110 rounded-xl text-xs font-black transition-all uppercase tracking-wider shadow-lg shadow-red-500/20"
+                                class="px-6 py-3 bg-red-500 text-white hover:brightness-110 rounded-xl text-xs font-black transition-all uppercase tracking-wider"
                             >
                                 Corrigir Formulário
                             </button>

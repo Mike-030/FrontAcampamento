@@ -17,7 +17,7 @@
     let eventSearchQuery = $state("");
     let isEditingEvent = $state(false);
     let selectedEvent = $state(null);
-    let typeFilter = $state("all"); // "all", "camping", "event"
+    let typeFilter = $state("all"); //"all", "camping", "event"
 
     let filteredEvents = $derived(
         events.filter((e) => {
@@ -143,8 +143,7 @@
             const res = await fetch(`${API_URL}/v1/subscriptions/${viewingSubscriber.id}/return-form`, {
                 method: "POST",
                 headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`, "Content-Type" : "application/json",
                     Accept: "application/json",
                 },
                 body: JSON.stringify({
@@ -185,7 +184,7 @@
                 selectionMethods = data.data || [];
             }
         } catch (err) {
-            console.error("Erro ao buscar métodos de seleção:", err);
+            console.error("Erro ao buscar métodos de seleção: ", err);
         }
     }
 
@@ -215,8 +214,7 @@
 
     function saveSubscription() {
         showModal(
-            "confirm",
-            "Tem certeza que deseja salvar as alterações nesta inscrição?",
+           "confirm", "Tem certeza que deseja salvar as alterações nesta inscrição? ",
             async () => {
                 closeModal();
                 await executeSaveSubscription();
@@ -231,8 +229,7 @@
                 {
                     method: "PUT",
                     headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`, "Content-Type" : "application/json",
                         Accept: "application/json",
                     },
                     body: JSON.stringify(editingSubscription),
@@ -254,12 +251,12 @@
                     ? Object.values(errorData.errors)[0][0]
                     : errorData.message;
                 showModal(
-                    "error",
+                   "error",
                     errorMessage || "Erro ao atualizar inscrição.",
                 );
             }
         } catch (err) {
-            console.error("Erro de conexão ao salvar:", err);
+            console.error("Erro de conexão ao salvar: ", err);
             showModal("error", "Não foi possível conectar com o servidor.");
         }
     }
@@ -389,8 +386,8 @@
             <button
                 onclick={() => openSubscribersList(selectedEvent, 1, isViewingOnlySelected, "todos")}
                 class="px-4 py-2 rounded-xl text-xs font-bold transition-all {subscriberVacancyTypeFilter ===
-                'todos'
-                    ? 'bg-brand text-white shadow-lg shadow-brand/20'
+               'todos'
+                    ? 'bg-brand text-white'
                     : 'bg-bg-secondary border border-border-ui text-text-secondary hover:text-text-primary'}"
             >
                 Todos
@@ -398,8 +395,8 @@
             <button
                 onclick={() => openSubscribersList(selectedEvent, 1, isViewingOnlySelected, "masculina")}
                 class="px-4 py-2 rounded-xl text-xs font-bold transition-all {subscriberVacancyTypeFilter ===
-                'masculina'
-                    ? 'bg-brand text-white shadow-lg shadow-brand/20'
+               'masculina'
+                    ? 'bg-brand text-white'
                     : 'bg-bg-secondary border border-border-ui text-text-secondary hover:text-text-primary'}"
             >
                 Masculina
@@ -407,8 +404,8 @@
             <button
                 onclick={() => openSubscribersList(selectedEvent, 1, isViewingOnlySelected, "feminina")}
                 class="px-4 py-2 rounded-xl text-xs font-bold transition-all {subscriberVacancyTypeFilter ===
-                'feminina'
-                    ? 'bg-brand text-white shadow-lg shadow-brand/20'
+               'feminina'
+                    ? 'bg-brand text-white'
                     : 'bg-bg-secondary border border-border-ui text-text-secondary hover:text-text-primary'}"
             >
                 Feminina
@@ -416,8 +413,8 @@
             <button
                 onclick={() => openSubscribersList(selectedEvent, 1, isViewingOnlySelected, "casal")}
                 class="px-4 py-2 rounded-xl text-xs font-bold transition-all {subscriberVacancyTypeFilter ===
-                'casal'
-                    ? 'bg-brand text-white shadow-lg shadow-brand/20'
+               'casal'
+                    ? 'bg-brand text-white'
                     : 'bg-bg-secondary border border-border-ui text-text-secondary hover:text-text-primary'}"
             >
                 Casal
@@ -483,7 +480,7 @@
                                 <td class="px-6 py-4"
                                     >{sub.user?.masked_cpf ||
                                         sub.user?.cpf ||
-                                        "-"}</td
+                                       "-"}</td
                                 >
                                 <td class="px-6 py-4">
                                     <span
@@ -608,7 +605,7 @@
                             isViewingOnlySelected,
                             subscriberVacancyTypeFilter,
                         )}
-                    class="px-6 py-2 bg-brand text-white rounded-xl font-bold disabled:opacity-50 hover:brightness-110 transition-all cursor-pointer disabled:cursor-not-allowed shadow-lg shadow-brand/20"
+                    class="px-6 py-2 bg-brand text-white rounded-xl font-bold disabled:opacity-50 hover:brightness-110 transition-all cursor-pointer disabled:cursor-not-allowed"
                 >
                     Próxima Página
                 </button>
@@ -702,7 +699,7 @@
                                             class="text-sm font-black text-brand mb-2"
                                         >
                                             {answer.question?.text ||
-                                                "Pergunta não encontrada"}
+                                               "Pergunta não encontrada"}
                                         </p>
                                         <p
                                             class="text-text-primary whitespace-pre-wrap"
@@ -741,7 +738,7 @@
                         <button
                             onclick={executeReturnForm}
                             disabled={submittingReturn}
-                            class="px-6 py-3 bg-red-500 text-white font-bold rounded-xl hover:brightness-110 transition-all shadow-lg shadow-red-500/20 disabled:opacity-50"
+                            class="px-6 py-3 bg-red-500 text-white font-bold rounded-xl hover:brightness-110 transition-all disabled:opacity-50"
                         >
                             {submittingReturn ? 'Enviando...' : 'Confirmar Devolução'}
                         </button>
@@ -769,7 +766,7 @@
     <!-- Modal Visualizar Documento -->
     {#if showDocumentModal && viewingDocumentUser}
         <div
-            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in "
         >
             <div class="bg-bg-secondary w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col border border-border-ui transform transition-all">
                 <div class="p-6 border-b border-border-ui flex items-center justify-between bg-bg-primary/50">
@@ -786,7 +783,7 @@
                 <div class="p-6 overflow-y-auto flex-1 bg-bg-primary flex justify-center items-center">
                     {#if viewingDocumentUser.photo}
                         <img 
-                            src={viewingDocumentUser.photo.startsWith('http') || viewingDocumentUser.photo.startsWith('data:') ? viewingDocumentUser.photo : `${API_URL}/storage/${viewingDocumentUser.photo}`} 
+                            src={viewingDocumentUser.photo.startsWith('http') || viewingDocumentUser.photo.startsWith('data: ') ? viewingDocumentUser.photo : `${API_URL}/storage/${viewingDocumentUser.photo}`} 
                             alt="Documento" 
                             class="max-w-full max-h-[60vh] rounded-xl object-contain border border-border-ui shadow-md" 
                         />
@@ -817,11 +814,11 @@
                 if (e.key === "Enter") fetchEvents(1, eventSearchQuery);
             }}
             placeholder="Pesquisar por nome da atividade..."
-            class="w-full bg-bg-secondary border-2 border-border-ui text-text-primary p-4 rounded-2xl focus:border-brand focus:ring-4 focus:ring-brand/20 transition-all outline-none"
+            class="w-full bg-bg-secondary border-2 border-border-ui text-text-primary p-4 rounded-2xl focus:border-brand transition-all outline-none"
         />
         <button
             onclick={() => fetchEvents(1, eventSearchQuery)}
-            class="px-8 py-4 bg-brand text-white rounded-2xl font-bold hover:brightness-110 transition-all shrink-0 shadow-lg shadow-brand/20"
+            class="px-8 py-4 bg-brand text-white rounded-2xl font-bold hover:brightness-110 transition-all shrink-0"
         >
             Buscar
         </button>
@@ -832,8 +829,8 @@
         <button
             onclick={() => (typeFilter = "all")}
             class="px-4 py-2 rounded-xl text-xs font-bold transition-all {typeFilter ===
-            'all'
-                ? 'bg-brand text-white shadow-lg shadow-brand/20'
+           'all'
+                ? 'bg-brand text-white'
                 : 'bg-bg-secondary border border-border-ui text-text-secondary hover:text-text-primary'}"
         >
             Todos
@@ -841,8 +838,8 @@
         <button
             onclick={() => (typeFilter = "camping")}
             class="px-4 py-2 rounded-xl text-xs font-bold transition-all {typeFilter ===
-            'camping'
-                ? 'bg-brand text-white shadow-lg shadow-brand/20'
+           'camping'
+                ? 'bg-brand text-white'
                 : 'bg-bg-secondary border border-border-ui text-text-secondary hover:text-text-primary'}"
         >
             Acampamentos
@@ -850,8 +847,8 @@
         <button
             onclick={() => (typeFilter = "event")}
             class="px-4 py-2 rounded-xl text-xs font-bold transition-all {typeFilter ===
-            'event'
-                ? 'bg-brand text-white shadow-lg shadow-brand/20'
+           'event'
+                ? 'bg-brand text-white'
                 : 'bg-bg-secondary border border-border-ui text-text-secondary hover:text-text-primary'}"
         >
             Eventos
@@ -1043,7 +1040,7 @@
             <button
                 disabled={currentPage === totalPages}
                 onclick={() => fetchEvents(currentPage + 1)}
-                class="px-6 py-2 bg-brand text-white rounded-xl font-bold disabled:opacity-50 hover:brightness-110 transition-all cursor-pointer disabled:cursor-not-allowed shadow-lg shadow-brand/20"
+                class="px-6 py-2 bg-brand text-white rounded-xl font-bold disabled:opacity-50 hover:brightness-110 transition-all cursor-pointer disabled:cursor-not-allowed"
             >
                 Próxima Página
             </button>
@@ -1053,7 +1050,7 @@
 
 {#if editingSubscription}
     <div
-        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in "
     >
         <div
             class="bg-bg-secondary w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden border border-border-ui transform transition-all"
@@ -1166,7 +1163,7 @@
                     </button>
                     <button
                         onclick={saveSubscription}
-                        class="flex-1 py-4 bg-brand text-white rounded-2xl font-bold shadow-lg shadow-brand/30 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                        class="flex-1 py-4 bg-brand text-white rounded-2xl font-bold hover:scale-[1.02] active:scale-[0.98] transition-all"
                     >
                         Salvar
                     </button>

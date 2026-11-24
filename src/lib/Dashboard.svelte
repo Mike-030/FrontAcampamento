@@ -79,23 +79,17 @@
 
     // Fallback para imagem caso o usuário não tenha uma
     let defaultAvatar = $derived(
-        "https://ui-avatars.com/api/?name=" +
+       "https://ui-avatars.com/api/?name=" +
             (userData.name || "User") +
-            "&background=DE6E27&color=fff",
+           "&background=DE6E27&color=fff",
     );
 
     onMount(() => {
         const requestedTab = $page.url.searchParams.get("tab");
-        const fromRoute = $page.url.searchParams.get("from");
+        const fromRoute = $page.url.searchParams.get("from ");
         const allowedUserTabs = ["events", "inbox", "profile", "subscriptions"];
         const allowedAdminTabs = [
-            "users",
-            "event_form",
-            "manage_activities",
-            "questions_admin",
-            "sectors",
-            "raffle",
-            "products",
+           "users", "event_form", "manage_activities", "questions_admin", "sectors", "raffle", "products",
         ];
 
         if (fromRoute && fromRoute.startsWith("/")) {
@@ -168,7 +162,7 @@
                 eventsTotalPages = data.meta?.last_page || 1;
             }
         } catch (err) {
-            console.error("Erro ao buscar atividades:", err);
+            console.error("Erro ao buscar atividades: ", err);
         } finally {
             loading = false;
         }
@@ -191,7 +185,7 @@
                 subscriptions = data.data || [];
             }
         } catch (err) {
-            console.error("Erro ao buscar inscrições:", err);
+            console.error("Erro ao buscar inscrições: ", err);
         } finally {
             loading = false;
         }
@@ -211,8 +205,7 @@
                 const response = await fetch(`${API_URL}/v1/couple-invitations`, {
                     method: "POST",
                     headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`, "Content-Type" : "application/json",
                         Accept: "application/json",
                     },
                     body: JSON.stringify({ activity_id: eventId, spouse_cpf: spouseCpf }),
@@ -253,8 +246,7 @@
             const response = await fetch(`${API_URL}/v1/subscriptions`, {
                 method: "POST",
                 headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`, "Content-Type" : "application/json",
                     Accept: "application/json",
                 },
                 body: JSON.stringify(payload),
@@ -277,16 +269,15 @@
                     ? Object.values(errorData.errors)[0][0]
                     : errorData.message;
                 showModal(
-                    "error",
+                   "error",
                     errorMessage || "Verifique os dados informados.",
                 );
-                console.error("Erros de validação:", errorData);
+                console.error("Erros de validação: ", errorData);
             }
         } catch (err) {
-            console.error("Erro de conexão ao se inscrever:", err);
+            console.error("Erro de conexão ao se inscrever: ", err);
             showModal(
-                "error",
-                "Não foi possível conectar com o servidor. Tente novamente.",
+               "error", "Não foi possível conectar com o servidor. Tente novamente.",
             );
         }
     }
@@ -294,8 +285,7 @@
     /** @param {number | string} subscriptionId */
     function requestCancelSubscription(subscriptionId) {
         showModal(
-            "confirm",
-            "Tem certeza que deseja cancelar esta inscrição? Esta ação não pode ser desfeita.",
+           "confirm", "Tem certeza que deseja cancelar esta inscrição? Esta ação não pode ser desfeita.",
             () => {
                 closeModal();
                 performCancelSubscription(subscriptionId);
@@ -323,12 +313,12 @@
             } else {
                 const errorData = await response.json().catch(() => ({}));
                 showModal(
-                    "error",
+                   "error",
                     errorData.message || "Erro ao cancelar a inscrição.",
                 );
             }
         } catch (err) {
-            console.error("Erro ao cancelar inscrição:", err);
+            console.error("Erro ao cancelar inscrição: ", err);
             showModal("error", "Não foi possível conectar com o servidor.");
         }
     }
@@ -343,8 +333,7 @@
      */
     function requestSubscription(eventId, type = "Campista", sector1 = null, sector2 = null, eventFee = 0, spouseCpf = null) {
         showModal(
-            "confirm",
-            "Ao confirmar, prosseguiremos com sua inscrição. Deseja continuar?",
+           "confirm", "Ao confirmar, prosseguiremos com sua inscrição. Deseja continuar? ",
             () => {
                 closeModal();
                 subscribe(eventId, type, sector1, sector2, eventFee, spouseCpf);
@@ -359,15 +348,14 @@
                 await fetch(`${API_URL}/v1/subscriptions/${createdSubscriptionId}`, {
                     method: "PUT",
                     headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`, "Content-Type" : "application/json",
                         Accept: "application/json",
                     },
                     body: JSON.stringify({ paid_the_fee: true })
                 });
             }
         } catch (err) {
-            console.error("Erro ao simular pagamento:", err);
+            console.error("Erro ao simular pagamento: ", err);
         }
         
         setTimeout(() => {
@@ -412,8 +400,7 @@
     /** @param {(() => void) | null} onSuccess */
     function requestUpdateProfile(onSuccess = null) {
         showModal(
-            "confirm",
-            "Deseja realmente salvar as alterações no seu perfil?",
+           "confirm", "Deseja realmente salvar as alterações no seu perfil? ",
             () => {
                 closeModal();
                 performUpdateProfile(onSuccess);
@@ -441,8 +428,7 @@
     /** @param {any} event */
     function requestDeleteEvent(event) {
         showModal(
-            "confirm",
-            "Tem certeza que deseja excluir esta atividade? Esta ação não pode ser desfeita.",
+           "confirm", "Tem certeza que deseja excluir esta atividade? Esta ação não pode ser desfeita.",
             () => {
                 closeModal();
                 performDeleteEvent(event.id);
@@ -470,12 +456,12 @@
             } else {
                 const errorData = await response.json().catch(() => ({}));
                 showModal(
-                    "error",
+                   "error",
                     errorData.message || "Erro ao excluir a atividade.",
                 );
             }
         } catch (err) {
-            console.error("Erro ao excluir atividade:", err);
+            console.error("Erro ao excluir atividade: ", err);
             showModal("error", "Não foi possível conectar com o servidor.");
         } finally {
             loading = false;
@@ -502,8 +488,7 @@
             const response = await fetch(`${API_URL}/v1/users/${userData.id}`, {
                 method: "PUT",
                 headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`, "Content-Type" : "application/json",
                     Accept: "application/json",
                 },
                 body: JSON.stringify(payload),
@@ -521,24 +506,22 @@
                     ? Object.values(errorData.errors)[0][0]
                     : errorData.message;
                 showModal(
-                    "error",
+                   "error",
                     errorMessage || "Verifique os dados informados.",
                 );
-                console.error("Erros de validação:", errorData);
+                console.error("Erros de validação: ", errorData);
             }
         } catch (err) {
-            console.error("Erro ao atualizar perfil:", err);
+            console.error("Erro ao atualizar perfil: ", err);
             showModal(
-                "error",
-                "Não foi possível conectar com o servidor. Tente novamente.",
+               "error", "Não foi possível conectar com o servidor. Tente novamente.",
             );
         }
     }
 
     function handleLogout() {
         showModal(
-            "confirm",
-            "Tem certeza que deseja sair da sua conta?",
+           "confirm", "Tem certeza que deseja sair da sua conta? ",
             () => {
                 closeModal();
                 performLogout();
@@ -702,7 +685,7 @@
             <div class="bg-bg-primary border border-border-ui w-full max-w-md rounded-[3rem] p-8 shadow-2xl relative overflow-hidden">
                 <h3 class="text-2xl font-black mb-6 text-center">Pagamento da Inscrição</h3>
                 <p class="text-text-secondary text-center text-sm font-bold uppercase tracking-wider mb-8">
-                    Valor: <span class="text-brand">R$ {parseFloat(paymentFee).toFixed(2).replace(".", ",")}</span>
+                    Valor: <span class="text-brand">R$ {parseFloat(paymentFee).toFixed(2).replace(".", ", ")}</span>
                 </p>
 
                 <div class="flex flex-col gap-4">
@@ -721,7 +704,7 @@
 
                         <button
                             onclick={simulatePayment}
-                            class="w-full px-6 py-4 bg-brand text-white font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-brand/20 hover:brightness-110 active:scale-95 transition-all"
+                            class="w-full px-6 py-4 bg-brand text-white font-black uppercase tracking-widest rounded-2xl hover:brightness-110 active:scale-95 transition-all"
                         >
                             Simular Pagamento
                         </button>

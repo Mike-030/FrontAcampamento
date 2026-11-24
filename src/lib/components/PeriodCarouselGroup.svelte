@@ -3,16 +3,16 @@
      * Carrossel de Carrosséis por Período (Passados -> Atuais -> Futuros -> Passados)
      *
      * @type {{
-     *   id?: string,
-     *   title: string,
-     *   subtitle?: string,
-     *   itemLabelPlural: string,
-     *   pastItems?: any[],
-     *   currentItems?: any[],
-     *   futureItems?: any[],
-     *   loading?: boolean,
-     *   autoPlayMs?: number,
-     *   accentVariant?: 'camping' | 'event'
+     * id?: string,
+     * title: string,
+     * subtitle?: string,
+     * itemLabelPlural: string,
+     * pastItems?: any[],
+     * currentItems?: any[],
+     * futureItems?: any[],
+     * loading?: boolean,
+     * autoPlayMs?: number,
+     * accentVariant?: 'camping'|'event'
      * }}
      */
     let {
@@ -30,7 +30,7 @@
 
     // Monta os períodos disponíveis na ordem exata: Passados (máx 3) -> Atuais (todos) -> Futuros (todos)
     let periods = $derived.by(() => {
-        /** @type {{ key: 'past' | 'current' | 'future', label: string, shortLabel: string, badge: string, items: any[] }[]} */
+        /** @type {{ key: 'past'|'current'|'future', label: string, shortLabel: string, badge: string, items: any[] }[]} */
         const list = [];
 
         if (pastItems.length > 0) {
@@ -252,7 +252,7 @@
         return `${startShort} – ${endFull}`;
     }
 
-    /** @param {'past' | 'current' | 'future'} key */
+    /** @param {'past'|'current'|'future'} key */
     function getPeriodBadgeStyle(key) {
         if (key === "current") {
             return "bg-emerald-500/90 text-white border-emerald-400/50";
@@ -307,7 +307,7 @@
                         onclick={() => selectPeriod(pIdx)}
                         class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer
                                {activePeriodIndex === pIdx
-                            ? 'bg-brand text-white shadow-lg shadow-brand/25'
+                            ? 'bg-brand text-white'
                             : 'text-text-secondary hover:text-text-primary hover:bg-bg-primary/60'}"
                     >
                         {#if period.key === "current"}

@@ -118,9 +118,9 @@
             const payload = await response.json();
             activities = payload.data || [];
         } catch (err) {
-            console.error("Erro ao carregar atividades públicas:", err);
+            console.error("Erro ao carregar atividades públicas: ", err);
             fetchError =
-                "Não foi possível conectar ao servidor para exibir a programação.";
+               "Não foi possível conectar ao servidor para exibir a programação.";
         } finally {
             loading = false;
         }
@@ -140,7 +140,7 @@
                 products = payload.data || [];
             }
         } catch (err) {
-            console.error("Erro ao carregar produtos públicos:", err);
+            console.error("Erro ao carregar produtos públicos: ", err);
         } finally {
             loadingProducts = false;
         }
@@ -246,7 +246,7 @@
                 <img
                     src={logo}
                     alt="Brasão Comunidade São Miguel"
-                    class="h-32 w-auto object-contain drop-shadow-[0_0_30px_rgba(196,152,42,0.45)]"
+                    class="h-32 w-auto object-contain drop-"
                 />
             </div>
         </div>
@@ -299,13 +299,6 @@
     <section
         class="relative rounded-[2.5rem] sm:rounded-[3rem] bg-bg-secondary/85 backdrop-blur-md border border-border-ui p-8 sm:p-14 text-center shadow-2xl overflow-hidden"
     >
-        <div
-            class="absolute -top-20 -left-20 w-64 h-64 bg-brand/10 rounded-full blur-3xl pointer-events-none"
-        ></div>
-        <div
-            class="absolute -bottom-20 -right-20 w-64 h-64 bg-brand/10 rounded-full blur-3xl pointer-events-none"
-        ></div>
-
         <div class="relative z-10 max-w-2xl mx-auto space-y-5">
             <span
                 class="inline-block text-[11px] font-black uppercase tracking-[0.25em] text-brand"
@@ -333,7 +326,7 @@
                     onclick={handleInterestedClick}
                     class="inline-flex items-center justify-center gap-3 px-10 py-5 rounded-2xl
                            bg-brand text-white text-sm sm:text-base font-black uppercase tracking-widest
-                           shadow-2xl shadow-brand/35 hover:brightness-110 hover:-translate-y-0.5
+                            hover:brightness-110 hover:-translate-y-0.5
                            active:scale-95 transition-all cursor-pointer"
                 >
                     <span>Interessado? Saiba mais.</span>
@@ -375,7 +368,7 @@
                 onclick={() => (isWhatsAppModalOpen = true)}
                 class="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl
                        bg-[#25D366] hover:bg-[#1EBE5D] text-white text-xs sm:text-sm font-black uppercase tracking-widest
-                       shadow-xl shadow-[#25D366]/30 hover:-translate-y-0.5 active:scale-95
+                        hover:-translate-y-0.5 active:scale-95
                        transition-all cursor-pointer"
             >
                 <svg

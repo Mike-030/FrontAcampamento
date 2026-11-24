@@ -106,7 +106,7 @@
                         </button>
                         <button
                             onclick={modalState.onConfirm}
-                            class="w-1/2 py-3.5 rounded-xl text-sm font-black uppercase tracking-wider bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/30 transition-all"
+                            class="w-1/2 py-3.5 rounded-xl text-sm font-black uppercase tracking-wider bg-red-500 hover:bg-red-600 text-white transition-all"
                         >
                             Confirmar
                         </button>
@@ -119,9 +119,9 @@
                             closeModal();
                         }}
                         class="w-full py-3.5 rounded-xl text-sm font-black uppercase tracking-wider transition-all {modalState.type ===
-                        'error'
-                            ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/30'
-                            : 'bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/30'}"
+                       'error'
+                            ? 'bg-red-500 hover:bg-red-600 text-white'
+                            : 'bg-green-500 hover:bg-green-600 text-white'}"
                     >
                         Entendi
                     </button>

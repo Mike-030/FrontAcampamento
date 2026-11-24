@@ -81,7 +81,7 @@
                             if (q) {
                                 if (q.type === 'Fechada (Múltipla Escolha)') {
                                     // Assumes multiple choice answers are comma-separated string
-                                    formData[q.id] = ans.answer ? ans.answer.split(',').map(s => s.trim()) : [];
+                                    formData[q.id] = ans.answer ? ans.answer.split(', ').map(s => s.trim()) : [];
                                 } else {
                                     formData[q.id] = ans.answer || "";
                                 }
@@ -101,8 +101,7 @@
     function requestSubmit(e) {
         e.preventDefault();
         showModal(
-            "confirm",
-            "Tem certeza que deseja enviar o formulário? Após o envio, as respostas não poderão ser alteradas.",
+           "confirm", "Tem certeza que deseja enviar o formulário? Após o envio, as respostas não poderão ser alteradas.",
             () => {
                 closeModal();
                 performSubmit();
@@ -129,7 +128,7 @@
             const res = await fetch(`${API_URL}/v1/answers`, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
+                   "Content-Type" : "application/json",
                     Authorization: `Bearer ${token}`,
                     Accept: "application/json",
                 },
@@ -277,7 +276,7 @@
                     <button
                         type="submit"
                         disabled={submitting}
-                        class="px-8 py-4 bg-brand text-white font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-brand/20 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="px-8 py-4 bg-brand text-white font-black uppercase tracking-widest rounded-2xl hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {submitting ? 'Enviando...' : 'Enviar Respostas'}
                     </button>

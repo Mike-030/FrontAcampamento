@@ -44,7 +44,7 @@
                 campings = data.data || [];
             }
         } catch (err) {
-            console.error("Erro ao buscar dados de sorteio:", err);
+            console.error("Erro ao buscar dados de sorteio: ", err);
         } finally {
             loading = false;
         }
@@ -59,8 +59,7 @@
                 {
                     method: "POST",
                     headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`, "Content-Type" : "application/json",
                         Accept: "application/json",
                     },
                 },
@@ -83,7 +82,7 @@
                 };
             }
         } catch (err) {
-            console.error("Erro ao realizar sorteio:", err);
+            console.error("Erro ao realizar sorteio: ", err);
             notification = {
                 show: true,
                 type: "error",
@@ -104,8 +103,7 @@
                 {
                     method: "POST",
                     headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`, "Content-Type" : "application/json",
                         Accept: "application/json",
                     },
                 },
@@ -129,7 +127,7 @@
                 };
             }
         } catch (err) {
-            console.error("Erro ao realizar sorteio de servos:", err);
+            console.error("Erro ao realizar sorteio de servos: ", err);
             notification = {
                 show: true,
                 type: "error",
@@ -622,10 +620,9 @@
                                     onclick={() =>
                                         viewRaffleList(
                                             camping.activity_id,
-                                            camping.name,
-                                            "Campista",
+                                            camping.name, "Campista",
                                         )}
-                                    class="flex items-center justify-center gap-2 px-4 py-4 bg-brand text-white shadow-lg shadow-brand/20 hover:-translate-y-0.5 hover:brightness-110 active:scale-95 transition-all rounded-2xl text-xs font-black uppercase tracking-widest cursor-pointer"
+                                    class="flex items-center justify-center gap-2 px-4 py-4 bg-brand text-white hover:-translate-y-0.5 hover:brightness-110 active:scale-95 transition-all rounded-2xl text-xs font-black uppercase tracking-widest cursor-pointer"
                                 >
                                     Ver Lista de Campistas
                                 </button>
@@ -640,7 +637,7 @@
                                     ) || raffleLoading === camping.activity_id}
                                     class="flex items-center justify-center gap-2 px-4 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all
                                     {isDateReached(camping.raffle_camper_date)
-                                        ? 'bg-brand text-white shadow-lg shadow-brand/20 hover:-translate-y-0.5 hover:brightness-110 active:scale-95 cursor-pointer'
+                                        ? 'bg-brand text-white hover:-translate-y-0.5 hover:brightness-110 active:scale-95 cursor-pointer'
                                         : 'bg-text-primary/5 text-text-secondary/40 cursor-not-allowed border border-border-ui'}"
                                 >
                                     {#if raffleLoading === camping.activity_id}
@@ -660,10 +657,9 @@
                                     onclick={() =>
                                         viewRaffleList(
                                             camping.activity_id,
-                                            camping.name,
-                                            "Servo",
+                                            camping.name, "Servo",
                                         )}
-                                    class="flex items-center justify-center gap-2 px-4 py-4 bg-brand text-white shadow-lg shadow-brand/20 hover:-translate-y-0.5 hover:brightness-110 active:scale-95 transition-all rounded-2xl text-xs font-black uppercase tracking-widest cursor-pointer"
+                                    class="flex items-center justify-center gap-2 px-4 py-4 bg-brand text-white hover:-translate-y-0.5 hover:brightness-110 active:scale-95 transition-all rounded-2xl text-xs font-black uppercase tracking-widest cursor-pointer"
                                 >
                                     Ver Lista de Servos
                                 </button>
@@ -678,7 +674,7 @@
                                     ) || raffleLoading === camping.activity_id}
                                     class="flex items-center justify-center gap-2 px-4 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all
                                     {isDateReached(camping.raffle_servant_date)
-                                        ? 'bg-brand text-white shadow-lg shadow-brand/20 hover:-translate-y-0.5 hover:brightness-110 active:scale-95 cursor-pointer'
+                                        ? 'bg-brand text-white hover:-translate-y-0.5 hover:brightness-110 active:scale-95 cursor-pointer'
                                         : 'bg-text-primary/5 text-text-secondary/40 cursor-not-allowed border border-border-ui'}"
                                 >
                                     {#if raffleLoading === camping.activity_id}

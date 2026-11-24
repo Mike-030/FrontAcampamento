@@ -34,18 +34,7 @@
     let selectedYear = $state(2000);
 
     const months = [
-        "Janeiro",
-        "Fevereiro",
-        "Março",
-        "Abril",
-        "Maio",
-        "Junho",
-        "Julho",
-        "Agosto",
-        "Setembro",
-        "Outubro",
-        "Novembro",
-        "Dezembro",
+       "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
     ];
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 110 }, (_, i) => currentYear - i);
@@ -136,7 +125,7 @@
             const response = await fetch(`${API_URL}/v1/register`, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
+                   "Content-Type" : "application/json",
                     Accept: "application/json",
                 },
                 body: JSON.stringify(payload),
@@ -548,7 +537,7 @@
                                     class="bg-bg-primary/50 border border-border-ui rounded-3xl p-6 relative overflow-hidden h-48 flex items-center justify-around group"
                                 >
                                     <div
-                                        class="absolute left-4 right-4 h-12 border-y-2 border-brand/20 bg-brand/5 pointer-events-none rounded-xl shadow-inner shadow-brand/10"
+                                        class="absolute left-4 right-4 h-12 border-y-2 border-brand/20 bg-brand/5 pointer-events-none rounded-xl"
                                     ></div>
 
                                     <!-- Dia -->
@@ -626,8 +615,7 @@
                                     >
                                         Data: <span class="text-brand"
                                             >{String(selectedDay).padStart(
-                                                2,
-                                                "0",
+                                                2, "0",
                                             )} de {months[selectedMonth - 1]} de
                                             {selectedYear}</span
                                         >
@@ -690,7 +678,7 @@
                             <button
                                 type="submit"
                                 disabled={loading}
-                                class="w-full bg-brand text-white p-5 rounded-2xl font-black uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all shadow-xl shadow-brand/20 disabled:opacity-50"
+                                class="w-full bg-brand text-white p-5 rounded-2xl font-black uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all disabled:opacity-50"
                             >
                                 {loading
                                     ? "Cadastrando..."
