@@ -120,7 +120,7 @@
         } catch (err) {
             console.error("Erro ao carregar atividades públicas: ", err);
             fetchError =
-               "Não foi possível conectar ao servidor para exibir a programação.";
+                "Não foi possível conectar ao servidor para exibir a programação.";
         } finally {
             loading = false;
         }
@@ -195,7 +195,7 @@
         <img
             src={bgHero}
             alt="São Miguel Arcanjo"
-            class="absolute inset-0 w-full h-full object-cover"
+            class="absolute inset-0 w-full h-[120vh] object-cover"
         />
         <div
             class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/65 to-black/30"
