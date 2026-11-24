@@ -32,6 +32,9 @@
     let subscriptions = $state([]); // Lista de inscrições do usuário
     let loading = $state(true); // Controle de carregamento global
     let activeTab = $state("events"); // Aba ativa (events, subscriptions, profile, etc.)
+    let previousTab = $state("events"); // Última aba visitada antes de abrir o perfil
+    /** @type {string | null} */
+    let previousRoute = $state(null); // Rota anterior caso tenha vindo de fora do dashboard
     let selectedEvent = $state(null); // Evento selecionado para detalhes ou edição
     let selectedInboxMessage = $state(null); // Mensagem selecionada para visualização
     let selectedSubscriptionId = $state(null); // ID da inscrição selecionada para responder questionário
@@ -83,6 +86,7 @@
 
     onMount(() => {
         const requestedTab = $page.url.searchParams.get("tab");
+        const fromRoute = $page.url.searchParams.get("from");
         const allowedUserTabs = ["events", "inbox", "profile", "subscriptions"];
         const allowedAdminTabs = [
             "users",
@@ -93,6 +97,10 @@
             "raffle",
             "products",
         ];
+
+        if (fromRoute && fromRoute.startsWith("/")) {
+            previousRoute = fromRoute;
+        }
 
         if (requestedTab) {
             if (requestedTab === "event_form" && isAdmin) {
@@ -106,6 +114,24 @@
             goto("/dashboard", { replaceState: true });
         }
     });
+
+    // Rastreia a última aba antes de entrar em configurações de perfil
+    $effect(() => {
+        if (activeTab !== "profile") {
+            previousTab = activeTab;
+            previousRoute = null;
+        }
+    });
+
+    function handleReturnFromProfile() {
+        if (previousRoute && previousRoute !== "/dashboard") {
+            const target = previousRoute;
+            previousRoute = null;
+            goto(target);
+        } else {
+            activeTab = previousTab && previousTab !== "profile" ? previousTab : "events";
+        }
+    }
 
     // Efeito para carregar dados baseados na aba ativa
     $effect(() => {
@@ -383,13 +409,14 @@
         }
     }
 
-    function requestUpdateProfile() {
+    /** @param {(() => void) | null} onSuccess */
+    function requestUpdateProfile(onSuccess = null) {
         showModal(
             "confirm",
             "Deseja realmente salvar as alterações no seu perfil?",
             () => {
                 closeModal();
-                performUpdateProfile();
+                performUpdateProfile(onSuccess);
             },
         );
     }
@@ -455,7 +482,8 @@
         }
     }
 
-    async function performUpdateProfile() {
+    /** @param {(() => void) | null} onSuccess */
+    async function performUpdateProfile(onSuccess = null) {
         try {
             /** @type {Record<string, any>} */
             const payload = {
@@ -485,6 +513,7 @@
                 const responseData = await response.json();
                 userData = { ...userData, ...responseData.data };
                 updateUser(userData);
+                if (typeof onSuccess === "function") onSuccess();
                 showModal("success", "Perfil atualizado com sucesso!");
             } else {
                 const errorData = await response.json().catch(() => ({}));
@@ -598,6 +627,9 @@
                 bind:userData
                 updateProfile={requestUpdateProfile}
                 {defaultAvatar}
+                {showModal}
+                {closeModal}
+                onBack={handleReturnFromProfile}
             />
         {:else if activeTab === "event_details" && selectedEvent}
             <!-- Componente: Detalhes do Evento para inscrição -->

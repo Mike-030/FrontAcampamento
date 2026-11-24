@@ -109,6 +109,8 @@
             } else {
                 activeTab = tab;
             }
+        } else if (tab === "profile") {
+            goto(`/dashboard?tab=profile&from=${encodeURIComponent(currentPath)}`);
         } else {
             goto(tab === "events" ? "/dashboard" : `/dashboard?tab=${tab}`);
         }
