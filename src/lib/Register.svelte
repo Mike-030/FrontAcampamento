@@ -2,6 +2,7 @@
     // Imagens utilizadas
     import logo from "../assets/LogoComunidadeSaoMiguel.png";
     import bgHero from "../assets/SaoMiguelArcanjo.png";
+    import Navbar from "./components/Navbar.svelte";
 
     import { goto } from '$app/navigation';
 
@@ -145,7 +146,7 @@
 
             if (response.ok) {
                 success = true;
-                setTimeout(() => goto('/login'), 3000);
+                setTimeout(() => goto('/?login=true'), 3000);
             } else {
                 error = data.message || "Erro ao realizar cadastro.";
                 if (data.errors) error = Object.values(data.errors)[0][0];
@@ -157,101 +158,160 @@
         }
     }
 
-    // Função que permite rolar as opções de data através do clique e arrasto do mouse
+    // Função que permite rolar as opções de data através do clique e arrasto do mouse ou scroll (1 casa por vez)
     /** @param {HTMLElement} node */
     function dragScroll(node) {
         let isDown = false;
         let startY = 0;
         let scrollTop = 0;
+        let targetIndex = -1;
+        /** @type {ReturnType<typeof setTimeout> | null} */
+        let wheelResetTimer = null;
 
-        node.addEventListener("mousedown", (e) => {
+        /**
+         * @param {string} nodeId
+         * @param {number} val
+         */
+        const updateSelectedValue = (nodeId, val) => {
+            if (nodeId === "scroll-day" && selectedDay !== val)
+                selectedDay = val;
+            if (nodeId === "scroll-month" && selectedMonth !== val)
+                selectedMonth = val;
+            if (nodeId === "scroll-year" && selectedYear !== val)
+                selectedYear = val;
+        };
+
+        /** @param {HTMLElement[]} items */
+        const getClosestItemIndex = (items) => {
+            const containerCenter =
+                node.getBoundingClientRect().top + node.offsetHeight / 2;
+            let closestIndex = 0;
+            let minDistance = Infinity;
+
+            items.forEach((item, idx) => {
+                const rect = item.getBoundingClientRect();
+                const itemCenter = rect.top + rect.height / 2;
+                const distance = Math.abs(containerCenter - itemCenter);
+
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestIndex = idx;
+                }
+            });
+
+            return closestIndex;
+        };
+
+        /** @param {HTMLElement} item */
+        const getCenteredScrollTop = (item) => {
+            const nodeRect = node.getBoundingClientRect();
+            const itemRect = item.getBoundingClientRect();
+            const itemCenterInScroll =
+                node.scrollTop +
+                (itemRect.top - nodeRect.top) +
+                itemRect.height / 2;
+            return itemCenterInScroll - node.clientHeight / 2;
+        };
+
+        /** @param {MouseEvent} e */
+        const handleMouseDown = (e) => {
             isDown = true;
+            targetIndex = -1;
             node.classList.add("cursor-grabbing");
             startY = e.pageY - node.offsetTop;
             scrollTop = node.scrollTop;
             e.preventDefault();
-        });
+        };
 
         const endDrag = () => {
             isDown = false;
             node.classList.remove("cursor-grabbing");
         };
 
-        window.addEventListener("mouseup", endDrag);
-
-        node.addEventListener("mousemove", (e) => {
+        /** @param {MouseEvent} e */
+        const handleMouseMove = (e) => {
             if (!isDown) return;
             if (e.buttons === 1) {
                 const y = e.pageY - node.offsetTop;
                 const walk = (y - startY) * 1.5;
                 node.scrollTop = scrollTop - walk;
             }
-        });
+        };
 
-        node.addEventListener("scroll", () => {
-            const containerCenter =
-                node.getBoundingClientRect().top + node.offsetHeight / 2;
-            const items = node.querySelectorAll(".picker-item");
+        /** @param {WheelEvent} e */
+        const handleWheel = (e) => {
+            if (e.deltaY === 0) return;
+            e.preventDefault();
 
-            /** @type {string | null} */
-            let closestVal = null;
-            let minDistance = Infinity;
+            const items = /** @type {HTMLElement[]} */ (
+                Array.from(node.querySelectorAll(".picker-item"))
+            );
+            if (items.length === 0) return;
 
-            items.forEach((item) => {
-                if (!(item instanceof HTMLElement)) return;
-                const itemCenter =
-                    item.getBoundingClientRect().top + item.offsetHeight / 2;
-                const distance = Math.abs(containerCenter - itemCenter);
+            if (targetIndex < 0) {
+                targetIndex = getClosestItemIndex(items);
+            }
 
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    const valAttr = item.getAttribute("data-val");
-                    if (valAttr) closestVal = valAttr;
-                }
+            const direction = e.deltaY > 0 ? 1 : -1;
+            targetIndex = Math.max(
+                0,
+                Math.min(items.length - 1, targetIndex + direction),
+            );
+
+            const targetItem = items[targetIndex];
+            node.scrollTo({
+                top: getCenteredScrollTop(targetItem),
+                behavior: "smooth",
             });
 
-            if (closestVal) {
-                const val = parseInt(closestVal);
-                if (node.id === "scroll-day" && selectedDay !== val)
-                    selectedDay = val;
-                if (node.id === "scroll-month" && selectedMonth !== val)
-                    selectedMonth = val;
-                if (node.id === "scroll-year" && selectedYear !== val)
-                    selectedYear = val;
+            const valAttr = targetItem.getAttribute("data-val");
+            if (valAttr) {
+                updateSelectedValue(node.id, parseInt(valAttr, 10));
             }
-        });
+
+            if (wheelResetTimer) clearTimeout(wheelResetTimer);
+            wheelResetTimer = setTimeout(() => {
+                targetIndex = -1;
+            }, 250);
+        };
+
+        const handleScroll = () => {
+            const items = /** @type {HTMLElement[]} */ (
+                Array.from(node.querySelectorAll(".picker-item"))
+            );
+            if (items.length === 0) return;
+
+            const closestIdx = getClosestItemIndex(items);
+            const valAttr = items[closestIdx]?.getAttribute("data-val");
+            if (valAttr) {
+                updateSelectedValue(node.id, parseInt(valAttr, 10));
+            }
+        };
+
+        node.addEventListener("mousedown", handleMouseDown);
+        window.addEventListener("mouseup", endDrag);
+        node.addEventListener("mousemove", handleMouseMove);
+        node.addEventListener("wheel", handleWheel, { passive: false });
+        node.addEventListener("scroll", handleScroll);
+
+        return {
+            destroy() {
+                if (wheelResetTimer) clearTimeout(wheelResetTimer);
+                node.removeEventListener("mousedown", handleMouseDown);
+                window.removeEventListener("mouseup", endDrag);
+                node.removeEventListener("mousemove", handleMouseMove);
+                node.removeEventListener("wheel", handleWheel);
+                node.removeEventListener("scroll", handleScroll);
+            },
+        };
     }
 </script>
 
-<!-- BOTÃO FLUTUANTE DE VOLTAR -->
-<button
-    onclick={() => goto('/login')}
-    class="fixed top-4 left-4 md:top-6 md:left-6 z-50
-           bg-bg-secondary/80 backdrop-blur-md
-           w-12 h-12 md:w-14 md:h-14
-           flex items-center justify-center rounded-2xl shadow-xl
-           border border-border-ui text-text-primary
-           hover:text-brand hover:border-brand/40
-           active:scale-90 transition-all"
-    aria-label="Voltar ao Login"
->
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="22"
-        height="22"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-    >
-        <path d="m15 18-6-6 6-6" />
-    </svg>
-</button>
+<!-- NAVBAR UNIFICADA -->
+<Navbar />
 
-<div class="fixed inset-0 w-full h-full flex flex-col overflow-y-auto">
-    <div class="flex-1 flex items-center justify-center p-4">
+<div class="w-full min-h-[calc(100vh-5rem)] flex flex-col">
+    <div class="flex-1 flex items-center justify-center p-4 py-8">
         <div
             class="w-full max-w-5xl bg-bg-secondary border border-border-ui shadow-2xl rounded-[3rem] overflow-hidden flex flex-col md:flex-row transition-all duration-300"
         >
@@ -641,7 +701,7 @@
 
                     <footer class="mt-10 text-center">
                         <button
-                            onclick={() => goto('/login')}
+                            onclick={() => goto('/?login=true')}
                             class="text-text-secondary text-sm hover:text-text-primary transition-all"
                         >
                             Já tem uma conta? <span

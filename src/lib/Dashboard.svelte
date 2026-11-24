@@ -1,7 +1,6 @@
 <script>
     // Componentes da Interface e Estrutura
-    import Sidebar from "./components/Sidebar.svelte";
-    import Header from "./components/Header.svelte";
+    import Navbar from "./components/Navbar.svelte";
     import ProfileForm from "./components/ProfileForm.svelte";
     import Modal from "./components/Modal.svelte";
     import ActivityDetails from "./components/ActivityDetails.svelte";
@@ -16,9 +15,12 @@
     import QuestionManager from "./components/QuestionManager.svelte";
     import ReviewPanel from "./components/ReviewPanel.svelte";
     import QuestionnaireForm from "./components/QuestionnaireForm.svelte";
+    import ProductManager from "./components/ProductManager.svelte";
 
+    import { onMount } from "svelte";
     import { token as auth_token, user as auth_user, setLogout, updateUser } from '$lib/stores/auth.js';
     import { goto } from '$app/navigation';
+    import { page } from '$app/stores';
 
     // Estado principal do Dashboard
     /** @type {any[]} */
@@ -41,8 +43,6 @@
         userData.is_admin === true ||
             userData.role === "admin",
     );
-
-    let isSidebarExpanded = $state(false);
 
     let showPaymentModal = $state(false);
     let isProcessingPayment = $state(false);
@@ -80,6 +80,32 @@
             (userData.name || "User") +
             "&background=DE6E27&color=fff",
     );
+
+    onMount(() => {
+        const requestedTab = $page.url.searchParams.get("tab");
+        const allowedUserTabs = ["events", "inbox", "profile", "subscriptions"];
+        const allowedAdminTabs = [
+            "users",
+            "event_form",
+            "manage_activities",
+            "questions_admin",
+            "sectors",
+            "raffle",
+            "products",
+        ];
+
+        if (requestedTab) {
+            if (requestedTab === "event_form" && isAdmin) {
+                openEventForm();
+            } else if (
+                allowedUserTabs.includes(requestedTab) ||
+                (isAdmin && allowedAdminTabs.includes(requestedTab))
+            ) {
+                activeTab = requestedTab;
+            }
+            goto("/dashboard", { replaceState: true });
+        }
+    });
 
     // Efeito para carregar dados baseados na aba ativa
     $effect(() => {
@@ -493,26 +519,23 @@
 
     function performLogout() {
         setLogout();
-        goto('/login');
+        goto('/');
     }
 </script>
 
 <div
-    class="flex min-h-screen bg-bg-primary text-text-primary transition-colors duration-300 font-['Inter']"
+    class="min-h-screen bg-bg-primary text-text-primary transition-colors duration-300 font-['Inter']"
 >
-    <!-- Componente: Sidebar (Navegação lateral) -->
-    <Sidebar
+    <!-- Navbar + Sidebar Unificada -->
+    <Navbar
         bind:activeTab
-        bind:isExpanded={isSidebarExpanded}
-        {isAdmin}
-        {handleLogout}
+        handleLogout={handleLogout}
+        onOpenMessage={handleOpenMessage}
         onAddEvent={() => openEventForm()}
     />
 
     <!-- Main Content -->
-    <main class="{isSidebarExpanded ? 'ml-64' : 'ml-20'} flex-grow p-10 transition-all duration-300">
-        <!-- Componente: Header (Cabeçalho com perfil) -->
-        <Header {userData} {defaultAvatar} bind:activeTab {handleLogout} onOpenMessage={handleOpenMessage} />
+    <main class="max-w-7xl mx-auto w-full p-6 sm:p-10 transition-all duration-300">
         
         {#if loading}
             <div
@@ -618,6 +641,9 @@
         {:else if activeTab === "sectors" && isAdmin}
             <!-- Componente: Gerenciamento de Setores (Admin) -->
             <SectorManager {token} />
+        {:else if activeTab === "products" && isAdmin}
+            <!-- Componente: Gerenciamento de Produtos (Admin) -->
+            <ProductManager {token} {showModal} {closeModal} />
         {:else if activeTab === "questions_admin" && isAdmin}
             <QuestionManager {token} />
         {:else if activeTab === "counselor_review" && isAdmin}

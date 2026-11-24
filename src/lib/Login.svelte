@@ -1,18 +1,61 @@
 <script>
     import logo from "../assets/LogoComunidadeSaoMiguel.png";
     import bgHero from "../assets/SaoMiguelArcanjo.png";
-    // Componentes de Interface
     import Modal from "./components/Modal.svelte";
 
-    import { setLogin } from '$lib/stores/auth.js';
-    import { goto } from '$app/navigation';
+    import { setLogin } from "$lib/stores/auth.js";
+    import { goto } from "$app/navigation";
+
+    /**
+     * Props do Modal de Login
+     * @type {{ isOpen?: boolean, onClose?: () => void, onSuccess?: () => void }}
+     */
+    let {
+        isOpen = false,
+        onClose = () => {},
+        onSuccess = () => goto("/dashboard"),
+    } = $props();
 
     // Estados do formulário de login
-    let cpf = $state(""); // CPF digitado pelo usuário
-    let password = $state(""); // Senha digitada pelo usuário
-    let loading = $state(false); // Controle de carregamento durante a requisição
-    let showPassword = $state(false); // Alterna a visualização da senha
-    let rememberMe = $state(false); // Opção para lembrar do login
+    let cpf = $state("");
+    let password = $state("");
+    let loading = $state(false);
+    let showPassword = $state(false);
+    let rememberMe = $state(false);
+
+    // Estado do Modal de avisos/erros
+    /** @type {{ isOpen: boolean, type: string, message: string, onConfirm: (() => void) | null }} */
+    let modalState = $state({
+        isOpen: false,
+        type: "error",
+        message: "",
+        onConfirm: null,
+    });
+
+    /**
+     * @param {string} type
+     * @param {string} message
+     * @param {(() => void) | null} onConfirm
+     */
+    function showModal(type, message, onConfirm = null) {
+        modalState = { isOpen: true, type, message, onConfirm };
+    }
+
+    function closeModal() {
+        modalState.isOpen = false;
+    }
+
+    // Bloqueio de scroll no body enquanto o modal estiver aberto
+    $effect(() => {
+        if (typeof document === "undefined") return;
+        if (isOpen) {
+            const previousOverflow = document.body.style.overflow;
+            document.body.style.overflow = "hidden";
+            return () => {
+                document.body.style.overflow = previousOverflow;
+            };
+        }
+    });
 
     // Função para aplicar máscara de CPF no input
     /** @param {Event} e */
@@ -37,25 +80,17 @@
         cpf = value;
     }
 
-    // Estado do Modal de avisos/erros
-    let modalState = $state({
-        isOpen: false,
-        type: "error",
-        message: "",
-        onConfirm: null,
-    });
-
-    // Função para exibir o modal
-    function showModal(type, message, onConfirm = null) {
-        modalState = { isOpen: true, type, message, onConfirm };
+    /** @param {KeyboardEvent} e */
+    function handleKeydown(e) {
+        if (e.key === "Escape" && isOpen && !modalState.isOpen) {
+            handleClose();
+        }
     }
 
-    function closeModal() {
-        modalState.isOpen = false;
+    function handleClose() {
+        if (loading) return;
+        onClose();
     }
-
-    // Estado da Sidebar
-    let isSidebarOpen = $state(false);
 
     const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
 
@@ -83,11 +118,13 @@
 
             if (response.ok) {
                 setLogin(data.token, data.data, rememberMe);
-                goto('/dashboard');
+                password = "";
+                onClose();
+                onSuccess();
             } else {
                 showModal(
                     "error",
-                    data.message || "E-mail ou senha incorretos.",
+                    data.message || "CPF ou senha incorretos.",
                 );
             }
         } catch (err) {
@@ -97,192 +134,81 @@
         }
     }
 
-    function toggleSidebar() {
-        isSidebarOpen = !isSidebarOpen;
+    function goToRegister() {
+        onClose();
+        goto("/register");
     }
 </script>
 
-<!-- BOTÃO HAMBÚRGUER (Floating - Adaptado Mobile) -->
-<button
-    onclick={toggleSidebar}
-    class="fixed top-4 left-4 md:top-6 md:left-6 z-[60]
-           bg-bg-secondary/80 backdrop-blur-md
-           w-12 h-12 md:w-14 md:h-14
-           flex items-center justify-center rounded-2xl shadow-xl
-           border border-border-ui text-text-primary
-           active:scale-90 transition-all"
-    aria-label="Botão Menu"
->
-    {#if isSidebarOpen}
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="md:w-7 md:h-7"
-            ><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg
-        >
-    {:else}
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="md:w-7 md:h-7"
-            ><line x1="4" x2="20" y1="12" y2="12" /><line
-                x1="4"
-                x2="20"
-                y1="6"
-                y2="6"
-            /><line x1="4" x2="20" y1="18" y2="18" /></svg
-        >
-    {/if}
-</button>
+<svelte:window onkeydown={handleKeydown} />
 
-<!-- BACKDROP -->
-{#if isSidebarOpen}
+{#if isOpen}
+    <!-- Backdrop do Modal de Login -->
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div
-        onclick={toggleSidebar}
-        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[50] transition-opacity duration-300"
-    ></div>
-{/if}
-
-<!-- SIDEBAR RESPONSIVA -->
-<aside
-    class="fixed top-0 left-0 h-full w-[280px] md:w-80 bg-bg-primary z-[55] shadow-2xl border-r border-border-ui flex flex-col transition-transform duration-500 ease-in-out
-           {isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}"
->
-    <!-- Espaçamento no topo -->
-    <div class="h-24 md:h-32"></div>
-
-    <!-- Navegação Direta -->
-    <nav class="flex-1 flex flex-col gap-2 md:gap-3 w-full p-6 text-left">
-        <a
-            href="https://www.google.com/maps/search/?api=1&query=Av.+Mato+Grosso,+415+-+Primavera+II,+Primavera+do+Leste+-+MT,+78850-000"
-            target="_blank"
-            class="flex items-center gap-4 text-text-secondary hover:text-brand transition-all p-4 rounded-2xl hover:bg-brand/5 group"
-        >
-            <div
-                class="w-10 h-10 flex items-center justify-center bg-bg-secondary rounded-xl group-hover:bg-brand/10 transition-colors shadow-sm"
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    ><path
-                        d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"
-                    /><circle cx="12" cy="10" r="3" /></svg
-                >
-            </div>
-            <span class="font-bold text-sm tracking-wide">Onde Estamos</span>
-        </a>
-
-        <a
-            href="https://www.instagram.com/campistasprimavera/"
-            target="_blank"
-            class="flex items-center gap-4 text-text-secondary hover:text-brand transition-all p-4 rounded-2xl hover:bg-brand/5 group"
-        >
-            <div
-                class="w-10 h-10 flex items-center justify-center bg-bg-secondary rounded-xl group-hover:bg-brand/10 transition-colors shadow-sm"
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    ><rect
-                        width="20"
-                        height="20"
-                        x="2"
-                        y="2"
-                        rx="5"
-                        ry="5"
-                    /><path
-                        d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"
-                    /><line x1="17.5" x2="17.51" y1="6.5" y2="6.5" /></svg
-                >
-            </div>
-            <div class="flex flex-col">
-                <span class="font-bold text-sm tracking-wide leading-none"
-                    >Instagram</span
-                >
-                <span
-                    class="text-[9px] opacity-40 font-bold mt-1 tracking-wider uppercase"
-                    >Seguir @campistas</span
-                >
-            </div>
-        </a>
-    </nav>
-
-    <!-- Rodapé Oficial -->
-    <div class="p-8 md:p-10 border-t border-border-ui/30 bg-bg-secondary/20">
-        <p
-            class="text-[9px] md:text-[10px] text-text-secondary/60 font-black text-center tracking-[0.2em] uppercase leading-relaxed"
-        >
-            Comunidade <br /> São Miguel Arcanjo
-        </p>
-    </div>
-</aside>
-
-<!-- CONTENT PRINCIPAL -->
-<div
-    class="fixed inset-0 w-full h-full flex flex-col overflow-y-auto overflow-x-hidden"
->
-    <div class="flex-1 flex items-center justify-center p-4">
-        <!-- Box Centralizado -->
-        <!-- Box Centralizado: Contém a imagem e o formulário -->
+        onclick={handleClose}
+        tabindex="-1"
+        class="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 backdrop-blur-md p-4 overflow-y-auto"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="login-modal-title"
+    >
+        <!-- Container do Modal -->
         <div
-            class="w-full max-w-7xl md:h-[90vh] md:max-h-[850px] flex flex-col md:flex-row
-                    bg-transparent md:bg-bg-secondary
-                    border-none md:border md:border-border-ui
-                    shadow-none md:shadow-2xl
-                    md:rounded-[3rem] overflow-hidden"
+            onclick={(e) => e.stopPropagation()}
+            class="relative w-full max-w-4xl max-h-[92vh] overflow-y-auto flex flex-col md:flex-row
+                   bg-bg-secondary border border-border-ui shadow-2xl
+                   rounded-[2.5rem] login-modal-enter"
         >
+            <!-- Botão Fechar -->
+            <button
+                type="button"
+                onclick={handleClose}
+                disabled={loading}
+                aria-label="Fechar login"
+                class="absolute top-4 right-4 z-20 w-10 h-10 rounded-full
+                       bg-bg-primary/80 backdrop-blur-sm border border-border-ui
+                       text-text-secondary hover:text-text-primary hover:border-brand
+                       flex items-center justify-center transition-all cursor-pointer
+                       active:scale-90 disabled:opacity-50"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <path d="M18 6 6 18" />
+                    <path d="m6 6 12 12" />
+                </svg>
+            </button>
+
             <!-- Metade Esquerda: Imagem de Destaque -->
-            <div class="hidden md:block md:w-1/2 relative bg-forest/10">
+            <div class="hidden md:block md:w-5/12 relative bg-forest/10 min-h-[540px]">
                 <img
                     src={bgHero}
                     alt="São Miguel Arcanjo"
                     class="absolute inset-0 w-full h-full object-cover"
                 />
                 <div
-                    class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"
+                    class="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-transparent"
                 ></div>
                 <div
-                    class="relative z-10 p-12 flex flex-col justify-end h-full text-white"
+                    class="relative z-10 p-8 lg:p-10 flex flex-col justify-end h-full text-white"
                 >
-                    <h2
-                        class="text-4xl lg:text-4xl font-black mb-3 leading-tight italic"
-                    >
-                        Quem como Deus?<br /><span
-                            class="text-4xl lg:text-5xl text-brand"
-                            >Ninguém como Deus!</span
-                        >
+                    <h2 class="text-2xl lg:text-3xl font-black mb-3 leading-tight italic">
+                        Quem como Deus?<br />
+                        <span class="text-3xl lg:text-4xl text-brand">
+                            Ninguém como Deus!
+                        </span>
                     </h2>
-                    <p class="text-white/80 text-base lg:text-lg max-w-sm">
+                    <p class="text-white/80 text-sm lg:text-base max-w-xs">
                         Portal destinado aos servos e campistas da Comunidade
                         São Miguel Arcanjo.
                     </p>
@@ -291,72 +217,75 @@
 
             <!-- Metade Direita: Formulário de Login -->
             <div
-                class="w-full md:w-1/2 p-6 md:p-8 lg:p-12 flex flex-col justify-center items-center"
+                class="w-full md:w-7/12 p-6 sm:p-8 lg:p-10 flex flex-col justify-center items-center"
             >
-                <header class="text-center w-full mb-0 relative">
+                <header class="text-center w-full mb-2">
                     <div class="w-full flex justify-center mb-2">
                         <img
                             src={logo}
-                            alt="Logo"
-                            class="pt-4 h-32 md:h-40 lg:h-50 max-w-full mt-4 drop-shadow-[0_0_30px_rgba(222,110,39,0.3)] object-contain"
+                            alt="Logo Comunidade São Miguel"
+                            class="h-24 md:h-28 max-w-full drop-shadow-[0_0_25px_rgba(196,152,42,0.3)] object-contain"
                         />
                     </div>
-                    <div class="relative z-10 mt-2">
-                        <h1
-                            class="text-text-primary text-2xl sm:text-4xl font-black mb-2"
-                        >
-                            Acesso
-                        </h1>
-                        <p
-                            class="text-text-secondary text-[10px] md:text-sm font-bold opacity-60 uppercase tracking-widest leading-none"
-                        >
-                            Portal Comunidade São Miguel
-                        </p>
-                    </div>
+                    <h1
+                        id="login-modal-title"
+                        class="text-text-primary text-2xl sm:text-3xl font-black mb-1"
+                    >
+                        Acesso
+                    </h1>
+                    <p
+                        class="text-text-secondary text-[10px] md:text-xs font-bold opacity-60 uppercase tracking-widest leading-none"
+                    >
+                        Portal Comunidade São Miguel
+                    </p>
                 </header>
 
                 <form
                     onsubmit={handleSubmit}
-                    class="w-full max-w-sm space-y-4 mt-6 px-4"
+                    class="w-full max-w-sm space-y-4 mt-5"
                 >
                     <!-- Campo: CPF -->
                     <div class="space-y-1.5 text-left w-full">
                         <label
-                            for="cpf"
+                            for="login-cpf"
                             class="text-text-secondary text-[10px] font-bold uppercase tracking-widest ml-1"
-                            >CPF</label
                         >
+                            CPF
+                        </label>
                         <input
-                            id="cpf"
+                            id="login-cpf"
                             value={cpf}
                             oninput={handleCpfInput}
                             type="text"
                             required
                             maxlength="14"
-                            class="w-full bg-bg-secondary/40 md:bg-bg-primary/50 border border-border-ui rounded-2xl p-4 text-text-primary focus:border-brand outline-none transition-all placeholder:text-text-secondary/60 shadow-sm"
+                            class="w-full bg-bg-primary/60 border border-border-ui rounded-2xl p-3.5 text-text-primary focus:border-brand outline-none transition-all placeholder:text-text-secondary/60 shadow-sm"
                             placeholder="000.000.000-00"
                         />
                     </div>
+
                     <!-- Campo: Senha -->
                     <div class="space-y-1.5 text-left w-full">
                         <label
-                            for="password"
+                            for="login-password"
                             class="text-text-secondary text-[10px] font-bold uppercase tracking-widest ml-1"
-                            >Senha</label
                         >
+                            Senha
+                        </label>
                         <div class="relative w-full">
                             <input
-                                id="password"
+                                id="login-password"
                                 bind:value={password}
                                 type={showPassword ? "text" : "password"}
                                 required
-                                class="w-full bg-bg-secondary/40 md:bg-bg-primary/50 border border-border-ui rounded-2xl p-4 pr-12 text-text-primary focus:border-brand outline-none transition-all placeholder:text-text-secondary/60 shadow-sm"
+                                class="w-full bg-bg-primary/60 border border-border-ui rounded-2xl p-3.5 pr-12 text-text-primary focus:border-brand outline-none transition-all placeholder:text-text-secondary/60 shadow-sm"
                                 placeholder="••••••••"
                             />
                             <button
                                 type="button"
                                 onclick={() => (showPassword = !showPassword)}
-                                class="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary focus:outline-none transition-colors"
+                                aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary focus:outline-none transition-colors cursor-pointer"
                             >
                                 {#if showPassword}
                                     <svg
@@ -369,15 +298,12 @@
                                         stroke-width="2.5"
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
-                                        ><path
-                                            d="M10.733 5.076a10.744 10.744 0 0 1 1.267-.076c7.02 0 10 7 10 7a18.16 18.16 0 0 1-2.062 2.805M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"
-                                        /><line
-                                            x1="2"
-                                            x2="22"
-                                            y1="2"
-                                            y2="22"
-                                        /></svg
                                     >
+                                        <path
+                                            d="M10.733 5.076a10.744 10.744 0 0 1 1.267-.076c7.02 0 10 7 10 7a18.16 18.16 0 0 1-2.062 2.805M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"
+                                        />
+                                        <line x1="2" x2="22" y1="2" y2="22" />
+                                    </svg>
                                 {:else}
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -389,28 +315,31 @@
                                         stroke-width="2.5"
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
-                                        ><path
-                                            d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"
-                                        /><circle cx="12" cy="12" r="3" /></svg
                                     >
+                                        <path
+                                            d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"
+                                        />
+                                        <circle cx="12" cy="12" r="3" />
+                                    </svg>
                                 {/if}
                             </button>
                         </div>
                     </div>
 
                     <!-- Checkbox: Lembrar de Mim -->
-                    <div class="flex items-center gap-2 mt-2 ml-1">
+                    <div class="flex items-center gap-2 mt-1 ml-1">
                         <input
                             type="checkbox"
-                            id="remember"
+                            id="login-remember"
                             bind:checked={rememberMe}
                             class="w-4 h-4 rounded border-border-ui text-brand focus:ring-brand accent-brand cursor-pointer"
                         />
                         <label
-                            for="remember"
+                            for="login-remember"
                             class="text-text-secondary text-xs font-medium cursor-pointer select-none"
-                            >Lembrar de mim</label
                         >
+                            Lembrar de mim
+                        </label>
                     </div>
 
                     <!-- Botão de Entrar -->
@@ -418,34 +347,45 @@
                         <button
                             type="submit"
                             disabled={loading}
-                            class="w-full bg-brand text-white p-5 rounded-2xl font-black uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all shadow-xl shadow-brand/30"
+                            class="w-full bg-brand text-white p-4 rounded-2xl font-black uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all shadow-xl shadow-brand/30 cursor-pointer disabled:opacity-60"
                         >
                             {loading ? "Entrando..." : "Entrar agora"}
                         </button>
                     </div>
                 </form>
 
-                <footer class="mt-10 mb-12 text-center w-full">
+                <footer class="mt-6 text-center w-full">
                     <button
-                        onclick={() => goto('/register')}
-                        class="text-text-secondary text-sm hover:text-text-primary transition-all"
-                        >Novo por aqui? <span
-                            class="text-brand font-black hover:underline"
-                            >Crie sua conta</span
-                        ></button
+                        type="button"
+                        onclick={goToRegister}
+                        class="text-text-secondary text-sm hover:text-text-primary transition-all cursor-pointer"
                     >
+                        Novo por aqui?
+                        <span class="text-brand font-black hover:underline">
+                            Crie sua conta
+                        </span>
+                    </button>
                 </footer>
             </div>
         </div>
     </div>
-</div>
+{/if}
 
 <Modal {modalState} {closeModal} />
 
 <style>
-    :global(html, body) {
-        overflow-x: hidden;
-        margin: 0;
-        padding: 0;
+    .login-modal-enter {
+        animation: modalPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalPopIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95) translateY(12px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
     }
 </style>

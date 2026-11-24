@@ -51,13 +51,13 @@ declare module '$env/static/private' {
 	export const ComSpec: string;
 	export const DriverData: string;
 	export const EDITOR: string;
-	export const EFC_9380_1262719628: string;
-	export const EFC_9380_1592913036: string;
-	export const EFC_9380_2283032206: string;
-	export const EFC_9380_2775293581: string;
-	export const EFC_9380_2946480783: string;
-	export const EFC_9380_3789132940: string;
-	export const EFC_9380_4126798990: string;
+	export const EFC_10608_1262719628: string;
+	export const EFC_10608_1592913036: string;
+	export const EFC_10608_2283032206: string;
+	export const EFC_10608_2775293581: string;
+	export const EFC_10608_2946480783: string;
+	export const EFC_10608_3789132940: string;
+	export const EFC_10608_4126798990: string;
 	export const FargoDataPath: string;
 	export const FPS_BROWSER_APP_PROFILE_STRING: string;
 	export const FPS_BROWSER_USER_PROFILE_STRING: string;
@@ -107,6 +107,7 @@ declare module '$env/static/private' {
 	export const ProgramW6432: string;
 	export const PROMPT: string;
 	export const PSModulePath: string;
+	export const PT8HOME: string;
 	export const PUBLIC: string;
 	export const SESSIONNAME: string;
 	export const SystemDrive: string;
@@ -127,6 +128,7 @@ declare module '$env/static/private' {
 	export const VSCODE_PYTHON_AUTOACTIVATE_GUARD: string;
 	export const windir: string;
 	export const WoTGDataPath: string;
+	export const WoTMPath: string;
 	export const ZES_ENABLE_SYSMAN: string;
 }
 
@@ -227,13 +229,13 @@ declare module '$env/dynamic/private' {
 		ComSpec: string;
 		DriverData: string;
 		EDITOR: string;
-		EFC_9380_1262719628: string;
-		EFC_9380_1592913036: string;
-		EFC_9380_2283032206: string;
-		EFC_9380_2775293581: string;
-		EFC_9380_2946480783: string;
-		EFC_9380_3789132940: string;
-		EFC_9380_4126798990: string;
+		EFC_10608_1262719628: string;
+		EFC_10608_1592913036: string;
+		EFC_10608_2283032206: string;
+		EFC_10608_2775293581: string;
+		EFC_10608_2946480783: string;
+		EFC_10608_3789132940: string;
+		EFC_10608_4126798990: string;
 		FargoDataPath: string;
 		FPS_BROWSER_APP_PROFILE_STRING: string;
 		FPS_BROWSER_USER_PROFILE_STRING: string;
@@ -283,6 +285,7 @@ declare module '$env/dynamic/private' {
 		ProgramW6432: string;
 		PROMPT: string;
 		PSModulePath: string;
+		PT8HOME: string;
 		PUBLIC: string;
 		SESSIONNAME: string;
 		SystemDrive: string;
@@ -303,6 +306,7 @@ declare module '$env/dynamic/private' {
 		VSCODE_PYTHON_AUTOACTIVATE_GUARD: string;
 		windir: string;
 		WoTGDataPath: string;
+		WoTMPath: string;
 		ZES_ENABLE_SYSMAN: string;
 		[key: `PUBLIC_${string}`]: undefined;
 		[key: `${string}`]: string | undefined;

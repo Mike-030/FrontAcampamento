@@ -2,6 +2,7 @@
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
     import { page } from '$app/stores';
+    import Navbar from '$lib/components/Navbar.svelte';
 
     const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
     let token = "";
@@ -21,7 +22,7 @@
         if (typeof window !== "undefined") {
             token = sessionStorage.getItem("token") || localStorage.getItem("token");
             if (!token) {
-                goto("/login");
+                goto("/?login=true");
                 return;
             }
             fetchData();
@@ -128,7 +129,9 @@
     }
 </script>
 
-<div class="min-h-screen bg-bg-primary text-text-primary p-6 lg:p-12 font-sans">
+<Navbar />
+
+<div class="min-h-[calc(100vh-5rem)] bg-bg-primary text-text-primary p-6 lg:p-12 font-sans">
     <div class="max-w-3xl mx-auto">
         <button
             onclick={() => goto("/dashboard")}

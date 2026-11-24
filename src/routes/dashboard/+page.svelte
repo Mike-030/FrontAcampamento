@@ -6,7 +6,7 @@
 
 	onMount(() => {
 		if (!$token) {
-			goto('/login');
+			goto('/?login=true');
 		}
 	});
 </script>
