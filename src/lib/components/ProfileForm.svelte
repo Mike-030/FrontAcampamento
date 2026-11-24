@@ -195,6 +195,8 @@
                 </span>
                 <button
                     type="button"
+                    role="switch"
+                    aria-checked={$isDarkMode}
                     onclick={toggleTheme}
                     aria-label="Trocar Tema"
                     class="inline-flex items-center gap-3 px-4 py-3 rounded-2xl bg-bg-primary border border-border-ui text-text-primary hover:border-brand hover:text-brand active:scale-95 transition-all shadow-sm cursor-pointer"
@@ -246,6 +248,17 @@
                             Claro
                         </span>
                     {/if}
+                    <div
+                        class="w-10 h-5 rounded-full p-0.5 transition-colors duration-300 {$isDarkMode
+                            ? 'bg-brand'
+                            : 'bg-border-ui'}"
+                    >
+                        <div
+                            class="w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-300 {$isDarkMode
+                                ? 'translate-x-5'
+                                : 'translate-x-0'}"
+                        ></div>
+                    </div>
                 </button>
             </div>
 

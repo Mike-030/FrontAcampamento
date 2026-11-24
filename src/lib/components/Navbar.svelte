@@ -2,6 +2,7 @@
     import { goto } from "$app/navigation";
     import { page } from "$app/stores";
     import { token, user, setLogout } from "$lib/stores/auth.js";
+    import { isDarkMode, toggleTheme } from "$lib/stores/theme.js";
 
     import logo from "../../assets/LogoComunidadeSaoMiguel.png";
     import Inbox from "./Inbox.svelte";
@@ -35,9 +36,10 @@
         minhaConta: false,
         administracao: false,
         sobreNos: false,
+        exibicao: false,
     });
 
-    /** @param {'navegacao' | 'minhaConta' | 'administracao' | 'sobreNos'} group */
+    /** @param {'navegacao' | 'minhaConta' | 'administracao' | 'sobreNos' | 'exibicao'} group */
     function toggleGroup(group) {
         openGroups[group] = !openGroups[group];
     }
@@ -861,6 +863,106 @@
                             </span>
                         </div>
                     </a>
+                </div>
+            {/if}
+        </div>
+
+        <!-- DROPDOWN 5: EXIBIÇÃO (Toggle de Tema Claro / Escuro) -->
+        <div class="flex-shrink-0 rounded-2xl border border-border-ui/60 bg-bg-secondary/35">
+            <button
+                type="button"
+                onclick={() => toggleGroup("exibicao")}
+                aria-expanded={openGroups.exibicao}
+                class="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left hover:bg-brand/5 transition-colors cursor-pointer"
+            >
+                <span class="text-xs font-black uppercase tracking-[0.18em] text-text-primary">
+                    Exibição
+                </span>
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="text-text-secondary transition-transform duration-300 {openGroups.exibicao ? 'rotate-180 text-brand' : ''}"
+                >
+                    <path d="m6 9 6 6 6-6" />
+                </svg>
+            </button>
+
+            {#if openGroups.exibicao}
+                <div class="px-2.5 pb-2.5 pt-1 flex flex-col gap-1 border-t border-border-ui/40">
+                    <button
+                        type="button"
+                        role="switch"
+                        aria-checked={$isDarkMode}
+                        onclick={toggleTheme}
+                        class="w-full flex items-center justify-between gap-3 p-2.5 rounded-xl text-text-secondary hover:text-brand hover:bg-brand/5 transition-all cursor-pointer group"
+                    >
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <div
+                                class="w-9 h-9 flex items-center justify-center bg-bg-secondary rounded-xl group-hover:bg-brand/10 transition-colors shadow-sm flex-shrink-0"
+                            >
+                                {#if $isDarkMode}
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="18"
+                                        height="18"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.3"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                                    </svg>
+                                {:else}
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="18"
+                                        height="18"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.3"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <circle cx="12" cy="12" r="4" />
+                                        <path d="M12 2v2" />
+                                        <path d="M12 20v2" />
+                                        <path d="m4.93 4.93 1.41 1.41" />
+                                        <path d="m17.66 17.66 1.41 1.41" />
+                                        <path d="M2 12h2" />
+                                        <path d="M20 12h2" />
+                                        <path d="m6.34 17.66-1.41 1.41" />
+                                        <path d="m19.07 4.93-1.41 1.41" />
+                                    </svg>
+                                {/if}
+                            </div>
+                            <span class="font-bold text-sm tracking-wide truncate">
+                                {$isDarkMode ? "Tema Escuro" : "Tema Claro"}
+                            </span>
+                        </div>
+
+                        <!-- Toggle Switch -->
+                        <div
+                            class="w-11 h-6 rounded-full p-0.5 transition-colors duration-300 flex-shrink-0 {$isDarkMode
+                                ? 'bg-brand'
+                                : 'bg-border-ui'}"
+                        >
+                            <div
+                                class="w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-300 {$isDarkMode
+                                    ? 'translate-x-5'
+                                    : 'translate-x-0'}"
+                            ></div>
+                        </div>
+                    </button>
                 </div>
             {/if}
         </div>
