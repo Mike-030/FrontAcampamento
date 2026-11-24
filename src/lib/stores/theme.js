@@ -2,7 +2,7 @@ import { get, writable } from 'svelte/store';
 import { browser } from '$app/environment';
 
 function resolveInitialTheme() {
-	if (!browser) return 'dark';
+	if (!browser) return 'light';
 
 	// Se houver usuário logado com tema salvo, prioriza o tema do usuário
 	try {
@@ -18,7 +18,7 @@ function resolveInitialTheme() {
 	}
 
 	const saved = localStorage.getItem('theme');
-	return saved === 'light' || saved === 'dark' ? saved : 'dark';
+	return saved === 'light' || saved === 'dark' ? saved : 'light';
 }
 
 const initialTheme = resolveInitialTheme();
